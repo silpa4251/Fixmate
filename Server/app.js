@@ -18,8 +18,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // User routes
-app.use("/api/auth",asyncErrorHandler, authRoutes);
+app.use("/api/auth", authRoutes);
 // app.use("/api/products", productRoutes);
 // app.use("/api/cart", cartRoutes);
 // app.use("/api/wishlist", wishlistRoutes);
@@ -36,6 +37,7 @@ app.use("/api/auth",asyncErrorHandler, authRoutes);
 // })
 
 // Middleware for gobal error handling
+app.use(asyncErrorHandler);
 app.use(errorHandler);
 
 module.exports = app;
