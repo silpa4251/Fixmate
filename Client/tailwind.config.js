@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",],
+  content: [ "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",],
   theme: {
     extend: {
       colors:{
@@ -23,6 +23,7 @@ export default {
           medium:'#CBEDA4'
         },
         white: {
+          default:'#ffffff',
           dark:'#D9D9D9',
           medium:'#E0D5D5'
         },
@@ -34,6 +35,7 @@ export default {
           link: '#388187'
         },
         black:{
+          default:"#000000",
           light: '#202E18',
           medium: '#484444',
           dark:'#191818'
