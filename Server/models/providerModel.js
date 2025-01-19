@@ -29,24 +29,27 @@ const providerSchema = mongoose.Schema(
         },
         address: {
             type: String,
-            required: true,
         },
         certifications: {
             type: [String],
             default: [],
         },
-        services: {
+        services: [
+            {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Service",
-        },
+            },
+        ],
         availability: {
             type: Boolean,
             default: true,
         },
-        reviews: {
+        reviews: [
+            {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Review",
-        },
+            },
+        ],
     },
     {
         timestamps: true,
