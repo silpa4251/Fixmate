@@ -3,6 +3,7 @@ const Provider = require("../models/providerModel");
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
+const cloudinary = require("../config/cloudinary");
 
 const userRegisteration = async (data) => {
   const { name, email, password, phone } = data;
@@ -17,15 +18,31 @@ const userRegisteration = async (data) => {
   return { message: "User registered successfully" };
 };
 
-const providerRegisteration = async (data) => {
-  const { name, email, password, services, certifications } = data;
+const providerRegisteration = async (data, files) => {
+  const { name, email, password, services } = data;
+  // const { certifications } = files || [];
+  // console.log("Certifications:", certifications);
   const existingProvider = await Provider.findOne({ email });
   if (existingProvider) {
     throw new CustomError("Provider already exists!", 400);
   }
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  const newProvider = new Provider({ name, email, password: hashedPassword, services : services ? services.split(",") : [], certifications: certifications ? certifications.split(",") : [] });
+
+  let certificateUrls = [];
+  if (files && files.length > 0) {
+    for (let file of files) {
+      
+      const uploadedFile = await cloudinary.uploader.upload(file.path, {
+        folder: "providers/certificates", // Optional: Organize uploads in a folder
+        resource_type: "auto", // Supports images and PDFs
+      });
+     
+      certificateUrls.push(uploadedFile.secure_url);
+    }
+  }
+
+  const newProvider = new Provider({ name, email, password: hashedPassword, services : services ? services.split(",") : [], certifications: certificateUrls });
   await newProvider.save();
   return { message: "Provider registered successfully" };
 }

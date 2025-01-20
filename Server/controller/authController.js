@@ -16,8 +16,9 @@ const registerUser = asyncErrorHandler(async (req, res) => {
 const registerProvider = asyncErrorHandler(async (req, res) => {
   const { error } = registerValidation(req.body)
   if (error) throw new CustomError(error.details[0].message, 400);
-
-  const data = await providerRegisteration(req.body);
+  console.log("Files:", req.files); // Logs uploaded files
+  console.log("Body:", req.body); 
+  const data = await providerRegisteration(req.body,req.files);
   res.status(201).json({ status: "success", data})
 });
 
