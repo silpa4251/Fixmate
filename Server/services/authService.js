@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 const { generateToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
 const cloudinary = require("../config/cloudinary");
+const { OAuth2Client } = require("google-auth-library");
+
 
 const userRegisteration = async (data) => {
   const { name, email, password, phone } = data;
@@ -79,4 +81,49 @@ const userLogin = async (data) => {
   };
 };
 
-module.exports = { userRegisteration, providerRegisteration, userLogin };
+const googleAuthService = async(Credentials) => {
+  
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+  
+  if (!Credentials) {
+    throw new AppError("No google credentials provided!", 400);
+  }
+
+  // Verify Google token
+  const ticket = await client.verifyIdToken({
+    idToken: body.credential,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  // Get payload from verified token
+  const payload = ticket.getPayload();
+  const { email, name } = payload;
+  let user = await User.findOne({ email });
+  let role = "User";
+
+  if (!user) {
+    user = await Provider.findOne({ email });
+    role = "Provider";
+  }
+
+  if (!user) {
+    // If user doesn't exist, create a new one
+    const newUser = new User({ name, email, password: null });
+    await newUser.save();
+    user = newUser;
+  }
+  const token = generateToken(user._id, role);
+
+  return {
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role,
+    },
+    role,
+  };
+};
+
+module.exports = { userRegisteration, providerRegisteration, userLogin, googleAuthService };
