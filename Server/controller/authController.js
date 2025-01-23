@@ -1,5 +1,5 @@
 const { registerValidation, loginValidation, ProviderValidation } = require("../validations/userValidations");
-const { userRegisteration, providerRegisteration, userLogin, googleAuthService } = require("../services/authService");
+const { userRegisteration, providerRegisteration, userLogin, googleAuthService, forgotPasswordService, resetPasswordService } = require("../services/authService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler")
 const CustomError = require("../utils/customError");
 
@@ -20,6 +20,7 @@ const registerProvider = asyncErrorHandler(async (req, res) => {
   if (error) throw new CustomError(error.details[0].message, 400);
  
   const data = await providerRegisteration(req.body,req.files);
+  console.log("hello",data);
   res.status(201).json({ status: "success", data})
 });
 
@@ -44,6 +45,18 @@ const googleAuth = asyncErrorHandler(async (req,res) => {
   
   });
 });
+
+const forgotPassword = asyncErrorHandler(async(req, res) =>{
+  console.log("Request received:", req.body);
+  const data =  await forgotPasswordService(req.body);
+  res.status(200).json({ status: "success", data})
+
+})
+
+const resetPassword = asyncErrorHandler(async(req,res) => {
+  const result = await resetPasswordService(req.body,req.params);
+  res.status(200).json({ status: "success", result})
+})
   
 
-module.exports = { registerUser, registerProvider, login, googleAuth };
+module.exports = { registerUser, registerProvider, login, googleAuth, forgotPassword, resetPassword };

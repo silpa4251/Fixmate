@@ -9,6 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 app.use(cors({
     origin: 'http://localhost:5173'
   }));
+app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

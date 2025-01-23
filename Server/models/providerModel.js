@@ -15,6 +15,12 @@ const providerSchema = mongoose.Schema(
             type: String,
             required: true,
         },
+        resetPasswordToken: {
+            type: String
+        },
+        resetPasswordExpires: {
+            type: Date 
+        },
         image: {
             type: [
                 {
