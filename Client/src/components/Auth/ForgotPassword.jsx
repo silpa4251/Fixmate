@@ -19,6 +19,7 @@ const ForgotPassword = () => {
         const res = await axiosInstance.post(endpoints.AUTH.FORGOT_PASSWORD, {
           email: values.email,
         });
+        console.log("res".res)
         if (res.status === 200) {
           toast.success("Password reset link sent to your email!", {
             position: "top-center",

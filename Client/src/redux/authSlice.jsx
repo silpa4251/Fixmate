@@ -22,7 +22,6 @@ export const blockUser = createAsyncThunk(
   "user/blockUser",
   async (userId) => {
     try {
-      console.log("Blocking user with ID:", userId);
       const response = await axiosInstance.patch(endpoints.ADMIN.BLOCK_USER(userId),  { isBlocked: true } );
       toast.success(`${response.data.data.user.username} is blocked`);
       return response.data.data.user;
@@ -52,33 +51,32 @@ const initialState = {
   isAuthenticated: localStorage.getItem('token') ? true : false,
   user: JSON.parse(localStorage.getItem('user')) || null,
   users: [],
-  admin: localStorage.getItem('user')?JSON.parse(localStorage.getItem('user')).role === 'admin': false,
+  role: JSON.parse(localStorage.getItem('role')) || null,
   loading: false,
   error: null,
 };
 
 const userSlice = createSlice({
-  name: "user",
+  name: "auth",
   initialState,
   reducers: {
     login: (state, action) => {
-      const user = action.payload.user[0];
+      const user = action.payload.user;
       state.isAuthenticated = true;
       state.user = user;
-      state.admin = user.role === 'admin';
+      state.role = user.role;
       localStorage.setItem('token', action.payload.token); 
-      localStorage.setItem('user', JSON.stringify(action.payload.user[0])); 
-      localStorage.setItem('role', JSON.stringify(action.payload.user[0].role)); 
+      localStorage.setItem('user', JSON.stringify(action.payload.user)); 
+      localStorage.setItem('role', JSON.stringify(action.payload.user.role)); 
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
-      state.admin = false;
+      state.role = null;
       localStorage.removeItem("token");
       localStorage.removeItem('user'); 
       localStorage.removeItem('role');
     },
-   
   },
   extraReducers: (builder) => {
     builder

@@ -14,19 +14,24 @@ import { GoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-//   const { isAuthenticated } = useSelector((state) => state.user);
+
+  const { isAuthenticated = false, role = null } = useSelector((state) => {
+  console.log("Redux state:", state);
+  return state.auth || {};
+});
   const [showPass, setShowPass] = useState(false);
 
-
-//   useEffect(() => {
-//     if (isAuthenticated) {
-//       if(admin) {
-//         navigate("/admin/dashboard",{replace: true});
-//       } else {
-//       navigate('/', { replace: true });
-//       }
-//     } 
-//   }, [isAuthenticated,admin, navigate]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      if(role === "Admin") {
+        navigate("/admin/dashboard",{replace: true});
+      } else if(role === "Provider") {
+      navigate('/provider/dashboard', { replace: true });
+      } else{
+        navigate('/home',{replace: true});
+      }
+    } 
+  }, [isAuthenticated, role, navigate]);
  
 
 
@@ -50,7 +55,7 @@ const Login = () => {
         const res = await axiosInstance.post(endpoints.AUTH.LOGIN, values);
         if (res.status === 200) {
           toast.success("Login successful!",{position: "top-center"});
-          dispatch(login(res.data));
+          dispatch(login(res.data.data));
         }
       } catch (error) {
         if (error.response?.status === 401) {

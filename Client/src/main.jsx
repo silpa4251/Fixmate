@@ -6,7 +6,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
-import store from './app/store.jsx';
+import store from './app/store';
 
 const CLIENTID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 

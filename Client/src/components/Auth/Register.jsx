@@ -66,17 +66,17 @@ const Register = () => {
           await axiosInstance.post(endpoint, formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
-        } else {
+        } 
+        else {
           await axiosInstance.post(endpoint, dataToSend, {
             headers: { "Content-Type": "application/json" },
           });
         }
-
-        toast.success("Registration successful!");
         navigate("/login");
+        toast.success("Registration successful!");
       } catch (error) {
-        toast.error(
-          error.response?.data?.message || "Something went wrong. Please try again."
+        console.error(
+          error.response?.data || "Something went wrong. Please try again."
         );
       }
     },
@@ -84,7 +84,7 @@ const Register = () => {
 
   return (
     <div className="bg-overlay bg-cover bg-center min-h-screen flex flex-col justify-center items-center">
-      <div className="bg-grey-light bg-opacity-90 p-8 rounded-lg shadow-md w-96 mt-10">
+      <div className="bg-grey-light bg-opacity-90 p-8 rounded-lg shadow-md w-96 mt-1">
         <h2 className="text-2xl font-bold text-center mb-6 text-black-default">
           Happy You&apos;re Here!
         </h2>

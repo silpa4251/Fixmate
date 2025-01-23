@@ -4,6 +4,7 @@ const endpoints = {
       REGISTER_USER: "/auth/register/user",
       REGISTER_PROVIDER: "/auth/register/provider",
       GOOGLE: "/auth/googleauth",
+      FORGOT_PASSWORD: "/auth/forgot-password",
 
     },
 };

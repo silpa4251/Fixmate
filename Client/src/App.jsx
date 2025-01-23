@@ -5,6 +5,9 @@ import LandingPage from "./page/LandingPage"
 import Register from "./components/Auth/Register"
 import Login from "./components/Auth/Login";
 import Navbar from "./components/Navbar/Navbar";
+import ForgotPassword from "./components/Auth/ForgotPassword";
+import ResetPassword from "./components/Auth/ResetPassword";
+import dashboard from "./components/Admin/dashboard";
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
 
@@ -19,6 +22,9 @@ function App() {
           <Route path="/" element={<LandingPage />}/>
           <Route path="/register" element={<Register />}/>
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/admin/dashboard" element={<dashboard />} />
 
       </Routes>
        {/* <div>
