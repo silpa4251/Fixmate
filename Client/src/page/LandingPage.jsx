@@ -9,8 +9,6 @@ const LandingPage = () => {
     <>
     <header className="bg-overlay text-white h-screen flex flex-col items-center justify-center relative" id="home">
 
-    <Navbar />
-
       <div className="text-center px-4">
         <p className="text-base text-white-medium sm:text-lg md:text-xl">
           We provide quality service

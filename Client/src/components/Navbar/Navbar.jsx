@@ -1,8 +1,20 @@
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate(); 
+
+  const isRegisterPage = location.pathname === "/register";
+  const isLoginPage = location.pathname === "/login";
+
+  const buttonText = isRegisterPage ? "Sign In" : isLoginPage ? "Sign Up" : "Get in Touch";
+  const buttonRoute = isLoginPage
+    ? "/register"
+    : "/login";
+    
 
   return (
     <nav className="fixed top-0 w-full flex items-center justify-between px-6 py-4 bg-black-default bg-opacity-60 h-20 z-50 ">
@@ -36,14 +48,18 @@ const Navbar = () => {
           </a>
         </li>
       </ul>
-      <button className="hidden md:block bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
-        Get in Touch
+      <button 
+       onClick={() => navigate(buttonRoute)} 
+      className="hidden md:block bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       {buttonText}
       </button>
 
-      {/* Get in Touch Button */}
+      {/* Mobile View */}
       <div className="md:hidden flex items-center space-x-4">
-      <button className=" bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
-        Get in Touch
+      <button
+       onClick={() => navigate(buttonRoute)} 
+       className=" bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       {buttonText}
       </button>
       
 
