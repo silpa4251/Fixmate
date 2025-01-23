@@ -34,12 +34,14 @@ const providerSchema = mongoose.Schema(
             type: [String],
             default: [],
         },
-        services: [
-            {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Service",
-            },
-        ],
+        services: {
+            // {
+            // type: mongoose.Schema.Types.ObjectId,
+            // ref: "Service",
+            // },
+            type: [String],
+            default: [],
+    },
         availability: {
             type: Boolean,
             default: true,
