@@ -3,6 +3,7 @@ const cors = require("cors");
 const errorHandler = require("./middlewares/errorHandler");
 const app = express();
 const authRoutes = require("./routes/authRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 
 // Middlewares for parsing request body
@@ -16,6 +17,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // User routes
 app.use("/api/auth", authRoutes);
+
+app.use("/api/admin",adminRoutes);
 
 
 // Middleware for gobal error handling

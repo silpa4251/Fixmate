@@ -5,7 +5,6 @@ const CustomError = require("../utils/customError");
 
 // Registering a new user
 const registerUser = asyncErrorHandler(async (req, res) => {
-  console.log("req",req.body);
   const { error } = registerValidation(req.body)
   if (error) throw new CustomError(error.details[0].message, 400);
   
@@ -15,12 +14,10 @@ const registerUser = asyncErrorHandler(async (req, res) => {
 
 // Registering a new provider
 const registerProvider = asyncErrorHandler(async (req, res) => {
-  console.log("repdy",req.body);
   const { error } = ProviderValidation(req.body)
   if (error) throw new CustomError(error.details[0].message, 400);
  
   const data = await providerRegisteration(req.body,req.files);
-  console.log("hello",data);
   res.status(201).json({ status: "success", data})
 });
 
@@ -47,7 +44,6 @@ const googleAuth = asyncErrorHandler(async (req,res) => {
 });
 
 const forgotPassword = asyncErrorHandler(async(req, res) =>{
-  console.log("Request received:", req.body);
   const data =  await forgotPasswordService(req.body);
   res.status(200).json({ status: "success", data})
 
