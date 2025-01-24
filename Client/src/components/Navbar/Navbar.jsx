@@ -1,20 +1,34 @@
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { logout } from "../../redux/authSlice";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate(); 
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const isRegisterPage = location.pathname === "/register";
   const isLoginPage = location.pathname === "/login";
 
-  const buttonText = isRegisterPage ? "Sign In" : isLoginPage ? "Sign Up" : "Get in Touch";
-  const buttonRoute = isLoginPage
-    ? "/register"
-    : "/login";
-    
+  const buttonText =  isAuthenticated
+  ? "Logout"
+  : isRegisterPage
+  ? "Sign In" 
+  : isLoginPage 
+  ? "Sign Up" 
+  : "Get in Touch";
+  const buttonAction = () => {
+    if (isAuthenticated) {
+      dispatch(logout());
+      navigate("/"); 
+    } else {
+      navigate(isLoginPage ? "/register" : "/login");
+    }
+  };
 
   return (
     <nav className="fixed top-0 w-full flex items-center justify-between px-6 py-4 bg-black-default bg-opacity-60 h-20 z-50 ">
@@ -49,7 +63,7 @@ const Navbar = () => {
         </li>
       </ul>
       <button 
-       onClick={() => navigate(buttonRoute)} 
+       onClick={buttonAction} 
       className="hidden md:block bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
        {buttonText}
       </button>
@@ -57,7 +71,7 @@ const Navbar = () => {
       {/* Mobile View */}
       <div className="md:hidden flex items-center space-x-4">
       <button
-       onClick={() => navigate(buttonRoute)} 
+       onClick={buttonAction} 
        className=" bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
        {buttonText}
       </button>
