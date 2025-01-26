@@ -1,3 +1,7 @@
+@import "slick-carousel/slick/slick.css";
+@import "slick-carousel/slick/slick-theme.css";
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,5 +17,6 @@
     url('./assets//background.jpeg'); 
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
 
 }

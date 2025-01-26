@@ -1,4 +1,4 @@
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance from "../../apiConfig/axiosInstance";
 import { GoogleLogin } from "@react-oauth/google";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -259,6 +259,13 @@ const Register = () => {
                 { credential: credentialResponse.credential }
               );
               toast.success("Google Login Successful!");
+              localStorage.setItem('token', res.data.token);
+          localStorage.setItem('role', res.data.user.role);
+          // localStorage.setItem('user', res.data.user);
+
+          if(res.data.user.role === "User") navigate('/home');
+          if(res.data.user.role === "Provider") navigate('/provider/dashboard');
+          if(res.data.user.role === "Admin") navigate('/admin/dashboard');
               console.log(res.data, "responsefrontend");
             } catch (error) {
               console.error("Error during Google login:", error);

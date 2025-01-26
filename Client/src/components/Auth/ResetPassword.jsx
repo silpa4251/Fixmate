@@ -2,7 +2,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import axiosInstance from "../../api/axiosInstance";
+import axiosInstance from "../../apiConfig/axiosInstance";
 
 const ResetPassword = () => {
   const { token } = useParams();

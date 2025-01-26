@@ -7,9 +7,10 @@ import { TbEyeClosed } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../redux/authSlice";
-import axiosInstance from "../../api/axiosInstance";
-import endpoints from "../../api/endpoints";
+import axiosInstance from "../../apiConfig/axiosInstance";
+import endpoints from "../../apiConfig/endpoints";
 import { GoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -52,17 +53,22 @@ const Login = () => {
     }),
     onSubmit: async (values) => {
       try {
+        console.log("val",values);
         const res = await axiosInstance.post(endpoints.AUTH.LOGIN, values);
         if (res.status === 200) {
           toast.success("Login successful!",{position: "top-center"});
           dispatch(login(res.data.data));
         }
       } catch (error) {
-        if (error.response?.status === 401) {
-          toast.error("Invalid email or password.");
+        if (error.response) {
+          // Server returned a response with a status code outside 2xx
+          toast.error(`Error: ${error.response.data.message || "An error occurred"}`);
+        } else if (error.request) {
+          // The request was made, but no response was received
+          toast.error("Server did not respond. Please try again.");
         } else {
-          console.error("Unexpected error during login:", error);
-          // toast.error("Something went wrong, please try again.");
+          // Something happened in setting up the request
+          toast.error(`Unexpected error: ${error.message}`);
         }
       }
     },
@@ -125,8 +131,17 @@ const Login = () => {
 
         <GoogleLogin
         onSuccess={async (credentialResponse) => {
-          const post = await axiosInstance.post('http://localhost:8000/api/auth/googleauth', credentialResponse)
-          console.log(post,"responsefrontend")
+          const res = await axios.post('http://localhost:8000/api/auth/googleauth', credentialResponse)
+          console.log(res.data,"responsefrontend")
+          localStorage.setItem('token', res.data.token);
+          localStorage.setItem('role', res.data.user.role);
+          // localStorage.setItem('user', res.data.user);
+
+          if(res.data.user.role === "User") navigate('/home');
+          if(res.data.user.role === "Provider") navigate('/provider/dashboard');
+          if(res.data.user.role === "Admin") navigate('/admin/dashboard');
+
+
         }}
         onError={() => {
           console.log("Login Failed");

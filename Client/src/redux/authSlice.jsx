@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axiosInstance from "../api/axiosInstance";
-import endpoints from "../api/endpoints";
+import axiosInstance from "../apiConfig/axiosInstance";
+import endpoints from "../apiConfig/endpoints";
 import { toast } from "react-toastify";
 
 
@@ -49,9 +49,9 @@ export const unblockUser = createAsyncThunk(
 
 const initialState = {
   isAuthenticated: localStorage.getItem('token') ? true : false,
-  user: JSON.parse(localStorage.getItem('user')) || null,
+  user: localStorage.getItem('user')|| null,
   users: [],
-  role: JSON.parse(localStorage.getItem('role')) || null,
+  role: localStorage.getItem('role') || null,
   loading: false,
   error: null,
 };

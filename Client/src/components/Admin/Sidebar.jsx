@@ -92,7 +92,7 @@ const Sidebar = () => {
           <MdOutlineLogout size={24} className="mr-3" /> Logout </button>
           </aside>
           <main className="flex-1 p-6 bg-green-pale overflow-auto">
-          <div className="p-6 bg-white-default shadow rounded-lg mt-2">
+          <div className="p-6 bg-white-default shadow rounded-lg mt-2 mx-5">
           <Breadcrumbs />
         </div>
         <Outlet />

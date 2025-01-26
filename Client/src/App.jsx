@@ -12,6 +12,8 @@ import Unauthorized from "./page/Unauthorized";
 import AdminRoutes from "./routes/AdminRoutes";
 import Dashboard from "./components/Admin/dashboard";
 import { useSelector } from "react-redux";
+import Loading from "./page/loading";
+import Footer from "./components/Footer/Footer";
 // import AllUsers from "./components/Admin/AllUsers";
 
 // import axios from "axios"
@@ -32,6 +34,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/loading" element={<Loading />} />
           
           <Route element={<AdminRoutes />}>
             <Route path = '/admin' element={<Sidebar />} >
@@ -41,7 +44,7 @@ function App() {
           </Route>
           </Route>
       </Routes>
-
+    <Footer />
      
        
     </>
