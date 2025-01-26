@@ -4,6 +4,7 @@ const errorHandler = require("./middlewares/errorHandler");
 const app = express();
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const providerRoutes = require("./routes/providerRoutes");
 
 
 // Middlewares for parsing request body
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // User routes
 app.use("/api/auth", authRoutes);
+app.use("/api/provider",providerRoutes);
 
 app.use("/api/admin",adminRoutes);
 
