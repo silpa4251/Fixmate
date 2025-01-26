@@ -47,10 +47,14 @@ const providerSchema = mongoose.Schema(
             // },
             type: [String],
             default: [],
-    },
+        },
         availability: {
             type: Boolean,
             default: true,
+        },
+        location: {
+            type: { type: String, enum: ["Point"] },
+            coordinates: { type: [Number] }, 
         },
         reviews: [
             {
@@ -63,5 +67,7 @@ const providerSchema = mongoose.Schema(
         timestamps: true,
     }
 );
+
+providerSchema.index({ location: "2dsphere" });
 
 module.exports = mongoose.model("Provider", providerSchema);

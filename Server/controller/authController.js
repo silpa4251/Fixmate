@@ -1,5 +1,5 @@
 const { registerValidation, loginValidation, ProviderValidation } = require("../validations/userValidations");
-const { userRegisteration, providerRegisteration, userLogin, googleAuthService, forgotPasswordService, resetPasswordService } = require("../services/authService");
+const { userRegisteration, providerRegisteration, userLogin, googleAuthService, forgotPasswordService, resetPasswordService, contactService } = require("../services/authService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler")
 const CustomError = require("../utils/customError");
 
@@ -53,6 +53,11 @@ const resetPassword = asyncErrorHandler(async(req,res) => {
   const result = await resetPasswordService(req.body,req.params);
   res.status(200).json({ status: "success", result})
 })
+
+const contact = asyncErrorHandler(async(req,res) => {
+  const result = await contactService(req.body);
+  res.status(200).json({ status: "success", result})
+})
   
 
-module.exports = { registerUser, registerProvider, login, googleAuth, forgotPassword, resetPassword };
+module.exports = { registerUser, registerProvider, login, googleAuth, forgotPassword, resetPassword, contact };

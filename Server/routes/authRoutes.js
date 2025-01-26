@@ -1,5 +1,5 @@
 const express = require("express");
-const { login, registerUser, registerProvider, googleAuth, forgotPassword, resetPassword } = require("../controller/authController");
+const { login, registerUser, registerProvider, googleAuth, forgotPassword, resetPassword, contact } = require("../controller/authController");
 const upload = require("../middlewares/multer");
 const authRouter = express.Router();
 
@@ -9,5 +9,6 @@ authRouter.post("/login", login);
 authRouter.post("/googleauth",googleAuth);
 authRouter.post("/forgot-password",forgotPassword);
 authRouter.post("/reset-password/:token",resetPassword);
+authRouter.post("/contact",contact);
 
 module.exports = authRouter;

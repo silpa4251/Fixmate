@@ -55,6 +55,7 @@ const userLogin = async (data) => {
   const { email, password } = data;
   let user = await User.findOne({ email });
   let role = "User";
+  console.log("use",user);
 
   if (!user) {
     user = await Provider.findOne({ email });
@@ -216,4 +217,30 @@ const resetPasswordService = async(data,params) => {
 
 }
 
-module.exports = { userRegisteration, providerRegisteration, userLogin, googleAuthService, forgotPasswordService, resetPasswordService };
+const contactService = async(data) => {
+  const { name, email, message } = data;
+  if (!name || !email || !message) {
+    throw new CustomError("All fields are required!",400);
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail", 
+    auth: {
+      user: process.env.EMAIL, 
+      pass: process.env.APP_PASSWORD,
+    },
+  });
+
+  // Email content
+  const mailOptions = {
+    from: email,
+    to: process.env.EMAIL, // Receiver's email (your email)
+    subject: `New Contact Form Submission from ${name}`,
+    text: `You received a new message from ${name} (${email}):\n\n${message}`,
+  };
+
+  await transporter.sendMail(mailOptions);
+  return { message: "Your message has been sent successfully!" };
+}
+
+module.exports = { userRegisteration, providerRegisteration, userLogin, googleAuthService, forgotPasswordService, resetPasswordService, contactService };
