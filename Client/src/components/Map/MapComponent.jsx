@@ -1,32 +1,39 @@
-/* eslint-disable react/prop-types */
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+import { useEffect, useState } from "react";
+import L from "leaflet";
+import ProviderMarker from "./ProviderMarker";
 
-const MapComponent = ({ userLocation, providers }) => {
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY",
-  });
+const MapComponent = () => {
+  const [map, setMap] = useState(null);
+  const providers = [
+    { name: "Provider 1", latitude: 51.515, longitude: -0.09, address: "123 Street" },
+    { name: "Provider 2", latitude: 51.505, longitude: -0.08, address: "456 Avenue" },
+  ];
+  useEffect(() => {
+    const mapInstance = L.map("map").setView([51.505, -0.09], 13);
 
-  if (!isLoaded) return <div>Loading...</div>;
+    // Add OpenStreetMap tiles
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(mapInstance);
+    setMap(mapInstance);
+
+    mapInstance.locate({ setView: true, maxZoom: 16 });
+    mapInstance.on("locationfound", (e) => {
+      const userMarker = L.marker(e.latlng).addTo(mapInstance);
+      userMarker.bindPopup("You are here!").openPopup();
+    });
+  
+    mapInstance.on("locationerror", () => {
+      alert("Unable to access your location.");
+    });
+
+  }, []);
 
   return (
-    <GoogleMap
-      center={{
-        lat: userLocation.latitude,
-        lng: userLocation.longitude,
-      }}
-      zoom={12}
-      mapContainerStyle={{ width: "100%", height: "400px" }}
-    >
-      {providers.map((provider) => (
-        <Marker
-          key={provider._id}
-          position={{
-            lat: provider.location.coordinates[1],
-            lng: provider.location.coordinates[0],
-          }}
-        />
-      ))}
-    </GoogleMap>
+  <div id="map" style={{ height: "500px", width: "100%" }} >
+    {map && <ProviderMarker map={map} providers={providers} />}
+  </div>
   );
 };
 

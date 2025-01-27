@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom"
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css'
-import LandingPage from "./page/LandingPage"
+import LandingPage from "./page/LandingPage";
 import Register from "./components/Auth/Register"
 import Login from "./components/Auth/Login";
 import Navbar from "./components/Navbar/Navbar";
@@ -14,6 +14,7 @@ import Dashboard from "./components/Admin/dashboard";
 import { useSelector } from "react-redux";
 import Loading from "./page/loading";
 import Footer from "./components/Footer/Footer";
+import Home from "./page/Home";
 // import AllUsers from "./components/Admin/AllUsers";
 
 // import axios from "axios"
@@ -35,6 +36,7 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/loading" element={<Loading />} />
+          <Route path="/home" element={<Home />} />
           
           <Route element={<AdminRoutes />}>
             <Route path = '/admin' element={<Sidebar />} >
