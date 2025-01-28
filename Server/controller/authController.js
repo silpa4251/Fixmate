@@ -1,5 +1,5 @@
 const { registerValidation, loginValidation, ProviderValidation } = require("../validations/userValidations");
-const { userRegisteration, providerRegisteration, userLogin, googleAuthService, forgotPasswordService, resetPasswordService, contactService } = require("../services/authService");
+const { userRegisteration, providerRegisteration, googleAuthService, forgotPasswordService, resetPasswordService, contactService, userLoginService, providerLoginService, providerGoogleAuthService } = require("../services/authService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler")
 const CustomError = require("../utils/customError");
 
@@ -22,11 +22,19 @@ const registerProvider = asyncErrorHandler(async (req, res) => {
 });
 
 //Login a user
-const login = asyncErrorHandler(async (req, res) => {
+const userLogin = asyncErrorHandler(async (req, res) => {
   const {error} = loginValidation(req.body);
   if (error) throw new CustomError(error.details[0].message, 400);
 
-  const data = await userLogin(req.body);
+  const data = await userLoginService(req.body);
+  res.status(200).json({ status: "success", data})
+});
+
+const providerLogin = asyncErrorHandler(async (req, res) => {
+  const {error} = loginValidation(req.body);
+  if (error) throw new CustomError(error.details[0].message, 400);
+
+  const data = await providerLoginService(req.body);
   res.status(200).json({ status: "success", data})
 });
 
@@ -41,6 +49,19 @@ const googleAuth = asyncErrorHandler(async (req,res) => {
       user: data.user,
   
   });
+});
+
+const providerGoogleAuth = asyncErrorHandler(async (req,res) => {
+  const body = req.body;
+   const data = await providerGoogleAuthService(body);
+  
+  res.status(200).json({
+    status: "success",
+    message: "provider authenticated with Google successfully",
+    token: data.token,
+    provider: data.provider,
+
+});
 });
 
 const forgotPassword = asyncErrorHandler(async(req, res) =>{
@@ -60,4 +81,4 @@ const contact = asyncErrorHandler(async(req,res) => {
 })
   
 
-module.exports = { registerUser, registerProvider, login, googleAuth, forgotPassword, resetPassword, contact };
+module.exports = { registerUser, registerProvider, userLogin, providerLogin, googleAuth,providerGoogleAuth, forgotPassword, resetPassword, contact };

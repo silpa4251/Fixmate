@@ -1,12 +1,14 @@
 const express = require("express");
-const { login, registerUser, registerProvider, googleAuth, forgotPassword, resetPassword, contact } = require("../controller/authController");
+const { registerUser, registerProvider, googleAuth, forgotPassword, resetPassword, contact, userLogin, providerLogin, providerGoogleAuth } = require("../controller/authController");
 const upload = require("../middlewares/multer");
 const authRouter = express.Router();
 
 authRouter.post("/register/user", registerUser);
 authRouter.post("/register/provider",upload.array("certifications",5), registerProvider);
-authRouter.post("/login", login);
+authRouter.post("/login/user", userLogin);
+authRouter.post("/login/provider", providerLogin);
 authRouter.post("/googleauth",googleAuth);
+authRouter.post("/googleauth/provider",providerGoogleAuth);
 authRouter.post("/forgot-password",forgotPassword);
 authRouter.post("/reset-password/:token",resetPassword);
 authRouter.post("/contact",contact);

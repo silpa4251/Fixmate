@@ -5,7 +5,7 @@ const registerValidation = (data) => {
   const schema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(4).required(),
+    password: Joi.string().min(4),
     role: Joi.string(),
   });
 
@@ -16,9 +16,9 @@ const ProviderValidation = (data) => {
   const schema = Joi.object({ 
     name: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(4).required(),
+    password: Joi.string().min(4),
     services: Joi.required(),
-    location:Joi.string().required(),
+    // location:Joi.string().required(),
     // certifications: Joi.required(),
     role: Joi.string(),
   });

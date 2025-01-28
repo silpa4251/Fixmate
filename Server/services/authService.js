@@ -24,7 +24,7 @@ const userRegisteration = async (data) => {
 };
 
 const providerRegisteration = async (data, files) => {
-  const { name, email, password, services } = data;
+  const { name, email, password, address, services } = data;
   const existingProvider = await Provider.findOne({ email });
   if (existingProvider) {
     throw new CustomError("Provider already exists!", 400);
@@ -37,36 +37,67 @@ const providerRegisteration = async (data, files) => {
     for (let file of files) {
       
       const uploadedFile = await cloudinary.uploader.upload(file.path, {
-        folder: "providers/certificates", // Optional: Organize uploads in a folder
-        resource_type: "auto", // Supports images and PDFs
+        folder: "providers/certificates",
+        resource_type: "auto", 
       });
      
       certificateUrls.push(uploadedFile.secure_url);
     }
   }
+  const { place, district, state, pincode } = address;
+  let coordinates = [];
 
-  const newProvider = new Provider({ name, email, password: hashedPassword, services : services ? services.split(",") : [], certifications: certificateUrls });
+  try {
+    // Fetch coordinates using OpenCage API
+    const response = await axios.get("https://api.opencagedata.com/geocode/v1/json", {
+      params: {
+        q: `${place}, ${district}, ${state}, ${pincode}`,
+        key: Process.env.GEO_API_KEY ,
+      },
+    });
+
+    if (response.data.results.length === 0) {
+      throw new CustomError("Unable to fetch coordinates for the provided address", 400);
+    }
+  
+    const { lat, lng } = response.data.results[0].geometry;
+    coordinates = [lng, lat];
+  } catch (error) {
+    throw new CustomError("Failed to fetch geolocation data. Please try again.", 500);
+  }
+
+  const newProvider = new Provider({ 
+    name, 
+    email, 
+    password: hashedPassword, 
+    address:[{
+      place,
+      district,
+      state,
+      pincode,
+      coordinates: {
+        type: "Point",
+        coordinates,
+      },
+
+  }], 
+  services : services ? services.split(",") : [], 
+  certifications: certificateUrls,
+ });
+
   await newProvider.save();
-  console.log("new",newProvider);
   return { message: "Provider registered successfully" };
-}
+};
 
-const userLogin = async (data) => {
+const userLoginService = async (data) => {
   const { email, password } = data;
   let user = await User.findOne({ email });
   let role = "User";
-  console.log("use",user);
 
-  if (!user) {
-    user = await Provider.findOne({ email });
-    role = "Provider";
-  }
- 
   if (!user) {
     user = await Admin.findOne({ email });
     role = "Admin";
   }
-  
   
   if (!user) {
     throw new CustomError("Invalid email or password", 400);
@@ -86,6 +117,32 @@ const userLogin = async (data) => {
       name: user.name,
       email: user.email,
       role
+    },
+  };
+};
+
+const providerLoginService = async (data) => {
+  const { email, password } = data;
+  const provider = await Provider.findOne({ email });
+
+  if (!provider) {
+    throw new CustomError("Invalid email or password", 400);
+  }
+
+  const isMatch = await bcrypt.compare(password, provider.password);
+  if (!isMatch) {
+    throw new CustomError("Invalid credentials", 400);
+  }
+  const token = generateToken(provider._id, "Provider");
+
+  return {
+    message: "Provider logged in successfully",
+    token,
+    user: {
+      id: provider._id,
+      name: provider.name,
+      email: provider.email,
+      role: "Provider",
     },
   };
 };
@@ -115,19 +172,16 @@ const googleAuthService = async(Credentials) => {
   
 
   if (!user) {
-    user = await Provider.findOne({ email });
+    user = await Admin.findOne({ email });
     if (user) {
-      role = "Provider";
+      role = "Admin";
     }
   }
-  console.log("role6",role)
   if (!user) {
-    // If user doesn't exist, create a new one
     const newUser = new User({ name, email, password: null });
     await newUser.save();
     user = newUser; 
     role = "User";
-    console.log("role2",role)
   
   }
 
@@ -147,24 +201,58 @@ const googleAuthService = async(Credentials) => {
   };
 };
 
+const providerGoogleAuthService = async (Credentials) => {
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+  if (!Credentials || !Credentials.credential) {
+    throw new CustomError("No valid Google credentials provided!", 400);
+  }
+
+  // Verify Google token
+  const ticket = await client.verifyIdToken({
+    idToken: Credentials.credential,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+
+  // Get payload from verified token
+  const payload = ticket.getPayload();
+  const { email, name } = payload;
+
+  let provider = await Provider.findOne({ email });
+
+  // If provider doesn't exist, create a new one
+  if (!provider) {
+    provider = new Provider({ name, email, password: null });
+    await provider.save();
+  }
+
+  // Generate token using the provider's ID
+  const token = generateToken(provider._id, "Provider");
+
+  return {
+    token,
+    provider: {
+      id: provider._id,
+      name: provider.name,
+      email: provider.email,
+      role: "Provider",
+    },
+  };
+};
+
+
 const forgotPasswordService = async(data) => {
-  console.log("body",data)
   const { email } = data;
   const user = await User.findOne({ email });
-  console.log("User found:", user);
     if (!user) {
       throw new CustomError("User not found",400);
     }
     const resetToken = crypto.randomBytes(32).toString("hex");
     const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
-    console.log("Reset Token:", resetToken);
-console.log("Hashed Token:", resetTokenHash);
 
     user.resetPasswordToken = resetTokenHash;
     user.resetPasswordExpires = Date.now() + 3600000;
-    console.log("User before saving:", user);
 await user.save();
-console.log("User after saving:", user);
 
     const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
@@ -243,4 +331,4 @@ const contactService = async(data) => {
   return { message: "Your message has been sent successfully!" };
 }
 
-module.exports = { userRegisteration, providerRegisteration, userLogin, googleAuthService, forgotPasswordService, resetPasswordService, contactService };
+module.exports = { userRegisteration, providerRegisteration, userLoginService, providerLoginService, googleAuthService,providerGoogleAuthService, forgotPasswordService, resetPasswordService, contactService };

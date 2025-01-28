@@ -1,4 +1,4 @@
-const Provider = require("../models/Provider");
+const Provider = require("../models/providerModel");
 
 const getNearbyProviders = async (req, res) => {
   const { latitude, longitude, distance = 5000 } = req.query;

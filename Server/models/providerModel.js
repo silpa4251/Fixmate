@@ -13,7 +13,6 @@ const providerSchema = mongoose.Schema(
         },
         password: {
             type: String,
-            required: true,
         },
         resetPasswordToken: {
             type: String
@@ -34,7 +33,19 @@ const providerSchema = mongoose.Schema(
             type: String,
         },
         address: {
-            type: String,
+            type: [
+              {
+                place: { type: String, required: true },
+                district: { type: String, required: true },
+                state: { type: String, required: true },
+                pincode: { type: String, required: true },
+                coordinates: {
+                  type: { type: String, enum: ["Point"], required: true },
+                  coordinates: { type: [Number], required: true },
+                },
+              },
+            ],
+            default: [],
         },
         certifications: {
             type: [String],
@@ -52,10 +63,6 @@ const providerSchema = mongoose.Schema(
             type: Boolean,
             default: true,
         },
-        location: {
-            type: { type: String, enum: ["Point"] },
-            coordinates: { type: [Number] }, 
-        },
         reviews: [
             {
             type: mongoose.Schema.Types.ObjectId,
@@ -68,6 +75,6 @@ const providerSchema = mongoose.Schema(
     }
 );
 
-providerSchema.index({ location: "2dsphere" });
+providerSchema.index({ "address.coordinates": "2dsphere"});
 
 module.exports = mongoose.model("Provider", providerSchema);
