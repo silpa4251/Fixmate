@@ -11,22 +11,42 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
 
-  const isRegisterPage = location.pathname === "/register/user";
-  const isLoginPage = location.pathname === "/login/user";
+  const isRegisterPage = location.pathname === "/user/register";
+  const isLoginPage = location.pathname === "/user/login";
+  const isRegisterProvider = location.pathname === "/provider/register";
+  const isLoginProvider = location.pathname === "/provider/login";
 
-  const buttonText =  isAuthenticated
+  const userText =  isAuthenticated
   ? "Logout"
   : isRegisterPage
   ? "Sign In" 
   : isLoginPage 
   ? "Sign Up" 
   : "Need a service?";
-  const buttonAction = () => {
+
+  const providerText =  isAuthenticated
+  ? "Logout"
+  : isRegisterProvider
+  ? "Sign In" 
+  : isLoginProvider 
+  ? "Sign Up" 
+  : "Join as a provider";
+
+  const userAction = () => {
     if (isAuthenticated) {
       dispatch(logout());
       navigate("/"); 
     } else {
-      navigate(isLoginPage ? "/register" : "/login");
+      navigate(isLoginPage ? "/user/register" : "/user/login");
+    }
+  };
+
+  const providerAction = () => {
+    if (isAuthenticated) {
+      dispatch(logout());
+      navigate("/"); 
+    } else {
+      navigate(isLoginProvider ? "/provider/register" : "/provider/login");
     }
   };
 
@@ -60,18 +80,30 @@ const Navbar = () => {
             Contact Us
           </NavLink>
       </div>
+      <div className="hidden md:flex space-x-0">
       <button 
-       onClick={buttonAction} 
-      className="hidden md:block bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
-       {buttonText}
+       onClick={providerAction} 
+      className="hidden md:block text-white-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       {providerText}
       </button>
+      <button 
+       onClick={userAction} 
+      className="hidden md:block text-white-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       {userText}
+      </button>
+      </div>
 
       {/* Mobile View */}
-      <div className="md:hidden flex items-center space-x-4">
+      <div className="md:hidden flex items-center">
       <button
-       onClick={buttonAction} 
-       className=" bg-green-default text-black-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
-       {buttonText}
+       onClick={providerAction} 
+       className=" text-white-default px-2 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       {providerText}
+      </button>
+      <button
+       onClick={userAction} 
+       className=" text-white-default px-2 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       {userText}
       </button>
       
 

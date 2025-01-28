@@ -49,7 +49,7 @@ const LandingPage = () => {
     <div className="container mx-auto flex flex-col lg:flex-row items-center lg:items-start">
     <div className="w-full lg:w-1/2 lg:pl-12 text-center lg:text-left">
             <h2 className="text-2xl md:text-3xl font-bold text-black-default mb-4">
-                Few Words About Us
+                Few Words About Us 
             </h2>
             <p className="text-gray-700 text-base md:text-lg leading-relaxed">
                 At FixMate, we connect you with trusted local service providers for

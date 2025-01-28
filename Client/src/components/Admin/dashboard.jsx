@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import axiosInstance from "../../apiConfig/axiosInstance";
+import axiosInstance from "../../api/axiosInstance";
 import { Bar } from "react-chartjs-2";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
@@ -33,7 +33,7 @@ const Dashboard = () => {
   }, []);
 
   const chartData = {
-    labels: ["Users", "Providers", "Bookings", "Revenue"], // X-axis labels
+    labels: ["Users", "Providers", "Bookings", "Revenue"],
     datasets: [
       {
         label: "Statistics",

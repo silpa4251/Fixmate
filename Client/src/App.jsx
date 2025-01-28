@@ -2,8 +2,6 @@ import { Route, Routes } from "react-router-dom"
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css'
 import LandingPage from "./page/LandingPage";
-import Register from "./components/Auth/Register"
-import Login from "./components/Auth/Login";
 import Navbar from "./components/Navbar/Navbar";
 import ForgotPassword from "./components/Auth/ForgotPassword";
 import ResetPassword from "./components/Auth/ResetPassword";
@@ -15,6 +13,10 @@ import { useSelector } from "react-redux";
 import Loading from "./page/loading";
 import Footer from "./components/Footer/Footer";
 import Home from "./page/Home";
+import UserRegister from "./components/Auth/UserRegister";
+import UserLogin from "./components/Auth/UserLogin";
+import ProviderRegister from "./components/Provider/ProviderRegister";
+import ProviderLogin from "./components/Provider/ProviderLogin";
 // import AllUsers from "./components/Admin/AllUsers";
 
 // import axios from "axios"
@@ -30,8 +32,10 @@ function App() {
       <Routes>
      
           <Route path="/" element={<LandingPage />}/>
-          <Route path="/register" element={<Register />}/>
-          <Route path="/login" element={<Login />} />
+          <Route path="/user/register" element={<UserRegister />}/>
+          <Route path="/user/login" element={<UserLogin />} />
+          <Route path="/provider/register" element={<ProviderRegister />}/>
+          <Route path="/provider/login" element={<ProviderLogin />}/>
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />

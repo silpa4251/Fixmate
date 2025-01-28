@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axiosInstance from "../apiConfig/axiosInstance";
-import endpoints from "../apiConfig/endpoints";
+import axiosInstance from "../api/axiosInstance"
 import { toast } from "react-toastify";
 
 
@@ -8,7 +7,7 @@ export const fetchAllUsers = createAsyncThunk(
   "user/fetchAllUsers",
   async () => {
     try {
-      const response = await axiosInstance.get(endpoints.ADMIN.GET_ALL_USERS);
+      const response = await axiosInstance.get("/dashboard/users");
       const nonAdminUsers = response.data.data.users.filter(user => user.role !== "admin");
       return nonAdminUsers;
     } catch (error) {

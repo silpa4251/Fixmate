@@ -1,8 +1,7 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import axiosInstance from "../../apiConfig/axiosInstance";
-import endpoints from "../../apiConfig/endpoints";
+import axiosInstance from "../../api/axiosInstance";
 
 const ForgotPassword = () => {
   const formik = useFormik({
