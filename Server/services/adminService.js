@@ -1,5 +1,5 @@
-const User = require('../models/userModel');
-const Provider = require('../models/providerModel'); 
+const User = require('../models/userModel').default;
+const Provider = require('../models/providerModel').default; 
 const Bookings = require('../models/bookingModel'); 
 
 const getStatsService = async () => {

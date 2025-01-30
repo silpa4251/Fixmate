@@ -59,6 +59,9 @@ const providerSchema = mongoose.Schema(
             type: [String],
             default: [],
         },
+        charge: {
+            type: Number,
+        },
         availability: {
             type: Boolean,
             default: true,

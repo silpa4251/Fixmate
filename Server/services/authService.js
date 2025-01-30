@@ -1,14 +1,15 @@
-const User = require("../models/userModel");
-const Provider = require("../models/providerModel");
+const User = require("../models/userModel").default;
+const Provider = require("../models/providerModel").default;
 const bcrypt = require("bcryptjs");
 const { generateToken, generateRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
-const cloudinary = require("../config/cloudinary");
+const cloudinary = require("../config/cloudinary").default;
 const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const Admin = require("../models/adminModel");
 const axios = require("axios");
+const { geoCodingApi } = require("../utils/geoCodingApi");
 
 
 const userRegisteration = async (data) => {
@@ -45,29 +46,9 @@ const providerRegisteration = async (data, files) => {
       certificateUrls.push(uploadedFile.secure_url);
     }
   }
-  const { place, district, state, pincode } = address[0];
-  let coordinates = [];
+  const coordinates = await geoCodingApi(address[0]);
 
-  try {
-    const response = await axios.get("https://api.opencagedata.com/geocode/v1/json", {
-      params: {
-        q: `${place}, ${district}, ${state}, ${pincode}`,
-        key: process.env.GEO_API_KEY ,
-      },
-    });
 
-    if (response.data.results.length === 0) {
-      throw new CustomError("Unable to fetch coordinates for the provided address", 400);
-    }
-  
-    const { lat, lng } = response.data.results[0].geometry;
-    coordinates = [lng, lat];
-  } catch (error) {
-    console.error("Geolocation API Error:", {
-      message: error.message,
-    });    
-    throw new CustomError("Failed to fetch geolocation data. Please try again.", 500);
-  }
 
   const newProvider = new Provider({ 
     name, 
