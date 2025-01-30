@@ -28,7 +28,8 @@ const ProviderRegister = () => {
 
   const onSubmit = async (values) => {
     try {
-      const address = [{
+      const address = [
+        {
         place: values.place,
         district: values.district,
         state: values.state,
@@ -64,7 +65,7 @@ const ProviderRegister = () => {
   };
 
   return (
-    <div className="bg-overlay bg-cover bg-center min-h-screen flex flex-col justify-center items-center">
+    <div className="bg-overlay bg-cover bg-center min-h-screen flex flex-col justify-center items-center p-28">
     <div className="bg-grey-light bg-opacity-90 p-8 rounded-lg shadow-md w-96 mt-1">
       <h2 className="text-2xl font-bold text-center mb-6 text-black-default">Join with us</h2>
     <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -197,10 +198,11 @@ const ProviderRegister = () => {
           onSuccess={async (credentialResponse) => {
             const res = await axios.post("http://localhost:8000/api/auth/googleauth/provider", credentialResponse);
             toast.success("Google Login Successful!");
+            navigate("/provider/dashboard");
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("role", res.data.user.role);
 
-            navigate("/provider/dashboard");
+            
           }}
           onError={() => {
             toast.error("Google Login Failed");

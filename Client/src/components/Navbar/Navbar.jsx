@@ -62,7 +62,7 @@ const Navbar = () => {
     
 
       
-      <div className="hidden md:flex space-x-6 lg:space-x-8 text-green-default font-medium text-sm sm:text-lg">
+      <div className="hidden md:flex md:ml-28 space-x-6 lg:space-x-8 text-green-default font-medium text-sm sm:text-lg">
           <NavLink to="/#home" className="hover:underline">
             Home
           </NavLink>
@@ -83,12 +83,12 @@ const Navbar = () => {
       <div className="hidden md:flex space-x-0">
       <button 
        onClick={providerAction} 
-      className="hidden md:block text-white-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+      className="hidden md:block text-green-default px-4 py-2 rounded-full hover:underline transition-all duration-200 font-medium text-sm sm:text-lg">
        {providerText}
       </button>
       <button 
        onClick={userAction} 
-      className="hidden md:block text-white-default px-4 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+      className="hidden md:block text-green-default px-4 py-2 rounded-full hover:underline transition-all duration-200 font-medium text-sm sm:text-lg">
        {userText}
       </button>
       </div>
@@ -97,12 +97,12 @@ const Navbar = () => {
       <div className="md:hidden flex items-center">
       <button
        onClick={providerAction} 
-       className=" text-white-default px-2 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       className=" text-green-default px-2 py-2 rounded-full hover:underline transition-all duration-200 font-medium text-sm sm:text-lg">
        {providerText}
       </button>
       <button
        onClick={userAction} 
-       className=" text-white-default px-2 py-2 rounded-full hover:bg-green-bright transition-all duration-200">
+       className=" text-green-default px-2 py-2 rounded-full hover:underline transition-all duration-200 font-medium text-sm sm:text-lg">
        {userText}
       </button>
       
