@@ -1,5 +1,5 @@
 const { registerValidation, loginValidation, ProviderValidation } = require("../validations/userValidations");
-const { userRegisteration, providerRegisteration, googleAuthService, forgotPasswordService, resetPasswordService, contactService, userLoginService, providerLoginService, providerGoogleAuthService } = require("../services/authService");
+const { userRegisteration, providerRegisteration, googleAuthService, forgotPasswordService, resetPasswordService, contactService, userLoginService, providerLoginService, providerGoogleAuthService, refreshTokenService } = require("../services/authService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler")
 const CustomError = require("../utils/customError");
 
@@ -14,6 +14,13 @@ const registerUser = asyncErrorHandler(async (req, res) => {
 
 // Registering a new provider
 const registerProvider = asyncErrorHandler(async (req, res) => {
+  if (typeof req.body.address === "string") {
+    try {
+      req.body.address = JSON.parse(req.body.address);
+    } catch (error) {
+      throw new CustomError("Invalid address format", 400);
+    }
+  }
   const { error } = ProviderValidation(req.body)
   if (error) throw new CustomError(error.details[0].message, 400);
  
@@ -27,6 +34,12 @@ const userLogin = asyncErrorHandler(async (req, res) => {
   if (error) throw new CustomError(error.details[0].message, 400);
 
   const data = await userLoginService(req.body);
+  res.cookie('refreshToken', data.refreshToken, {
+    httpOnly: true,      
+    secure: true,          
+    sameSite: 'Strict',   
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
   res.status(200).json({ status: "success", data})
 });
 
@@ -35,6 +48,12 @@ const providerLogin = asyncErrorHandler(async (req, res) => {
   if (error) throw new CustomError(error.details[0].message, 400);
 
   const data = await providerLoginService(req.body);
+  res.cookie('refreshToken', data.refreshToken, {
+    httpOnly: true,      
+    secure: true,          
+    sameSite: 'Strict',   
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
   res.status(200).json({ status: "success", data})
 });
 
@@ -64,6 +83,19 @@ const providerGoogleAuth = asyncErrorHandler(async (req,res) => {
 });
 });
 
+const refreshToken = asyncErrorHandler(async(req,res) =>{
+  const token = req.cookies.refreshToken;
+  const data = await refreshTokenService(token);
+  res.cookie('refreshToken', data.refreshtoken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+  res.status(200).json({ status: "success", data})
+
+})
+
 const forgotPassword = asyncErrorHandler(async(req, res) =>{
   const data =  await forgotPasswordService(req.body);
   res.status(200).json({ status: "success", data})
@@ -81,4 +113,4 @@ const contact = asyncErrorHandler(async(req,res) => {
 })
   
 
-module.exports = { registerUser, registerProvider, userLogin, providerLogin, googleAuth,providerGoogleAuth, forgotPassword, resetPassword, contact };
+module.exports = { registerUser, registerProvider, userLogin, providerLogin, googleAuth,providerGoogleAuth,refreshToken, forgotPassword, resetPassword, contact };

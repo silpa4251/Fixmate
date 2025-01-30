@@ -1,13 +1,14 @@
 const User = require("../models/userModel");
 const Provider = require("../models/providerModel");
 const bcrypt = require("bcryptjs");
-const { generateToken } = require("../utils/jwt");
+const { generateToken, generateRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
 const cloudinary = require("../config/cloudinary");
 const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const Admin = require("../models/adminModel");
+const axios = require("axios");
 
 
 const userRegisteration = async (data) => {
@@ -44,15 +45,14 @@ const providerRegisteration = async (data, files) => {
       certificateUrls.push(uploadedFile.secure_url);
     }
   }
-  const { place, district, state, pincode } = address;
+  const { place, district, state, pincode } = address[0];
   let coordinates = [];
 
   try {
-    // Fetch coordinates using OpenCage API
     const response = await axios.get("https://api.opencagedata.com/geocode/v1/json", {
       params: {
         q: `${place}, ${district}, ${state}, ${pincode}`,
-        key: Process.env.GEO_API_KEY ,
+        key: process.env.GEO_API_KEY ,
       },
     });
 
@@ -63,6 +63,9 @@ const providerRegisteration = async (data, files) => {
     const { lat, lng } = response.data.results[0].geometry;
     coordinates = [lng, lat];
   } catch (error) {
+    console.error("Geolocation API Error:", {
+      message: error.message,
+    });    
     throw new CustomError("Failed to fetch geolocation data. Please try again.", 500);
   }
 
@@ -108,10 +111,13 @@ const userLoginService = async (data) => {
     throw new CustomError("Invalid credentials", 400);
   }
   const token = generateToken(user._id, role);
+  const refreshToken = generateRefreshToken(user._id, role);
+  
 
   return {
     message: `${role} logged in successfully`,
     token,
+    refreshToken,
     user: {
       id: user._id,
       name: user.name,
@@ -134,10 +140,13 @@ const providerLoginService = async (data) => {
     throw new CustomError("Invalid credentials", 400);
   }
   const token = generateToken(provider._id, "Provider");
+  const refreshToken = generateRefreshToken(provider._id, "Provider");
+ 
 
   return {
     message: "Provider logged in successfully",
     token,
+    refreshToken,
     user: {
       id: provider._id,
       name: provider.name,
@@ -240,6 +249,18 @@ const providerGoogleAuthService = async (Credentials) => {
   };
 };
 
+const refreshTokenService = async(token) => {
+  if (!token) {
+    throw new CustomError('Refresh token missing', 401);
+  }
+  const decoded = verifyRefreshToken(token);
+  const newToken = generateToken(decoded.id,decoded.role);
+  const newRefreshToken = generateRefreshToken(decoded.id, decoded.role);
+  return {token: newToken, refreshtoken: newRefreshToken};
+
+}
+
+
 
 const forgotPasswordService = async(data) => {
   const { email } = data;
@@ -331,4 +352,4 @@ const contactService = async(data) => {
   return { message: "Your message has been sent successfully!" };
 }
 
-module.exports = { userRegisteration, providerRegisteration, userLoginService, providerLoginService, googleAuthService,providerGoogleAuthService, forgotPasswordService, resetPasswordService, contactService };
+module.exports = { userRegisteration, providerRegisteration, userLoginService, providerLoginService, googleAuthService,providerGoogleAuthService,refreshTokenService, forgotPasswordService, resetPasswordService, contactService };

@@ -12,4 +12,16 @@ const verifyToken = (token) => {
   return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 };
 
-module.exports = { generateToken, verifyToken };
+const generateRefreshToken = (userId, role) => {
+  const refreshToken = jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: process.env.REFRESH_EXPIRES_IN, 
+  });
+  return refreshToken;
+};
+
+const verifyRefreshToken = (token) => {
+  return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+};
+
+
+module.exports = { generateToken, verifyToken, generateRefreshToken, verifyRefreshToken };

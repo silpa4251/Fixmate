@@ -18,6 +18,20 @@ const ProviderValidation = (data) => {
     email: Joi.string().email().required(),
     password: Joi.string().min(4),
     services: Joi.required(),
+    address: Joi.array()
+    .items(
+      Joi.object({
+        place: Joi.string().required(),
+        district: Joi.string().required(),
+        state: Joi.string().required(),
+        pincode: Joi.string().required(),
+        coordinates: Joi.object({
+          type: Joi.string().valid("Point").required(),
+          coordinates: Joi.array().items(Joi.number()).length(2).required(),
+        }).optional(),
+      })
+    )
+    .required(),
     // location:Joi.string().required(),
     // certifications: Joi.required(),
     role: Joi.string(),
