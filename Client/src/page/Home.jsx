@@ -19,9 +19,9 @@ const Home = () => {
       {/* Main Content */}
       <div className="container mx-auto mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 lg:px-8">
         {/* Provider List */}
-        {/* <div>
-          <ProviderList />
-        </div> */}
+        <div>
+          hello
+        </div>
 
         {/* Map Component */}
         <div>
