@@ -48,16 +48,16 @@ const LandingPage = () => {
     <section className="bg-grey-medium py-12 px-6 rounded-lg shadow-lg md:px-12 lg:px-20" id="about">
     <div className="container mx-auto flex flex-col lg:flex-row items-center lg:items-start">
     <div className="w-full lg:w-1/2 lg:pl-12 text-center lg:text-left">
-            <h2 className="text-2xl md:text-3xl font-bold text-black-default mb-4">
-                Few Words About Us 
+            <h2 className="text-4xl font-extrabold text-black-default mb-8 mt-5">
+                Why Choose Us...
             </h2>
             <p className="text-gray-700 text-base md:text-lg leading-relaxed">
-                At FixMate, we connect you with trusted local service providers for
+                At <span className="font-bold text-black-dark">FixMate</span>, we connect you with trusted local service providers for
                 all your repair and maintenance needs. From finding skilled experts
                 to seamless booking, we prioritize reliability, transparency, and
                 convenience. FixMate isn&apos;t just about solving problems — it&apos;s about
                 building a community of trust and professionalism. <br />
-                Let&apos;s fix it, together!
+                <span className="font-bold text-black-dark">Let&apos;s fix it, together!</span>
             </p>
         </div>
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end mb-6 lg:mb-4">

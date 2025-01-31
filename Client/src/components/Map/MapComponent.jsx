@@ -11,21 +11,31 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadowPng,
 });
 
-const MapComponent = () => {
+const MapComponent = ({ serviceQuery, providers, setProviders }) => {
   const [map, setMap] = useState(null);
-  const [providers, setProviders] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
   const [error, setError] = useState(null);
   const [locationInput, setLocationInput] = useState("");
   const userMarkerRef = useRef(null);
 
-  const fetchProviders = async (longitude, latitude) => {
+  const fetchAddress = async (lat, lng) => {
     try {
-      setProviders([]);
-      const response = await axiosInstance.get("/providers/nearby", {
-        params: { longitude, latitude, distance: 5000 },
+      const response = await axiosInstance.get("/map/reverse", {
+        params: { lat, lng },
       });
-      setProviders(response.data.providers);
+      return response.data.address.address || `${lat}, ${lng}`;
+    } catch (error) {
+      console.error("Error fetching address:", error.message);
+      return `${lat}, ${lng}`;
+    }
+  };
+
+  const fetchProviders = async (longitude, latitude, service = "") => {
+    try {
+      const response = await axiosInstance.get("/providers/nearby", {
+        params: { longitude, latitude, distance: 5000, service },
+      });
+      setProviders(response.data.providers); // Update providers state
     } catch (error) {
       console.error("Error fetching providers:", error.message);
       setError("Failed to load nearby providers.");
@@ -34,7 +44,7 @@ const MapComponent = () => {
 
   const handleGeocode = async (address) => {
     try {
-      const response = await axiosInstance.get("/geocode", { params: { address } });
+      const response = await axiosInstance.get("/map/geocode", { params: { address } });
       const { lat, lng } = response.data;
 
       if (map) {
@@ -60,17 +70,14 @@ const MapComponent = () => {
             .openPopup();
 
           // Handle drag event on marker
-          userMarkerRef.current.on("dragend", () => {
-            const { lat: newLat, lng: newLng } = userMarkerRef.current.getLatLng();
-            setUserLocation({ lat: newLat, lng: newLng });
-            setLocationInput(`${newLat}, ${newLng}`);
-            fetchProviders(newLng, newLat);
-          });
+          userMarkerRef.current.on("dragend", handleMarkerDrag);
         }
 
         // Update location and fetch nearby providers
         setUserLocation({ lat, lng });
-        fetchProviders(lng, lat);
+        const readableAddress = await fetchAddress(lat, lng);
+        setLocationInput(readableAddress);
+        fetchProviders(lng, lat, serviceQuery);
       }
     } catch (error) {
       setError("Failed to find location.");
@@ -78,6 +85,13 @@ const MapComponent = () => {
     }
   };
 
+  const handleMarkerDrag = async () => {
+    const { lat: newLat, lng: newLng } = userMarkerRef.current.getLatLng();
+    const readableAddress = await fetchAddress(newLat, newLng);
+    setUserLocation({ lat: newLat, lng: newLng });
+    setLocationInput(readableAddress);
+    fetchProviders(newLng, newLat, serviceQuery);
+  };
 
   useEffect(() => {
     const mapInstance = L.map("map").setView([11.19843, 75.82421], 13);
@@ -89,7 +103,7 @@ const MapComponent = () => {
 
     mapInstance.locate({ setView: true, maxZoom: 16 });
 
-    mapInstance.on("locationfound", (e) => {
+    mapInstance.on("locationfound", async (e) => {
       const { lat, lng } = e.latlng;
       userMarkerRef.current = L.marker([lat, lng], {
         draggable: true,
@@ -100,19 +114,15 @@ const MapComponent = () => {
           iconAnchor: [12, 41],
           popupAnchor: [0, -35],
         }),
-      }).addTo(mapInstance)
+      })
+        .addTo(mapInstance)
         .bindPopup("You are here!")
         .openPopup();
       setUserLocation(e.latlng);
-      setLocationInput(`${lat}, ${lng}`);
-      fetchProviders(lng, lat);
-
-      userMarkerRef.current.on("dragend", () => {
-        const { lat: newLat, lng: newLng } = userMarkerRef.current.getLatLng();
-        setUserLocation({ lat: newLat, lng: newLng });
-        setLocationInput(`${newLat}, ${newLng}`);
-        fetchProviders(newLng, newLat);
-      });
+      const readableAddress = await fetchAddress(lat, lng);
+      setLocationInput(readableAddress);
+      fetchProviders(lng, lat); // Fetch providers on page load
+      userMarkerRef.current.on("dragend", handleMarkerDrag);
     });
 
     mapInstance.on("locationerror", () => {
@@ -120,10 +130,18 @@ const MapComponent = () => {
     });
 
     setMap(mapInstance);
+
+    // Cleanup
     return () => {
       mapInstance.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (userLocation && serviceQuery) {
+      fetchProviders(userLocation.lng, userLocation.lat, serviceQuery);
+    }
+  }, [serviceQuery, userLocation]);
 
   const handleLocationInput = (e) => {
     setLocationInput(e.target.value);
@@ -134,7 +152,6 @@ const MapComponent = () => {
       handleGeocode(locationInput);
     }
   };
-
 
   return (
     <div className="w-full p-4 bg-white-default shadow-md rounded-lg">
