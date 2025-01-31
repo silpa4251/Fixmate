@@ -1,6 +1,6 @@
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/customError");
-const geoCodingApi = require("../utils/geoCodingApi");
+const { geoCodingApi, reverseApi } = require("../utils/geoCodingApi");
 
 
 const fetchGeoCoordinates = asyncErrorHandler( async(req,res) => {

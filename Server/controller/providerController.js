@@ -1,13 +1,12 @@
 const Provider = require("../models/providerModel");
+const asyncErrorHandler = require("../utils/asyncErrorHandler");
 
-const getNearbyProviders = async (req, res) => {
-  const { latitude, longitude, distance = 5000 } = req.query;
+const getNearbyProviders = asyncErrorHandler(async (req, res) => {
+  const { latitude, longitude, distance, service } = req.query;
 
   if (!latitude || !longitude) {
     return res.status(400).json({ message: "Latitude and longitude are required" });
   }
-
-  try {
     const providers = await Provider.find({
       "address.coordinates": {
         $near: {
@@ -15,13 +14,26 @@ const getNearbyProviders = async (req, res) => {
           $maxDistance: parseInt(distance),
         },
       },
+      ...(service  && {service: new RegExp(service,"i")}),
     });
 
-    res.json({ providers });
-  } catch (error) {
-    console.error("Error fetching providers:", error);
-    res.status(500).json({ message: "Error fetching nearby providers" });
-  }
-};
+    res.status(200).json({ providers });
 
-module.exports = { getNearbyProviders };
+});
+
+const searchService = asyncErrorHandler(async (req, res) => {
+  const { service } = req.query;
+
+  if (!service) {
+    return res.status(400).json({ message: "Service name is required" });
+  }
+
+  // Find providers by service name (case-insensitive)
+  const providers = await Provider.find({
+    services: new RegExp(service, "i"),
+  });
+
+  res.status(200).json({ providers });
+});
+
+module.exports = { getNearbyProviders, searchService };

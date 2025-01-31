@@ -38,9 +38,10 @@ const geoCodingApi = async (address) => {
   }
 };
 
+
 const reverseApi = async(lat,lng) => {
     if (!lat || !lng) {
-        throw new CustomError("Latitude and longitude are required",400);
+      throw new CustomError("Latitude and longitude are required",400);
     }
     const response = await axios.get("https://api.opencagedata.com/geocode/v1/json", {
         params: {
@@ -51,9 +52,9 @@ const reverseApi = async(lat,lng) => {
   
       if (response.data.results.length > 0) {
         const address = response.data.results[0].formatted;
-        return res.json({ address });
+        return { address };
       } else {
-        return res.status(404).json({ message: "No address found for the given coordinates." });
+        throw new CustomError("No address found for the given coordinates.",404);
     }
 }
 module.exports = { geoCodingApi, reverseApi };

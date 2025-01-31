@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 // User routes
 app.use("/api/auth", authRoutes);
 app.use("/api/providers",providerRoutes);
-app.use("/api/geocode", mapRoute);
+app.use("/api/map", mapRoute);
 
 app.use("/api/admin",adminRoutes);
 

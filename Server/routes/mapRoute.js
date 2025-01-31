@@ -1,7 +1,8 @@
 const express = require("express");
-const { fetchGeoCoordinates } = require("../controller/mapController");
+const { fetchGeoCoordinates, reverseGeocode } = require("../controller/mapController");
 const mapRouter = express.Router();
 
-mapRouter.get("/", fetchGeoCoordinates);
+mapRouter.get("/geocode", fetchGeoCoordinates);
+mapRouter.get("/reverse", reverseGeocode);
 
 module.exports = mapRouter;
