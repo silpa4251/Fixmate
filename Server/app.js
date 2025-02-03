@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const providerRoutes = require("./routes/providerRoutes");
 const mapRoute = require("./routes/mapRoute");
+const userRoutes = require("./routes/userRoutes");
 
 
 // Middlewares for parsing request body
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // User routes
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/providers",providerRoutes);
 app.use("/api/map", mapRoute);
 

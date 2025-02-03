@@ -21,13 +21,14 @@ const providerSchema = mongoose.Schema(
             type: Date 
         },
         image: {
-            type: [
-                {
-                    originalImageUrl: { type: String },
-                    imageThumbnailUrl: { type: String },
-                },
-            ],
-            default: [],
+            type: String,
+            // type: [
+            //     {
+            //         originalImageUrl: { type: String },
+            //         imageThumbnailUrl: { type: String },
+            //     },
+            // ],
+            // default: [],
         },
         phone: {
             type: String,

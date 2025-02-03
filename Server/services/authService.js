@@ -1,15 +1,14 @@
-const User = require("../models/userModel").default;
-const Provider = require("../models/providerModel").default;
+const User = require("../models/userModel");
+const Provider = require("../models/providerModel");
 const bcrypt = require("bcryptjs");
 const { generateToken, generateRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
-const cloudinary = require("../config/cloudinary").default;
+const cloudinary = require("../config/cloudinary");
 const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const Admin = require("../models/adminModel");
 const axios = require("axios");
-const { geoCodingApi } = require("../utils/geoCodingApi");
 
 
 const userRegisteration = async (data) => {
@@ -46,9 +45,28 @@ const providerRegisteration = async (data, files) => {
       certificateUrls.push(uploadedFile.secure_url);
     }
   }
-  const coordinates = await geoCodingApi(address[0]);
+  const { place, district, state, pincode } = address[0];
+  let coordinates = [];
+  try {
+    const response = await axios.get("https://api.opencagedata.com/geocode/v1/json", {
+      params: {
+        q: `${place}, ${district}, ${state}, ${pincode}`,
+        key: process.env.GEO_API_KEY ,
+      },
+    });
 
-
+    if (response.data.results.length === 0) {
+      throw new CustomError("Unable to fetch coordinates for the provided address", 400);
+    }
+  
+    const { lat, lng } = response.data.results[0].geometry;
+    coordinates = [lng, lat];
+  } catch (error) {
+    console.error("Geolocation API Error:", {
+      message: error.message,
+    });    
+    throw new CustomError("Failed to fetch geolocation data. Please try again.", 500);
+  }
 
   const newProvider = new Provider({ 
     name, 
@@ -137,7 +155,7 @@ const providerLoginService = async (data) => {
   };
 };
 
-const googleAuthService = async(Credentials) => {
+const userGoogleAuthService = async(Credentials) => {
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   
   if (!Credentials) {
@@ -333,4 +351,4 @@ const contactService = async(data) => {
   return { message: "Your message has been sent successfully!" };
 }
 
-module.exports = { userRegisteration, providerRegisteration, userLoginService, providerLoginService, googleAuthService,providerGoogleAuthService,refreshTokenService, forgotPasswordService, resetPasswordService, contactService };
+module.exports = { userRegisteration, providerRegisteration, userLoginService, providerLoginService, userGoogleAuthService,providerGoogleAuthService,refreshTokenService, forgotPasswordService, resetPasswordService, contactService };

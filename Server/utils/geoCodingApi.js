@@ -28,7 +28,7 @@ const geoCodingApi = async (address) => {
 
     if (response.data && response.data.results && response.data.results.length > 0) {
         const { lat, lng } = response.data.results[0].geometry;
-        return { lat, lng }; // Return the coordinates
+        return { lng, lat }; // Return the coordinates
       } else {
         throw new CustomError("Location not found");
       }

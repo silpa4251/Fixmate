@@ -1,8 +1,9 @@
-const Provider = require("../models/providerModel");
+const Booking = require("../models/bookingModel");
+const Provider= require("../models/providerModel");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 
 const getNearbyProviders = asyncErrorHandler(async (req, res) => {
-  const { latitude, longitude, distance, service } = req.query;
+  const { latitude, longitude, distance = 5000, service } = req.query;
 
   if (!latitude || !longitude) {
     return res.status(400).json({ message: "Latitude and longitude are required" });
@@ -14,7 +15,7 @@ const getNearbyProviders = asyncErrorHandler(async (req, res) => {
           $maxDistance: parseInt(distance),
         },
       },
-      ...(service  && {service: new RegExp(service,"i")}),
+      ...(service  && {services: new RegExp(service,"i")}),
     });
 
     res.status(200).json({ providers });
@@ -36,4 +37,38 @@ const searchService = asyncErrorHandler(async (req, res) => {
   res.status(200).json({ providers });
 });
 
-module.exports = { getNearbyProviders, searchService };
+const getAllProviders = asyncErrorHandler(async (req, res) => {
+  const providers = await Provider.aggregate([
+    {
+      $project: {
+          name: 1,
+          email: 1,
+          services: 1,
+          address: 1,
+          createdAt: 1,
+        }
+    }
+]);
+  res.status(200).json({message:"All users retrieved successfully", providers});
+});
+
+const getProviderById = asyncErrorHandler( async(req, res) => {
+  const providerId = req.params.id;
+  const provider = await Provider.findById(providerId);
+  if(!provider) {
+    throw new CustomError("provider not found", 404);
+  }
+  res.status(200).json({status: "success", message:"provider retrieved successfully", provider})
+});
+
+const availableSlots = asyncErrorHandler(async(req,res) => {
+  const { providerId, date } = req.query;
+  const bookings = await Booking.find({ providerId, date });
+  const bookedSlots = bookings.map((booking) => booking.slot);
+  const allSlots = ["10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM"];
+  const availableSlots = allSlots.filter((slot) => !bookedSlots.includes(slot));
+  res.status(200).json({status:"success" ,message: "Available slots Fetched", availableSlots});
+
+}) 
+
+module.exports = { getNearbyProviders, searchService,getAllProviders, getProviderById, availableSlots };

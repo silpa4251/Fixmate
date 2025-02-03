@@ -1,5 +1,5 @@
 const { registerValidation, loginValidation, ProviderValidation } = require("../validations/userValidations");
-const { userRegisteration, providerRegisteration, googleAuthService, forgotPasswordService, resetPasswordService, contactService, userLoginService, providerLoginService, providerGoogleAuthService, refreshTokenService } = require("../services/authService");
+const { userRegisteration, providerRegisteration, forgotPasswordService, resetPasswordService, contactService, userLoginService, providerLoginService, providerGoogleAuthService, refreshTokenService, userGoogleAuthService } = require("../services/authService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler")
 const CustomError = require("../utils/customError");
 
@@ -57,13 +57,13 @@ const providerLogin = asyncErrorHandler(async (req, res) => {
   res.status(200).json({ status: "success", data})
 });
 
-const googleAuth = asyncErrorHandler(async (req,res) => {
+const userGoogleAuth = asyncErrorHandler(async (req,res) => {
     const body = req.body;
-     const data = await googleAuthService(body);
+     const data = await userGoogleAuthService(body);
     
     res.status(200).json({
       status: "success",
-      message: `${data.user.role} authenticated with Google successfully`,
+      message: "user authenticated with Google successfully",
       token: data.token,
       user: data.user,
   
@@ -113,4 +113,4 @@ const contact = asyncErrorHandler(async(req,res) => {
 })
   
 
-module.exports = { registerUser, registerProvider, userLogin, providerLogin, googleAuth,providerGoogleAuth,refreshToken, forgotPassword, resetPassword, contact };
+module.exports = { registerUser, registerProvider, userLogin, providerLogin, userGoogleAuth,providerGoogleAuth,refreshToken, forgotPassword, resetPassword, contact };
