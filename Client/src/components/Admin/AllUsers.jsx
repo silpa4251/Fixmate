@@ -1,151 +1,94 @@
-// import { useEffect, useState } from "react";
-// import { useDispatch, useSelector } from "react-redux";
-// import { useNavigate } from "react-router-dom";
-// import { fetchAllUsers, blockUser, unblockUser } from "../../features/userSlice";
-// import { FaSearch } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import axiosInstance from "../../api/axiosInstance";
 
-// const AllUsers = () => {
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [filter, setFilter] = useState("All");
-//   const [localUsers, setLocalUsers] = useState([]);
-//   const dispatch = useDispatch();
-//   const navigate = useNavigate();
-//   const { users, loading } = useSelector((state) => state.user);
+const AllUsers = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-//   useEffect(() => {
-//     dispatch(fetchAllUsers());
-//   }, [dispatch]);
+  // Fetch all users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axiosInstance.get("/users");
+        setUsers(response.data.users);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch users.");
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
-//   useEffect(() => {
-//     setLocalUsers(users);
-//   }, [users]);
+  // Handle user block
+  const handleBlock = async (userId) => {
+    try {
+      await axiosInstance.put(`/users/block/${userId}`);
+      setUsers(users.map(user => 
+        user._id === userId ? { ...user, isBlocked: !user.isBlocked } : user
+      ));
+      alert("User status updated successfully.");
+    } catch (err) {
+      alert("Failed to update user status.");
+    }
+  };
 
-//    // Handle user blocking
-//    const handleBlock = async (id) => {
-//     await dispatch(blockUser(id));
-//     setLocalUsers((prevUsers) =>
-//       prevUsers.map((user) =>
-//         user._id === id ? { ...user, isBlocked: true } : user
-//       )
-//     );
-//   };
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
-//   // Handle user unblocking
-//   const handleUnblock = async (id) => {
-//     await dispatch(unblockUser(id));
-//     setLocalUsers((prevUsers) =>
-//       prevUsers.map((user) =>
-//         user._id === id ? { ...user, isBlocked: false } : user
-//       )
-//     );
-//   };
+  return (
+    <div className="p-4 bg-green-50 min-h-screen">
+      <h2 className="text-xl font-bold mb-4 text-gray-700">Users List</h2>
 
-//   const viewDetails = (id) => {
-//     navigate(`/admin/users/${id}`);
-//   };
+      <div className="overflow-x-auto shadow-md rounded-lg">
+        <table className="min-w-full bg-white text-left text-sm text-gray-500">
+          <thead className="bg-green-200 text-gray-700 text-xs uppercase">
+            <tr>
+              <th className="px-6 py-3">Name</th>
+              <th className="px-6 py-3">E-Mail</th>
+              {/* <th className="px-6 py-3">Phone</th>
+              <th className="px-6 py-3">Location</th> */}
+              <th className="px-6 py-3">Joined Date</th>
+              <th className="px-6 py-3">Actions</th>
+              <th className="px-6 py-3">View</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user, index) => (
+              <tr
+                key={index}
+                className={`${
+                  index % 2 === 0 ? "bg-gray-50" : "bg-white-default"
+                } border-b hover:bg-gray-100`}
+              >
+                <td className="px-6 py-4 text-gray-800">{user.name}</td>
+                <td className="px-6 py-4">{user.email}</td>
+                {/* <td className="px-6 py-4">{user.phone}</td>
+                <td className="px-6 py-4">{user.location}</td> */}
+                <td className="px-6 py-4">{user.createdAt}</td>
+                <td className="px-6 py-4">
+                  <button
+                    onClick={() => handleBlock(user._id)}
+                    className={`py-1 px-4 rounded text-white-default ${
+                      user.isBlocked ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
+                    }`}
+                  >
+                    {user.isBlocked ? "Unblock" : "Block"}
+                  </button>
+                </td>
+                <td className="px-6 py-4">
+                  <button className="bg-blue-500 text-white-default py-1 px-4 rounded hover:bg-blue-600">
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
-//   const filteredUsers = users
-//     .filter(
-//       (user) =>
-//         user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//         user.email.toLowerCase().includes(searchTerm.toLowerCase())
-//     )
-//     .filter((user) => {
-//       if (filter === "Active") return !user.isBlocked;
-//       if (filter === "Blocked") return user.isBlocked;
-//       return true;
-//     });
-
-//   return (
-//     <div className="p-4 sm:p-6 bg-white shadow rounded-lg mt-6">
-//       <h2 className="text-2xl sm:text-3xl font-semibold mb-4 text-pink">Users</h2>
-//       <div className="flex flex-col sm:flex-row sm:justify-end items-center mb-4 space-y-4 sm:space-y-0 sm:space-x-4">
-//         <div className="relative w-full sm:w-auto">
-//           <input
-//             type="text"
-//             placeholder="Search by username or email"
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//             className="w-full sm:w-64 border-2 border-slate-200 focus:border-slate-300 rounded p-2 pr-10"
-//           />
-//           <FaSearch size={20} className="absolute right-2 top-[10px] text-pink" />
-//         </div>
-//         <select
-//           value={filter}
-//           onChange={(e) => setFilter(e.target.value)}
-//           className="w-full sm:w-auto border-2 border-slate-200 focus:border-slate-300 rounded p-2"
-//         >
-//           <option value="All">All</option>
-//           <option value="Active">Active</option>
-//           <option value="Blocked">Blocked</option>
-//         </select>
-//       </div>
-//       <div className="overflow-x-auto">
-//         {loading ? (
-//           <p>Loading users...</p>
-//         ) : (
-//           <table className="min-w-full border border-gray-200">
-//             <thead>
-//               <tr className="bg-gray-300">
-//                 <th className="border px-4 py-2 text-left">Username</th>
-//                 <th className="border px-4 py-2 text-left">Email</th>
-//                 <th className="border px-4 py-2 text-left">Status</th>
-//                 <th className="border px-2 sm:px-4 py-2 text-left">Details</th>
-//                 <th className="border px-4 py-2 text-left">Actions</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//             {filteredUsers.length === 0 ? (
-//               <tr>
-//                 <td colSpan="5" className="border px-4 py-2 text-center">No users found</td>
-//               </tr>
-//             ) : (
-//               filteredUsers && filteredUsers.map((user) => (
-//                 <tr key={user._id} className="border-b hover:bg-gray-50">
-//                   <td className="border px-4 py-2">{user.username}</td>
-//                   <td className="border px-4 py-2">{user.email}</td>
-//                   <td className="border px-4 py-2">
-//                     <span
-//                       className={`py-1 px-3 rounded-full text-white text-sm ${
-//                         user.isBlocked ? "bg-red-500" : "bg-green-500"
-//                       }`}
-//                     >
-//                       {user.isBlocked ? "Blocked" : "Active"}
-//                     </span>
-//                   </td>
-//                   <td className="border px-2 sm:px-4 py-2">
-//                     <button onClick={() => viewDetails(user._id)} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-//                       View Details
-//                     </button>
-//                   </td>
-//                   <td className="border px-4 py-2">
-//                     <div className="flex space-x-2">
-//                       {user.isBlocked ? (
-//                         <button
-//                           className="bg-green-500 text-white px-4 py-2 rounded"
-//                           onClick={() => handleUnblock(user._id)}
-//                         >
-//                           Unblock
-//                         </button>
-//                       ) : (
-//                         <button
-//                           className="bg-red-500 text-white px-4 py-2 rounded"
-//                           onClick={() => handleBlock(user._id)}
-//                         >
-//                           Block
-//                         </button>
-//                       )}
-//                     </div>
-//                   </td>
-//                 </tr>
-//               ))
-//             )}
-//             </tbody>
-//           </table>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AllUsers;
+export default AllUsers;

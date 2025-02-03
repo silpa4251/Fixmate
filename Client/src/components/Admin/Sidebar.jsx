@@ -15,11 +15,11 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate("/login");
+    navigate("/user/login");
   };
 
   if (!isAuthenticated) {
-    navigate("/login");
+    navigate("/user/login");
   }
 
   return (
@@ -55,7 +55,7 @@ const Sidebar = () => {
             </li>
             <li className="mb-4">
               <NavLink
-                to="/admin/productlist"
+                to="/admin/providers"
                 className="flex  justify-center items-center p-3 rounded hover:bg-green-hover"
                 
               >

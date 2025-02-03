@@ -28,15 +28,15 @@ const SearchBar = ({ setServiceProviders }) => {
     <div className="flex items-center space-x-2 p-4">
       <input
         type="text"
-        placeholder="Search for a service (e.g., 'Plumber')..."
+        placeholder="Search for a service like Plumber, Electrician..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full text-black-default p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full text-black-default p-2 border rounded-lg  focus:outline-none focus:ring-2 focus:ring-green-500"
       />
       <button
         onClick={handleSearch}
         disabled={loading}
-        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+        className="px-4 py-2 bg-green-button text-white-default rounded-lg hover:bg-green-700 transition duration-300 disabled:bg-gray-400"
       >
         {loading ? "Searching..." : "Search"}
       </button>

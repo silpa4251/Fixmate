@@ -1,6 +1,6 @@
 import { useState } from "react";
 import logo from "../../assets/logo.png";
-import axios from "axios";
+import { contactApi } from "../../api/AuthApi";
 
 
 const ContactUs = () => {
@@ -32,7 +32,7 @@ const ContactUs = () => {
         }
       
         try {
-          const response = await axios.post("http://localhost:8000/api/auth/contact", formData);
+          const response = await contactApi(formData);
       
           if (response.status === 200) {
             setIsSubmitted(true);

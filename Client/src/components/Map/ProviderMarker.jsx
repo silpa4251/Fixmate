@@ -7,36 +7,48 @@ import { useNavigate } from "react-router-dom";
 
 const ProviderMarker = ({ map, providers }) => {
   const markersGroup = useRef(L.layerGroup());
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    markersGroup.current.clearLayers();
-    if (map && providers.length) {
-    providers.forEach((provider) => {
-      const providerCoordinates = provider.address[0]?.coordinates?.coordinates;
-        
-      if (providerCoordinates && providerCoordinates.length >0) {
-        const [longitude, latitude] = providerCoordinates;
-      const marker = L.marker([latitude, longitude],{
-         icon: L.icon({
-                  iconUrl: providerMark,
-                  shadowUrl: markerShadowPng,
-                  iconSize: [25, 41],
-                  iconAnchor: [12, 41],
-                  popupAnchor: [0,-35],
-                }),
+    if (map && markersGroup.current) {
+      map.removeLayer(markersGroup.current); 
+    }
+    markersGroup.current = L.layerGroup();
+    if (map && providers.length > 0) {
+      providers.forEach((provider) => {
+        const providerCoordinates = provider.address[0]?.coordinates?.coordinates;
+
+        if (providerCoordinates && providerCoordinates.length === 2) {
+          const [longitude, latitude] = providerCoordinates;
+          if (typeof latitude === "number" && typeof longitude === "number") {
+            const marker = L.marker([latitude, longitude], {
+              icon: L.icon({
+                iconUrl: providerMark,
+                shadowUrl: markerShadowPng,
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [0, -35],
+              }),
+            });
+            marker.on("click", () => {
+              navigate(`/provider/${provider._id}`);
+            });
+            marker
+              .bindPopup(`<b>${provider.name}</b><br>${provider.address[0].place}`)
+              .addTo(markersGroup.current);
+          } else {
+            console.error(`Invalid coordinates for provider: ${provider.name}`);
+          }
+        } else {
+          console.error(`Missing or invalid coordinates for provider: ${provider.name}`);
+        }
       });
-      marker.on("click", () => {
-        navigate(`/provider/${provider._id}`);
-      });
-      marker
-        .addTo(map)
-        .bindPopup(`<b>${provider.name}</b><br>${provider.address[0].place}`);
-        markersGroup.current.addLayer(marker); }
-    });
-    markersGroup.current.addTo(map);
+      markersGroup.current.addTo(map);
     }
     return () => {
-      markersGroup.current.clearLayers();
+      if (map && markersGroup.current) {
+        map.removeLayer(markersGroup.current);
+      }
     };
   }, [map, navigate, providers]);
 

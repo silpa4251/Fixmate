@@ -1,96 +1,75 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Menu, X } from "lucide-react"; // Install lucide-react for icons
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/authSlice";
+import { FiMenu, FiX } from "react-icons/fi";
 
 const UserNavbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/user/login");
+  };
 
   return (
-    <nav className="bg-gray-800 text-green-400 px-4 py-2 shadow-md">
-      <div className="flex items-center justify-between">
-        {/* Left Section - Logo */}
-        <div className="flex items-center space-x-2">
-          <img
-            src="/path-to-your-logo.png"
-            alt="FixMate Logo"
-            className="h-8 w-8 rounded-full"
-          />
-          <span className="text-xl font-bold">FixMate</span>
+    <nav className="fixed top-0 w-full flex items-center justify-between px-6 py-4 bg-black-default bg-opacity-60 h-20 z-50 ">
+      <Link to="/" className="flex items-center">
+        <img src="/logo.png" alt="FixMate Logo" className="h-12 sm:h-16" />
+        <span className="text-xl sm:text-2xl font-bold ml-2 text-green-default">
+          FixMate
+        </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex md:ml-28 space-x-6 lg:space-x-8 text-green-default font-medium text-sm sm:text-lg">
+          <Link to="/" className="hover:underline">Home</Link>
+          <Link to="/bookings" className="hover:underline">Bookings</Link>
+          <Link to="/profile" className="hover:underline">Profile</Link>
         </div>
 
-        {/* Right Section - Hamburger for Small Screens */}
-        <button
-          className="md:hidden text-green-400 focus:outline-none"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-
-        {/* Center Section - Links (Hidden on Small Screens) */}
+        {/* Profile Image & Logout */}
         <div className="hidden md:flex items-center space-x-6">
-          <Link
-            to="/"
-            className="hover:text-green-300 transition duration-300"
-          >
-            Home
-          </Link>
-          <Link
-            to="/bookings"
-            className="hover:text-green-300 transition duration-300"
-          >
-            My Bookings
-          </Link>
-          <Link
-            to="/profile"
-            className="hover:text-green-300 transition duration-300"
-          >
-            My Profile
-          </Link>
-        </div>
+          {user?.image ? (
+            <img src={user.image} alt="Profile" className="w-10 h-10 rounded-full object-cover" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center">
+              <span className="text-white-default text-xl">{user?.name?.charAt(0)}</span>
+            </div>
+          )}
 
-        {/* Right Section - Profile & Logout (Hidden on Small Screens) */}
-        <div className="hidden md:flex items-center space-x-4">
-          <img
-            src="/path-to-profile-image.jpg"
-            alt="User Profile"
-            className="h-8 w-8 rounded-full border border-green-400"
-          />
-          <button className="bg-green-500 text-white px-4 py-1 rounded-md hover:bg-green-600 transition duration-300">
+          <button
+            onClick={handleLogout}
+            className="bg-green-button text-white-dark px-4 py-2 rounded-md text-white hover:bg-green-700 transition"
+          >
             Logout
           </button>
         </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden flex items-center">
+        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+        </button>
       </div>
 
       {/* Mobile Menu */}
-      {menuOpen && (
-        <div className="md:hidden flex flex-col items-center space-y-4 mt-2">
-          <Link
-            to="/"
-            className="hover:text-green-300 transition duration-300"
-            onClick={() => setMenuOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/bookings"
-            className="hover:text-green-300 transition duration-300"
-            onClick={() => setMenuOpen(false)}
-          >
-            My Bookings
-          </Link>
-          <Link
-            to="/profile"
-            className="hover:text-green-300 transition duration-300"
-            onClick={() => setMenuOpen(false)}
-          >
-            My Profile
-          </Link>
-          <button
-            className="bg-green-500 text-white px-4 py-1 rounded-md hover:bg-green-600 transition duration-300"
-            onClick={() => setMenuOpen(false)}
-          >
-            Logout
-          </button>
+      {isOpen && (
+        <div className="md:hidden mt-4 space-y-4">
+          <Link to="/" className="block text-center hover:text-gray-300">Home</Link>
+          <Link to="/bookings" className="block text-center hover:text-gray-300">Bookings</Link>
+          <Link to="/profile" className="block text-center hover:text-gray-300">Profile</Link>
+          <div className="flex justify-center">
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 px-4 py-2 rounded-md text-white hover:bg-red-700 transition"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </nav>

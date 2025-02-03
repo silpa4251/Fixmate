@@ -45,25 +45,36 @@ const LandingPage = () => {
       </div>
       
     </header>
-    <section className="bg-grey-medium py-12 px-6 rounded-lg shadow-lg md:px-12 lg:px-20" id="about">
-    <div className="container mx-auto flex flex-col lg:flex-row items-center lg:items-start">
-    <div className="w-full lg:w-1/2 lg:pl-12 text-center lg:text-left">
-            <h2 className="text-4xl font-extrabold text-black-default mb-8 mt-5">
-                Why Choose Us...
-            </h2>
-            <p className="text-gray-700 text-base md:text-lg leading-relaxed">
-                At <span className="font-bold text-black-dark">FixMate</span>, we connect you with trusted local service providers for
-                all your repair and maintenance needs. From finding skilled experts
-                to seamless booking, we prioritize reliability, transparency, and
-                convenience. FixMate isn&apos;t just about solving problems — it&apos;s about
-                building a community of trust and professionalism. <br />
-                <span className="font-bold text-black-dark">Let&apos;s fix it, together!</span>
-            </p>
+    <section className="bg-gray-100 py-16 px-6 md:px-12 lg:px-20" id="about">
+      <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between">
+        {/* Left Side: Text Content */}
+        <div className="w-full lg:w-1/2 z-10 bg-white p-8 rounded-lg shadow-lg lg:mr-[-100px]">
+          <h2 className="text-4xl font-extrabold text-green-700 mb-6">
+            Why Choose Us...
+          </h2>
+          <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-6">
+            At <span className="font-bold text-green-700">FixMate</span>, we connect you with trusted local service providers for
+            all your repair and maintenance needs. From finding skilled experts
+            to seamless booking, we prioritize reliability, transparency, and
+            convenience. FixMate isn&apos;t just about solving problems — it&apos;s about
+            building a community of trust and professionalism.
+          </p>
+          <p className="text-green-700 font-bold text-lg">
+            Let&apos;s fix it, together!
+          </p>
+          <button className="mt-6 bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition-all duration-300">
+            Learn More
+          </button>
         </div>
-        <div className="w-full lg:w-1/2 flex justify-center lg:justify-end mb-6 lg:mb-4">
-            <img src={About} alt="About us"    className="max-w-full h-auto"  />
+
+        {/* Right Side: Image */}
+        <div className="w-full lg:w-1/2 flex justify-center lg:justify-end mt-8 lg:mt-0">
+          <img
+            src={About}
+            alt="About us"
+            className="max-w-full h-auto rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300"
+          />
         </div>
-       
     </div>
     </section>
 

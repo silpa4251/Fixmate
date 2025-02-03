@@ -1,53 +1,39 @@
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
-import { useDispatch, useSelector } from "react-redux";
+// import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { logout } from "../../redux/authSlice";
+// import { logout } from "../../redux/authSlice";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate(); 
-  const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const isRegisterPage = location.pathname === "/user/register";
   const isLoginPage = location.pathname === "/user/login";
   const isRegisterProvider = location.pathname === "/provider/register";
   const isLoginProvider = location.pathname === "/provider/login";
 
-  const userText =  isAuthenticated
-  ? "Logout"
-  : isRegisterPage
+  const userText = isRegisterPage
   ? "Sign In" 
   : isLoginPage 
   ? "Sign Up" 
   : "Need a service?";
 
-  const providerText =  isAuthenticated
-  ? "Logout"
-  : isRegisterProvider
+  const providerText = isRegisterProvider
   ? "Sign In" 
   : isLoginProvider 
   ? "Sign Up" 
   : "Join as a provider";
 
   const userAction = () => {
-    if (isAuthenticated) {
-      dispatch(logout());
-      navigate("/"); 
-    } else {
+  
       navigate(isLoginPage ? "/user/register" : "/user/login");
-    }
+
   };
 
   const providerAction = () => {
-    if (isAuthenticated) {
-      dispatch(logout());
-      navigate("/"); 
-    } else {
       navigate(isLoginProvider ? "/provider/register" : "/provider/login");
-    }
   };
 
   return (

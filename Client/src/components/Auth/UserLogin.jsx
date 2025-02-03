@@ -37,9 +37,8 @@ const UserLogin = () => {
   
         // Dispatch the user data to store it in Redux
         dispatch(login(userData));
-  
         // Navigate based on role
-        if (userData.role === "Admin") {
+        if (userData.user.role === "Admin") {
           navigate("/admin/dashboard");
         } else {
           navigate("/home");
@@ -117,6 +116,7 @@ const UserLogin = () => {
               "http://localhost:8000/api/auth/googleauth",
               credentialResponse
             );
+            localStorage.setItem("isAuth",true);
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("role", res.data.user.role);
 

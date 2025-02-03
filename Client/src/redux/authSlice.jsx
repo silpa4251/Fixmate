@@ -7,7 +7,8 @@ export const fetchAllUsers = createAsyncThunk(
   "user/fetchAllUsers",
   async () => {
     try {
-      const response = await axiosInstance.get("/dashboard/users");
+      const response = await axiosInstance.get("/users");
+      console.log("responseall", response);
       const nonAdminUsers = response.data.data.users.filter(user => user.role !== "admin");
       return nonAdminUsers;
     } catch (error) {
@@ -64,6 +65,7 @@ const userSlice = createSlice({
       state.isAuthenticated = true;
       state.user = user;
       state.role = user.role;
+      localStorage.setItem('isAuth',true);
       localStorage.setItem('token', action.payload.token); 
       localStorage.setItem('user', JSON.stringify(action.payload.user)); 
       localStorage.setItem('role', JSON.stringify(action.payload.user.role)); 
@@ -72,6 +74,7 @@ const userSlice = createSlice({
       state.isAuthenticated = false;
       state.user = null;
       state.role = null;
+      localStorage.removeItem('isAuth');
       localStorage.removeItem("token");
       localStorage.removeItem('user'); 
       localStorage.removeItem('role');

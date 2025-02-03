@@ -2,7 +2,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import axiosInstance from "../../api/axiosInstance";
+import { resetPasswordApi } from "../../api/AuthApi";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -23,7 +23,7 @@ const ResetPassword = () => {
     }),
     onSubmit: async (values) => {
       try {
-        await axiosInstance.post(`/auth/reset-password/${token}`, {
+        await resetPasswordApi(token,{
           password: values.password,
         });
         toast.success("Password reset successfully!");

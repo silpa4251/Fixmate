@@ -30,3 +30,13 @@ export const forgotPasswordApi = ( data ) => {
     const res = axiosInstance.post("/auth/forgot-password", data);
     return res;
 }
+
+export const resetPasswordApi = (token,data) => {
+    const res = axiosInstance.post(`/auth/reset-password/${token}`,data);
+    return res;
+}
+
+export const contactApi = (data) => {
+    const res = axiosInstance.post("/auth/contact", data);
+    return res;
+}

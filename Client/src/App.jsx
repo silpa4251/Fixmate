@@ -17,18 +17,23 @@ import UserRegister from "./components/Auth/UserRegister";
 import UserLogin from "./components/Auth/UserLogin";
 import ProviderRegister from "./components/Provider/ProviderRegister";
 import ProviderLogin from "./components/Provider/ProviderLogin";
-// import AllUsers from "./components/Admin/AllUsers";
+import BookService from "./components/User/BookService";
+import ProtectedRoute from "./routes/ProtectedRoute";
+// import UserNavbar from "./components/Navbar/UserNavbar";
+import AllUsers from "./components/Admin/AllUsers";
+import AllProviders from "./components/Admin/AllProviders";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
 
 
 function App() {
-
+  // const { role } = useSelector((state) => state.auth);
 
   return (
     <>
-     <NavbarConditional />
+    <NavbarConditional />
+    {/* {role === "User" ? <UserNavbar /> : role !== "Admin" && <Navbar />} */}
       <Routes>
      
           <Route path="/" element={<LandingPage />}/>
@@ -40,13 +45,18 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/loading" element={<Loading />} />
-          <Route path="/home" element={<Home />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/book/:id" element={<BookService />} />
+          </Route>
           
           <Route element={<AdminRoutes />}>
             <Route path = '/admin' element={<Sidebar />} >
             <Route index element={<Dashboard />} />
             <Route path='dashboard' element={<Dashboard />} />
-            {/* <Route path='users' element={<AllUsers />} /> */}
+            <Route path='users' element={<AllUsers />} />
+            <Route path='providers' element={<AllProviders />} />
           </Route>
           </Route>
       </Routes>
@@ -60,7 +70,7 @@ function App() {
 
 const NavbarConditional = () => {
   const { role } = useSelector((state) => state.auth);
-  return !(role === "Admin") && <Navbar />;
+  return !(role === "Admin")   && <Navbar />;
 
 }
 export default App

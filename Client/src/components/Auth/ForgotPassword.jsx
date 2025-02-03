@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import axiosInstance from "../../api/axiosInstance";
+import { forgotPasswordApi } from "../../api/AuthApi";
 
 const ForgotPassword = () => {
   const formik = useFormik({
@@ -15,10 +15,9 @@ const ForgotPassword = () => {
     }),
     onSubmit: async (values) => {
       try {
-        const res = await axiosInstance.post(endpoints.AUTH.FORGOT_PASSWORD, {
+        const res = await forgotPasswordApi({
           email: values.email,
         });
-        console.log("res".res)
         if (res.status === 200) {
           toast.success("Password reset link sent to your email!", {
             position: "top-center",

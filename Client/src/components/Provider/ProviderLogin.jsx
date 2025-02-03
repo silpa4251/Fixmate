@@ -106,6 +106,7 @@ const ProviderLogin = () => {
           onSuccess={async (credentialResponse) => {
             const res = await axios.post("http://localhost:8000/api/auth/googleauth/provider", credentialResponse);
             toast.success("Google Login Successful!");
+            localStorage.setItem("isAuth", true);
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("role", res.data.user.role);
 

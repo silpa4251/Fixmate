@@ -126,10 +126,11 @@ const MapComponent = ({ serviceQuery, providers, setProviders }) => {
     });
 
     mapInstance.on("locationerror", () => {
-      setError("Unable to access your location.");
+      setError("Unable to access your location.Please refresh the page");
     });
 
     setMap(mapInstance);
+
 
     // Cleanup
     return () => {
@@ -154,7 +155,7 @@ const MapComponent = ({ serviceQuery, providers, setProviders }) => {
   };
 
   return (
-    <div className="w-full p-4 bg-white-default shadow-md rounded-lg">
+    <div className="w-full p-4 bg-white-default shadow-md rounded-2xl mt-4 mb-5">
       {error && <p className="text-red-600 text-center font-semibold">{error}</p>}
       <div className="mb-4 flex items-center space-x-2">
         <input
@@ -166,7 +167,7 @@ const MapComponent = ({ serviceQuery, providers, setProviders }) => {
         />
         <button
           onClick={handleLocationSearch}
-          className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300"
+          className="bg-green-button text-white-default px-4 py-2 rounded-lg shadow-md hover:bg-green-700 transition duration-300"
         >
           Search
         </button>
@@ -174,7 +175,7 @@ const MapComponent = ({ serviceQuery, providers, setProviders }) => {
 
       <div
         id="map"
-        className="h-[300px] sm:h-[400px] lg:h-[500px] w-full rounded-lg shadow-lg overflow-hidden z-20"
+        className="h-[300px] sm:h-[400px] lg:h-[722px] w-full rounded-lg shadow-lg overflow-hidden z-20"
       >
         {map && <ProviderMarker map={map} providers={providers} />}
       </div>
