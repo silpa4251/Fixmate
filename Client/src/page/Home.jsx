@@ -45,7 +45,26 @@ const Home = () => {
         <MapComponent  serviceQuery={serviceQuery} providers={serviceProviders}   setProviders={setServiceProviders}  />
         </div>
       </div>
-
+      <div className="bg-green-50 py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { title: "Verified Providers", desc: "All service providers are thoroughly vetted" },
+              { title: "Instant Booking", desc: "Book services with just a few clicks" },
+              { title: "Satisfaction Guaranteed", desc: "100% satisfaction or money back guarantee" }
+            ].map((feature, idx) => (
+              <div key={idx} 
+                   className="bg-white rounded-lg shadow-md hover:shadow-lg 
+                            transition duration-200 p-6 text-center">
+                <h3 className="text-xl font-semibold text-green-700 mb-2">
+                  {feature.title}
+                </h3>
+                <p className="text-green-600">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
       {/* Footer (Optional for pagination) */}
       {/* <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">Showing page 1 of 3</p>

@@ -23,6 +23,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import AllUsers from "./components/Admin/AllUsers";
 import AllProviders from "./components/Admin/AllProviders";
 import Bookings from "./components/User/Bookings";
+import RescheduleBooking from "./components/User/RescheduleBooking";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -51,6 +52,7 @@ function App() {
             <Route path="/home" element={<Home />} />
             <Route path="/book/:id" element={<BookService />} />
             <Route path="/bookings" element={<Bookings />} />
+            <Route path="/reschedule/:bookingId" element={<RescheduleBooking />} />
           </Route>
           
           <Route element={<AdminRoutes />}>
