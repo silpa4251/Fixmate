@@ -74,12 +74,45 @@ const getProviderBookings = asyncErrorHandler(async (req, res) => {
     res.status(200).json({ status: "success", message: "Bookings fetched successfully", bookings });
 });
 
+const rescheduleBookings = asyncErrorHandler(async(req, res) => {
+    const { bookingId } = req.params;
+    const { newDate, newSlot } = req.body;
+
+    const existingBooking = await Booking.findOne({
+        providerId: req.body.providerId,
+        date: newDate,
+        slot: newSlot,
+      });
+      if (existingBooking && existingBooking._id.toString() !== bookingId) {
+        return res.status(400).json({
+          status: "error",
+          message: "This slot is already booked.",
+        });
+      }
+  
+      // Update the booking with the new date and slot
+      const booking = await Booking.findByIdAndUpdate(
+        bookingId,
+        { date: newDate, slot: newSlot },
+        { new: true }
+      );
+  
+      if (!booking) {
+        return res.status(404).json({
+          status: "error",
+          message: "Booking not found.",
+        });
+      }
+      res.status(200).json({status: "success",message: "Booking rescheduled successfully.", booking });
+    });
+
+
 // Update booking status
 const updateBookingStatus = asyncErrorHandler(async (req, res) => {
     const { bookingId } = req.params;
     const { status } = req.body;
 
-    const allowedStatuses = ["pending", "confirmed", "cancelled"];
+    const allowedStatuses = ["pending", "confirmed","completed","cancelled"];
     if (!allowedStatuses.includes(status)) {
         return res.status(400).json({ status: "error", message: "Invalid status value." });
     }
@@ -88,7 +121,7 @@ const updateBookingStatus = asyncErrorHandler(async (req, res) => {
         bookingId,
         { status },
         { new: true }
-    ).populate('userId serviceId');
+    ).populate('userId');
 
     if (!booking) {
         throw new CustomError("Booking not found", 404);
@@ -97,4 +130,4 @@ const updateBookingStatus = asyncErrorHandler(async (req, res) => {
     res.status(200).json({ status: "success", message: "Booking status updated successfully", booking });
 });
 
-module.exports = { newBooking, availableSlots, getUserBookings, getProviderBookings, updateBookingStatus };
+module.exports = { newBooking, availableSlots, getUserBookings, getProviderBookings, rescheduleBookings, updateBookingStatus };
