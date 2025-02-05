@@ -109,7 +109,7 @@ const rescheduleBookings = asyncErrorHandler(async(req, res) => {
 
 // Update booking status
 const updateBookingStatus = asyncErrorHandler(async (req, res) => {
-    const { bookingId } = req.params;
+    const { id } = req.params;
     const { status } = req.body;
 
     const allowedStatuses = ["pending", "confirmed","completed","cancelled"];
@@ -118,7 +118,7 @@ const updateBookingStatus = asyncErrorHandler(async (req, res) => {
     }
 
     const booking = await Booking.findByIdAndUpdate(
-        bookingId,
+        id,
         { status },
         { new: true }
     ).populate('userId');

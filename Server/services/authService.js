@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const Provider = require("../models/providerModel");
 const bcrypt = require("bcryptjs");
-const { generateToken, generateRefreshToken, verifyRefreshToken } = require("../utils/jwt");
+const { generateToken, generateRefreshToken, verifyRefreshToken, sentRefreshToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
 const cloudinary = require("../config/cloudinary");
 const { OAuth2Client } = require("google-auth-library");
@@ -54,26 +54,6 @@ const providerRegisteration = async (data) => {
   }
   const { lat, lng } = geoResponse.data.results[0].geometry;
   const coordinates = [lng, lat];
-
-  // // **Upload certificates in parallel (if files exist)**
-  // let certificateUrls = [];
-  // if (files?.length) {
-  //   try {
-  //     const uploadPromises = files.map(file =>
-  //       cloudinary.uploader.upload(file.path, {
-  //         folder: "providers/certificates",
-  //         resource_type: "auto",
-  //       })
-  //     );
-  //     const uploadedFiles = await Promise.all(uploadPromises);
-  //     certificateUrls = uploadedFiles.map(file => file.secure_url);
-  //   } catch (error) {
-  //     console.error("Cloudinary Upload Error:", error.message);
-  //     throw new CustomError("Failed to upload certificates. Please try again.", 500);
-  //   }
-  // }
-
-  // Create provider instance
   const newProvider = new Provider({
     name,
     email,
@@ -98,18 +78,13 @@ const providerRegisteration = async (data) => {
 };
 
 
-const userLoginService = async (data) => {
+const userLoginService = async (res,data) => {
   const { email, password } = data;
-  let user = await User.findOne({ email });
-  let role = "User";
+  const user = await User.findOne({ email });
+  const role = "User";
 
   if (!user) {
-    user = await Admin.findOne({ email });
-    role = "Admin";
-  }
-  
-  if (!user) {
-    throw new CustomError("Invalid email or password", 400);
+    throw new CustomError("Invalid email", 400);
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
@@ -118,10 +93,10 @@ const userLoginService = async (data) => {
   }
   const token = generateToken(user._id, role);
   const refreshToken = generateRefreshToken(user._id, role);
-  
+  sentRefreshToken(res, refreshToken);
 
   return {
-    message: `${role} logged in successfully`,
+    message: "user logged in successfully",
     token,
     refreshToken,
     user: {
@@ -133,7 +108,7 @@ const userLoginService = async (data) => {
   };
 };
 
-const providerLoginService = async (data) => {
+const providerLoginService = async (res,data) => {
   const { email, password } = data;
   const provider = await Provider.findOne({ email });
 
@@ -147,7 +122,7 @@ const providerLoginService = async (data) => {
   }
   const token = generateToken(provider._id, "Provider");
   const refreshToken = generateRefreshToken(provider._id, "Provider");
- 
+  sentRefreshToken(res, refreshToken);
 
   return {
     message: "Provider logged in successfully",
@@ -162,7 +137,7 @@ const providerLoginService = async (data) => {
   };
 };
 
-const userGoogleAuthService = async(Credentials) => {
+const userGoogleAuthService = async(res, Credentials) => {
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
   
   if (!Credentials) {
@@ -182,16 +157,10 @@ const userGoogleAuthService = async(Credentials) => {
   const payload = ticket.getPayload();
   const { email, name } = payload;
 
-  let user = await User.findOne({ email });
-  let role = "User";
+  const user = await User.findOne({ email });
+  const role = "User";
   
 
-  if (!user) {
-    user = await Admin.findOne({ email });
-    if (user) {
-      role = "Admin";
-    }
-  }
   if (!user) {
     const newUser = new User({ name, email, password: null });
     await newUser.save();
@@ -202,6 +171,8 @@ const userGoogleAuthService = async(Credentials) => {
 
 
   const token = generateToken(user._id, role);
+  const refreshToken = generateRefreshToken(user._id, role);
+  sentRefreshToken(res, refreshToken);
 
   return {
     token,
@@ -216,7 +187,7 @@ const userGoogleAuthService = async(Credentials) => {
   };
 };
 
-const providerGoogleAuthService = async (Credentials) => {
+const providerGoogleAuthService = async (res, Credentials) => {
   const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
   if (!Credentials || !Credentials.credential) {
@@ -233,8 +204,8 @@ const providerGoogleAuthService = async (Credentials) => {
   const payload = ticket.getPayload();
   const { email, name } = payload;
 
-  let provider = await Provider.findOne({ email });
-
+  const provider = await Provider.findOne({ email });
+  const role = "Provider";
   // If provider doesn't exist, create a new one
   if (!provider) {
     provider = new Provider({ name, email, password: null });
@@ -242,8 +213,9 @@ const providerGoogleAuthService = async (Credentials) => {
   }
 
   // Generate token using the provider's ID
-  const token = generateToken(provider._id, "Provider");
-
+  const token = generateToken(provider._id, role);
+  const refreshToken = generateRefreshToken(provider._id, role);
+  sentRefreshToken(res, refreshToken);
   return {
     token,
     provider: {
@@ -262,11 +234,11 @@ const refreshTokenService = async(token) => {
   const decoded = verifyRefreshToken(token);
   const user = await User.findById(decoded.userId);
     if (!user || user.refreshToken !== token) {
-      return res.status(403).json({ status: "error", message: "Invalid refresh token" });
+      throw new CustomError("Invalid refresh token", 403);
     }
-  const newToken = generateToken(decoded.id,decoded.role);
-  const newRefreshToken = generateRefreshToken(decoded.id, decoded.role);
-  return {token: newToken, refreshtoken: newRefreshToken};
+    console.log("decoded", decoded);
+  const newToken = generateToken(decoded.userId,decoded.role);
+  return {token: newToken};
 
 }
 

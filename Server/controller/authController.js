@@ -32,13 +32,8 @@ const userLogin = asyncErrorHandler(async (req, res) => {
   const {error} = loginValidation(req.body);
   if (error) throw new CustomError(error.details[0].message, 400);
 
-  const data = await userLoginService(req.body);
-  res.cookie('refreshToken', data.refreshToken, {
-    httpOnly: true,      
-    secure: true,          
-    sameSite: 'Strict',   
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  const data = await userLoginService(res,req.body);
+  
   res.status(200).json({ status: "success", data})
 });
 
@@ -46,19 +41,14 @@ const providerLogin = asyncErrorHandler(async (req, res) => {
   const {error} = loginValidation(req.body);
   if (error) throw new CustomError(error.details[0].message, 400);
 
-  const data = await providerLoginService(req.body);
-  res.cookie('refreshToken', data.refreshToken, {
-    httpOnly: true,      
-    secure: true,          
-    sameSite: 'Strict',   
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  const data = await providerLoginService(res,req.body);
+ 
   res.status(200).json({ status: "success", data})
 });
 
 const userGoogleAuth = asyncErrorHandler(async (req,res) => {
     const body = req.body;
-     const data = await userGoogleAuthService(body);
+     const data = await userGoogleAuthService(res, body);
     
     res.status(200).json({
       status: "success",
@@ -71,7 +61,7 @@ const userGoogleAuth = asyncErrorHandler(async (req,res) => {
 
 const providerGoogleAuth = asyncErrorHandler(async (req,res) => {
   const body = req.body;
-   const data = await providerGoogleAuthService(body);
+   const data = await providerGoogleAuthService(res, body);
   
   res.status(200).json({
     status: "success",
@@ -85,12 +75,7 @@ const providerGoogleAuth = asyncErrorHandler(async (req,res) => {
 const refreshToken = asyncErrorHandler(async(req,res) =>{
   const token = req.cookies.refreshToken;
   const data = await refreshTokenService(token);
-  res.cookie('refreshToken', data.refreshtoken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'Strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+ 
   res.status(200).json({ status: "success", data})
 
 })
