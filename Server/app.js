@@ -7,6 +7,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const providerRoutes = require("./routes/providerRoutes");
 const mapRoute = require("./routes/mapRoute");
 const userRoutes = require("./routes/userRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 
 // Middlewares for parsing request body
@@ -23,7 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/providers",providerRoutes);
 app.use("/api/map", mapRoute);
-
+app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin",adminRoutes);
 
 

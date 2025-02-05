@@ -1,13 +1,7 @@
-const Booking = require("../models/bookingModel");
 const User = require("../models/userModel");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 
-const booking = asyncErrorHandler(async(req, res) => {
-    const { providerId, date, slot } = req.body;
-    const booking = new Booking({ providerId, date, slot });
-    await booking.save();
-    res.status(200).json({status:"success", message: "Booking successful", booking });
-});
+
 
 const getAllUsers = asyncErrorHandler(async (req, res) => {
     const users = await User.aggregate([
@@ -76,4 +70,4 @@ const unblockUser = asyncErrorHandler(async (req, res) => {
     res.status(200).json({message:"User unblocked successfully", updatedUser });
 });
 
-module.exports = {booking, getAllUsers, getUserById, blockUser, unblockUser };
+module.exports = {getAllUsers, getUserById, blockUser, unblockUser };

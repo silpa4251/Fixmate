@@ -24,72 +24,79 @@ const userRegisteration = async (data) => {
   return { message: "User registered successfully" };
 };
 
-const providerRegisteration = async (data, files) => {
+const providerRegisteration = async (data) => {
   const { name, email, password, address, services } = data;
+  // Check if provider already exists
   const existingProvider = await Provider.findOne({ email });
   if (existingProvider) {
     throw new CustomError("Provider already exists!", 400);
   }
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
 
-  let certificateUrls = [];
-  if (files && files.length > 0) {
-    for (let file of files) {
-      
-      const uploadedFile = await cloudinary.uploader.upload(file.path, {
-        folder: "providers/certificates",
-        resource_type: "auto", 
-      });
-     
-      certificateUrls.push(uploadedFile.secure_url);
-    }
+  if (!Array.isArray(address) || address.length === 0) {
+    throw new CustomError("Invalid address provided", 400);
   }
   const { place, district, state, pincode } = address[0];
-  let coordinates = [];
-  try {
-    const response = await axios.get("https://api.opencagedata.com/geocode/v1/json", {
+
+  // **Run hashing and geolocation in parallel**
+  const [hashedPassword, geoResponse] = await Promise.all([
+    bcrypt.hash(password, 10), // Hash password
+    axios.get("https://api.opencagedata.com/geocode/v1/json", {
       params: {
         q: `${place}, ${district}, ${state}, ${pincode}`,
-        key: process.env.GEO_API_KEY ,
+        key: process.env.GEO_API_KEY,
       },
-    });
+    }),
+  ]);
 
-    if (response.data.results.length === 0) {
-      throw new CustomError("Unable to fetch coordinates for the provided address", 400);
-    }
-  
-    const { lat, lng } = response.data.results[0].geometry;
-    coordinates = [lng, lat];
-  } catch (error) {
-    console.error("Geolocation API Error:", {
-      message: error.message,
-    });    
-    throw new CustomError("Failed to fetch geolocation data. Please try again.", 500);
+  // Extract coordinates
+  if (geoResponse.data.results.length === 0) {
+    throw new CustomError("Unable to fetch coordinates for the provided address", 400);
   }
+  const { lat, lng } = geoResponse.data.results[0].geometry;
+  const coordinates = [lng, lat];
 
-  const newProvider = new Provider({ 
-    name, 
-    email, 
-    password: hashedPassword, 
-    address:[{
-      place,
-      district,
-      state,
-      pincode,
-      coordinates: {
-        type: "Point",
-        coordinates,
+  // // **Upload certificates in parallel (if files exist)**
+  // let certificateUrls = [];
+  // if (files?.length) {
+  //   try {
+  //     const uploadPromises = files.map(file =>
+  //       cloudinary.uploader.upload(file.path, {
+  //         folder: "providers/certificates",
+  //         resource_type: "auto",
+  //       })
+  //     );
+  //     const uploadedFiles = await Promise.all(uploadPromises);
+  //     certificateUrls = uploadedFiles.map(file => file.secure_url);
+  //   } catch (error) {
+  //     console.error("Cloudinary Upload Error:", error.message);
+  //     throw new CustomError("Failed to upload certificates. Please try again.", 500);
+  //   }
+  // }
+
+  // Create provider instance
+  const newProvider = new Provider({
+    name,
+    email,
+    password: hashedPassword,
+    address: [
+      {
+        place,
+        district,
+        state,
+        pincode,
+        coordinates: {
+          type: "Point",
+          coordinates,
+        },
       },
-
-  }], 
-  services : services ? services.split(",") : [], 
-  certifications: certificateUrls,
- });
+    ],
+    services: Array.isArray(services) ? services : services.split(",")
+  });
 
   await newProvider.save();
   return { message: "Provider registered successfully" };
 };
+
 
 const userLoginService = async (data) => {
   const { email, password } = data;
@@ -253,6 +260,10 @@ const refreshTokenService = async(token) => {
     throw new CustomError('Refresh token missing', 401);
   }
   const decoded = verifyRefreshToken(token);
+  const user = await User.findById(decoded.userId);
+    if (!user || user.refreshToken !== token) {
+      return res.status(403).json({ status: "error", message: "Invalid refresh token" });
+    }
   const newToken = generateToken(decoded.id,decoded.role);
   const newRefreshToken = generateRefreshToken(decoded.id, decoded.role);
   return {token: newToken, refreshtoken: newRefreshToken};

@@ -23,8 +23,7 @@ const registerProvider = asyncErrorHandler(async (req, res) => {
   }
   const { error } = ProviderValidation(req.body)
   if (error) throw new CustomError(error.details[0].message, 400);
- 
-  const data = await providerRegisteration(req.body,req.files);
+  const data = await providerRegisteration(req.body);
   res.status(201).json({ status: "success", data})
 });
 

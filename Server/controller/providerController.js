@@ -61,14 +61,6 @@ const getProviderById = asyncErrorHandler( async(req, res) => {
   res.status(200).json({status: "success", message:"provider retrieved successfully", provider})
 });
 
-const availableSlots = asyncErrorHandler(async(req,res) => {
-  const { providerId, date } = req.query;
-  const bookings = await Booking.find({ providerId, date });
-  const bookedSlots = bookings.map((booking) => booking.slot);
-  const allSlots = ["10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM"];
-  const availableSlots = allSlots.filter((slot) => !bookedSlots.includes(slot));
-  res.status(200).json({status:"success" ,message: "Available slots Fetched", availableSlots});
 
-}) 
 
-module.exports = { getNearbyProviders, searchService,getAllProviders, getProviderById, availableSlots };
+module.exports = { getNearbyProviders, searchService,getAllProviders, getProviderById };
