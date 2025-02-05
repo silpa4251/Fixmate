@@ -33,16 +33,11 @@ const UserLogin = () => {
       const res = await userLoginApi(values);
       if (res.status === 200) {
         const userData = res.data.data; // Assuming the response contains user role data
-        toast.success("Login successful!", { position: "top-center" });
+        toast.success("Login successful!", { position: "top-right" });
   
         // Dispatch the user data to store it in Redux
         dispatch(login(userData));
-        // Navigate based on role
-        if (userData.user.role === "Admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/home");
-        }
+        navigate("/home");
       }
     } catch (error) {
         if (error.response) {

@@ -24,7 +24,7 @@ const RescheduleBooking = () => {
         );
         setTimeSlots(response.data.availableSlots || []);
         setLoading(false);
-      } catch (error) {
+      } catch (error) { 
         console.error('Error fetching time slots:', error);
         setLoading(false);
       }

@@ -4,7 +4,6 @@ import SearchBar from "../components/User/SearchBar";
 import MapComponent from "../components/Map/MapComponent";
 import { useState } from "react";
 import ProviderList from "../components/Provider/ProviderList";
-import UserNavbar from "../components/Navbar/UserNavbar";
 
 
 const Home = () => {
@@ -21,7 +20,6 @@ const Home = () => {
 
   return (
     <>
-    <UserNavbar />
     <div className="min-h-screen bg-green-pale">
       {/* Hero Section */}
       <div className="relative bg-cover bg-center h-[500px]" style={{ backgroundImage: `url(${homeImage})`}}>

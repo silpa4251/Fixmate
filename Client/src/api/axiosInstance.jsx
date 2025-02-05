@@ -6,6 +6,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 // Add a request interceptor to include the token in headers
@@ -30,8 +31,10 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const response = await axiosInstance.post("/auth/refresh", { refreshToken });
-
+        // const refreshToken = localStorage.getItem("refreshToken");
+         
+        const response = await axiosInstance.post("/auth/refresh", {},{withCredentials:true});
+        console.log("res", response);
         const newToken = response.data.token;
         localStorage.setItem("token", newToken);
 
@@ -40,8 +43,8 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (err) {
         console.error("Refresh token failed:", err);
-        localStorage.removeItem("token");
-        window.location.href = "/login";
+        localStorage.clear();
+        // window.location.href = "/login";
       }
     }
 

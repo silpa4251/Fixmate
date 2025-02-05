@@ -19,7 +19,7 @@ import ProviderRegister from "./components/Provider/ProviderRegister";
 import ProviderLogin from "./components/Provider/ProviderLogin";
 import BookService from "./components/User/BookService";
 import ProtectedRoute from "./routes/ProtectedRoute";
-// import UserNavbar from "./components/Navbar/UserNavbar";
+import UserNavbar from "./components/Navbar/UserNavbar";
 import AllUsers from "./components/Admin/AllUsers";
 import AllProviders from "./components/Admin/AllProviders";
 import Bookings from "./components/User/Bookings";
@@ -30,12 +30,13 @@ import RescheduleBooking from "./components/User/RescheduleBooking";
 
 
 function App() {
-  // const { role } = useSelector((state) => state.auth);
+  const role = localStorage.getItem("role");
+  console.log("objectrole",role);
 
   return (
     <>
     <NavbarConditional />
-    {/* {role === "User" ? <UserNavbar /> : role !== "Admin" && <Navbar />} */}
+    {role === "User" ? <UserNavbar /> : <Navbar />}
       <Routes>
      
           <Route path="/" element={<LandingPage />}/>
