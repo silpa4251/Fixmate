@@ -6,7 +6,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
-import store from './app/store';
+import store from './redux/store/store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 

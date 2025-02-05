@@ -6,7 +6,7 @@ import { FaEye } from "react-icons/fa";
 import { TbEyeClosed } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
-import { login } from "../../redux/authSlice";
+import { login } from "../../redux/slices/authSlice";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import { userLoginApi } from "../../api/AuthApi";

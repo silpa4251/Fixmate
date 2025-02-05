@@ -13,7 +13,7 @@ import axios from "axios";
 const ProviderRegister = () => {
   const navigate = useNavigate();
   const [showPass, setShowPass] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
+  // const [selectedFile, setSelectedFile] = useState(null);
 
   const togglePass = () => setShowPass(!showPass);
 
@@ -35,19 +35,10 @@ const ProviderRegister = () => {
         state: values.state,
         pincode: values.pincode,
     }];
-    console.log("add",address);
       // eslint-disable-next-line no-unused-vars
       const { confirmPassword, place, district, state, pincode, ...dataToSend } = values;
-      const formData = new FormData();
-      Object.keys(dataToSend).forEach((key) => {
-        formData.append(key, dataToSend[key]);
-      });
-      formData.append("address", JSON.stringify(address));
-      if (selectedFile) {
-        formData.append("certifications", selectedFile);
-      }
-      console.log("fprm",formData);
-      await providerRegisterApi(formData);
+      dataToSend.address = address;
+      await providerRegisterApi(dataToSend);
 
       toast.success("Registration successful!");
       navigate("/provider/login");
@@ -57,12 +48,12 @@ const ProviderRegister = () => {
     }
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
+  // const handleFileChange = (event) => {
+  //   const file = event.target.files[0];
+  //   if (file) {
+  //     setSelectedFile(file);
+  //   }
+  // };
 
   return (
     <div className="bg-overlay bg-cover bg-center min-h-screen flex flex-col justify-center items-center p-28">
@@ -174,7 +165,7 @@ const ProviderRegister = () => {
       </select>
       {errors.services && <div className="text-red-500 text-sm">{errors.services.message}</div>}
 
-      <div className="flex items-center">
+      {/* <div className="flex items-center">
         <label className="mr-2">Upload Certifications</label>
         <input
           type="file"
@@ -182,8 +173,8 @@ const ProviderRegister = () => {
           className="p-2 w-56 bg-gray-200 border border-gray-300 rounded-md"
           onChange={handleFileChange}
         />
-      </div>
-      {errors.certifications && <div className="text-red-500 text-sm">{errors.certifications.message}</div>}
+      </div> */}
+      {/* {errors.certifications && <div className="text-red-500 text-sm">{errors.certifications.message}</div>} */}
 
       <button
             type="submit"

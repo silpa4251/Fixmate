@@ -5,7 +5,7 @@ import { FaUserEdit } from "react-icons/fa";
 import { GrMoney } from "react-icons/gr";
 import { BsTools } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../redux/authSlice";
+import { logout } from "../../redux/slices/authSlice";
 import Breadcrumbs from "./Breadcrumbs";
 
 const Sidebar = () => {

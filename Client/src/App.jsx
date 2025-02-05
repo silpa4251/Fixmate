@@ -22,6 +22,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 // import UserNavbar from "./components/Navbar/UserNavbar";
 import AllUsers from "./components/Admin/AllUsers";
 import AllProviders from "./components/Admin/AllProviders";
+import Bookings from "./components/User/Bookings";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -49,6 +50,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<Home />} />
             <Route path="/book/:id" element={<BookService />} />
+            <Route path="/bookings" element={<Bookings />} />
           </Route>
           
           <Route element={<AdminRoutes />}>

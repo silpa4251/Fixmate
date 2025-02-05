@@ -6,8 +6,7 @@ export const userRegisterApi = ( data ) => {
 }
 
 export const providerRegisterApi = ( data ) => {
-    const res = axiosInstance.post("/auth/register/provider", data, {
-        headers: { "Content-Type": "multipart/form-data" }});
+    const res = axiosInstance.post("/auth/register/provider", data);
     return res;
 }
 

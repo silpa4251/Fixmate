@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../redux/authSlice";
+import { logout } from "../../redux/slices/authSlice";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const UserNavbar = () => {
