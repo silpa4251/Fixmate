@@ -74,9 +74,9 @@ const providerGoogleAuth = asyncErrorHandler(async (req,res) => {
 
 const refreshToken = asyncErrorHandler(async(req,res) =>{
   const token = req.cookies.refreshToken;
-  const data = await refreshTokenService(token);
+  const newToken = await refreshTokenService(token);
  
-  res.status(200).json({ status: "success", data})
+  res.status(200).json({ status: "success", token: newToken})
 
 })
 

@@ -55,6 +55,9 @@ const availableSlots = asyncErrorHandler(async (req, res) => {
 
 // Get user bookings
 const getUserBookings = asyncErrorHandler(async (req, res) => {
+    if (!req.user?.userId) {
+        return res.status(400).json({ status: "error", message: "User ID missing" });
+    }
     const bookings = await Booking.find({ userId: req.user.userId })
         .populate('providerId', 'name address services charge')
         .sort({ date: 1 , slot: 1});
@@ -74,60 +77,115 @@ const getProviderBookings = asyncErrorHandler(async (req, res) => {
     res.status(200).json({ status: "success", message: "Bookings fetched successfully", bookings });
 });
 
-const rescheduleBookings = asyncErrorHandler(async(req, res) => {
+const bookingById = asyncErrorHandler(async(req, res) => {
+    const { bookingId }= req.params;
+    const booking = await Booking.findById(bookingId)
+                    .populate('providerId', 'name address services charge')
+                    .populate('userId', 'name email');
+    console.log("id", booking);
+    if (!booking) {
+        return res.status(404).json({status: "error",message: "Booking not found."});
+    }
+    res.status(200).json({
+        status: "success",
+        message: "Booking details fetched successfully.",
+        booking,
+    });            
+});
+
+const rescheduleBookings = asyncErrorHandler(async (req, res) => {
+    console.log("objectparams",req.params);
+    console.log("boduy", req.body);
     const { bookingId } = req.params;
     const { newDate, newSlot } = req.body;
 
+    // Fetch the booking to validate its status
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+        return res.status(404).json({
+            status: "error",
+            message: "Booking not found.",
+        });
+    }
+
+    // Check if the booking is already completed or canceled
+    if (booking.status === "completed") {
+        return res.status(400).json({
+            status: "error",
+            message: "Cannot reschedule a completed booking.",
+        });
+    }
+    if (booking.status === "cancelled") {
+        return res.status(400).json({
+            status: "error",
+            message: "Cannot reschedule a canceled booking.",
+        });
+    }
+
+    // Check if the new slot is already booked
     const existingBooking = await Booking.findOne({
-        providerId: req.body.providerId,
+        providerId: booking.providerId,
         date: newDate,
         slot: newSlot,
-      });
-      if (existingBooking && existingBooking._id.toString() !== bookingId) {
+    });
+
+    if (existingBooking && existingBooking._id.toString() !== bookingId) {
         return res.status(400).json({
-          status: "error",
-          message: "This slot is already booked.",
+            status: "error",
+            message: "This slot is already booked.",
         });
-      }
-  
-      // Update the booking with the new date and slot
-      const booking = await Booking.findByIdAndUpdate(
+    }
+
+    // Update the booking with the new date and slot
+    const updatedBooking = await Booking.findByIdAndUpdate(
         bookingId,
         { date: newDate, slot: newSlot },
         { new: true }
-      );
-  
-      if (!booking) {
-        return res.status(404).json({
-          status: "error",
-          message: "Booking not found.",
-        });
-      }
-      res.status(200).json({status: "success",message: "Booking rescheduled successfully.", booking });
-    });
+    );
 
+    res.status(200).json({
+        status: "success",
+        message: "Booking rescheduled successfully.",
+        booking: updatedBooking,
+    });
+});
 
 // Update booking status
 const updateBookingStatus = asyncErrorHandler(async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
+    const allowedStatuses = ["pending", "confirmed", "completed", "cancelled"];
 
-    const allowedStatuses = ["pending", "confirmed","completed","cancelled"];
     if (!allowedStatuses.includes(status)) {
         return res.status(400).json({ status: "error", message: "Invalid status value." });
     }
 
-    const booking = await Booking.findByIdAndUpdate(
+    // Fetch the booking to validate its current status
+    const booking = await Booking.findById(id);
+    if (!booking) {
+        throw new CustomError("Booking not found", 404);
+    }
+
+    // Prevent canceling a completed booking
+    if (status === "cancelled" && booking.status === "completed") {
+        return res.status(400).json({
+            status: "error",
+            message: "Cannot cancel a completed booking.",
+        });
+    }
+
+    // Update the booking status
+    const updatedBooking = await Booking.findByIdAndUpdate(
         id,
         { status },
         { new: true }
     ).populate('userId');
 
-    if (!booking) {
-        throw new CustomError("Booking not found", 404);
-    }
-
-    res.status(200).json({ status: "success", message: "Booking status updated successfully", booking });
+    res.status(200).json({
+        status: "success",
+        message: "Booking status updated successfully.",
+        booking: updatedBooking,
+    });
 });
 
-module.exports = { newBooking, availableSlots, getUserBookings, getProviderBookings, rescheduleBookings, updateBookingStatus };
+module.exports = { newBooking, availableSlots, getUserBookings, getProviderBookings, bookingById, rescheduleBookings, updateBookingStatus };

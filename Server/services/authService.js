@@ -233,12 +233,11 @@ const refreshTokenService = async(token) => {
   }
   const decoded = verifyRefreshToken(token);
   const user = await User.findById(decoded.userId);
-    if (!user || user.refreshToken !== token) {
+    if (!user) {
       throw new CustomError("Invalid refresh token", 403);
     }
-    console.log("decoded", decoded);
-  const newToken = generateToken(decoded.userId,decoded.role);
-  return {token: newToken};
+    const newToken = generateToken(decoded.userId,decoded.role);
+  return  newToken ;
 
 }
 
