@@ -23,25 +23,34 @@ const Bookings = () => {
   }, []);
 
   // Handle Reschedule
-  const handleReschedule = (bookingId) => {
+  const handleReschedule = (bookingId, status) => {
+    if (["completed", "cancelled"].includes(status)) {
+        alert("This booking cannot be rescheduled.");
+        return;
+    }
     navigate(`/reschedule/${bookingId}`);
-  };
+};
 
   // Handle Cancel
-  const handleCancel = async (bookingId) => {
-    if (window.confirm('Are you sure you want to cancel this booking?')) {
-      try {
-        await axiosInstance.patch(`/bookings/${bookingId}/status`, { status: 'cancelled' });
-        alert('Booking cancelled successfully!');
-        setBookings((prevBookings) =>
-          prevBookings.filter((booking) => booking._id !== bookingId)
-        );
-      } catch (error) {
-        console.error('Error cancelling booking:', error);
-        alert('Failed to cancel booking. Please try again.');
-      }
+  const handleCancel = async (bookingId, status) => {
+    if (status === "completed") {
+        alert("This booking cannot be canceled.");
+        return;
     }
-  };
+
+    if (window.confirm('Are you sure you want to cancel this booking?')) {
+        try {
+            await axiosInstance.patch(`/bookings/${bookingId}/status`, { status: 'cancelled' });
+            alert('Booking cancelled successfully!');
+            setBookings((prevBookings) =>
+                prevBookings.filter((booking) => booking._id !== bookingId)
+            );
+        } catch (error) {
+            console.error('Error cancelling booking:', error);
+            alert('Failed to cancel booking. Please try again.');
+        }
+    }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-20">
@@ -124,7 +133,7 @@ const Bookings = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span>{booking.date}</span>
+                      <span>{new Date(booking.date).toISOString().split('T')[0]}</span>
                     </div>
 
                     <div className="flex items-start gap-2 text-gray-600">
@@ -141,17 +150,21 @@ const Bookings = () => {
                 <div className="p-4 bg-gray-50 flex gap-3">
                   <button
                     onClick={() => handleReschedule(booking._id)}
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-4 rounded-lg 
-                             font-medium transition duration-200 focus:outline-none focus:ring-2 
-                             focus:ring-blue-500 focus:ring-offset-2"
+                    disabled={["completed", "cancelled"].includes(booking.status)}
+                    className={`flex-1 ${["completed", "cancelled"].includes(booking.status)
+                      ? "bg-gray-300 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                    } text-white py-2.5 px-4 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
                   >
                     Reschedule
                   </button>
                   <button
                     onClick={() => handleCancel(booking._id)}
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 px-4 rounded-lg 
-                             font-medium transition duration-200 focus:outline-none focus:ring-2 
-                             focus:ring-red-500 focus:ring-offset-2"
+                    disabled={["completed", "cancelled"].includes(booking.status)}
+                    className={`flex-1 ${["completed", "cancelled"].includes(booking.status)
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600"
+                    } text-white py-2.5 px-4 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
                   >
                     Cancel
                   </button>

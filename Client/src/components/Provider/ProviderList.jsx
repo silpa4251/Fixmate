@@ -4,7 +4,7 @@ import ProviderCard from "./ProviderCard";
 
 const ProviderList = ({ providers }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const PROVIDER_PER_PAGE = 4;
+  const PROVIDER_PER_PAGE = 3;
 
   const lastIndex = currentPage * PROVIDER_PER_PAGE;
   const firstIndex =  lastIndex - PROVIDER_PER_PAGE;

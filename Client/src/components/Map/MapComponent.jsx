@@ -175,7 +175,7 @@ const MapComponent = ({ serviceQuery, providers, setProviders }) => {
 
       <div
         id="map"
-        className="h-[300px] sm:h-[400px] lg:h-[722px] w-full rounded-lg shadow-lg overflow-hidden z-20"
+        className="h-[300px] sm:h-[400px] lg:h-[662px] w-full rounded-lg shadow-lg overflow-hidden z-20"
       >
         {map && <ProviderMarker map={map} providers={providers} />}
       </div>
