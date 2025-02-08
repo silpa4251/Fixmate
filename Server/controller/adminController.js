@@ -12,15 +12,13 @@ const adminLogin = asyncErrorHandler(async(req,res) => {
 });
 
 const getStats = asyncErrorHandler(async(req,res) => {
-  const { totalUsers, totalProviders, totalBookings, totalRevenue } = await getStatsService();
+  const data = await getStatsService();
+  console.log("first",data);
   
   res.status(200).json({
     status: "success",
     message: "Successfully retrieved stats",
-    totalUsers,
-    totalProviders,
-    totalBookings,
-    totalRevenue,
+    data
   });
 });
 
