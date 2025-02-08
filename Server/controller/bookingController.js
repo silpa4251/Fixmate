@@ -6,7 +6,7 @@ const { generateSlots, parseTime } = require("../utils/generateSlots");
 // Create a new booking
 const newBooking = asyncErrorHandler(async (req, res) => {
     const { providerId, date, slot } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     // Check for duplicate bookings
     const existingBooking = await Booking.findOne({ userId, providerId, date, slot });
@@ -53,12 +53,13 @@ const availableSlots = asyncErrorHandler(async (req, res) => {
     res.status(200).json({ status: "success", message: "Available slots fetched", availableSlots });
 });
 
+
 // Get user bookings
 const getUserBookings = asyncErrorHandler(async (req, res) => {
-    if (!req.user?.userId) {
+    if (!req.user?.id) {
         return res.status(400).json({ status: "error", message: "User ID missing" });
     }
-    const bookings = await Booking.find({ userId: req.user.userId })
+    const bookings = await Booking.find({ userId: req.user.id })
         .populate('providerId', 'name address services charge')
         .sort({ date: 1 , slot: 1});
 
@@ -80,8 +81,8 @@ const getProviderBookings = asyncErrorHandler(async (req, res) => {
 const bookingById = asyncErrorHandler(async(req, res) => {
     const { bookingId }= req.params;
     const booking = await Booking.findById(bookingId)
-                    .populate('providerId', 'name address services charge')
-                    .populate('userId', 'name email');
+                    .populate('providerId', 'name image address services charge')
+                    .populate('userId', 'name phone address');
     console.log("id", booking);
     if (!booking) {
         return res.status(404).json({status: "error",message: "Booking not found."});

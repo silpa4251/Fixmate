@@ -91,8 +91,8 @@ const userLoginService = async (res,data) => {
   if (!isMatch) {
     throw new CustomError("Invalid credentials", 400);
   }
-  const token = generateToken({id:user._id, role});
-  const refreshToken = generateRefreshToken({id:user._id, role});
+  const token = generateToken(user._id, role);
+  const refreshToken = generateRefreshToken(user._id, role);
   sentRefreshToken(res, refreshToken);
 
   return {
@@ -120,8 +120,8 @@ const providerLoginService = async (res,data) => {
   if (!isMatch) {
     throw new CustomError("Invalid credentials", 400);
   }
-  const token = generateToken({id:provider._id,role: "Provider"});
-  const refreshToken = generateRefreshToken({id:provider._id, role: "Provider"});
+  const token = generateToken(provider._id,"Provider");
+  const refreshToken = generateRefreshToken(provider._id, "Provider");
   sentRefreshToken(res, refreshToken);
 
   return {
@@ -170,8 +170,8 @@ const userGoogleAuthService = async(res, Credentials) => {
   }
 
 
-  const token = generateToken({id:user._id, role});
-  const refreshToken = generateRefreshToken({id:user._id, role});
+  const token = generateToken(user._id, role);
+  const refreshToken = generateRefreshToken(user._id, role);
   sentRefreshToken(res, refreshToken);
 
   return {
@@ -213,8 +213,8 @@ const providerGoogleAuthService = async (res, Credentials) => {
   }
 
   // Generate token using the provider's ID
-  const token = generateToken({id:provider._id, role});
-  const refreshToken = generateRefreshToken({id:provider._id, role});
+  const token = generateToken(provider._id, role);
+  const refreshToken = generateRefreshToken(provider._id, role);
   sentRefreshToken(res, refreshToken);
   return {
     token,
@@ -236,23 +236,28 @@ const refreshTokenService = async(token) => {
     throw new CustomError('Refresh token missing', 401);
   }
   const decoded = verifyRefreshToken(token);
+  console.log("hjello",decoded)
   if( !decoded.role || !decoded.id){
     throw new CustomError('Invalid token format', 401);
   }
-  let model;
+  let model =   User;
+  let role = "User";
   if(decoded.role === "Admin"){
     model = Admin;
+    role = "Admin";
   }if(decoded.role === "Provider"){
     model = Provider;
+    role = "Provider";
   }
   if(decoded.role === "User"){
     model = User;
+    role = "User";
   }
   const user = await model?.findById(decoded.id);
     if (!user) {
       throw new CustomError("Invalid refresh token", 403);
     }
-    const newToken = generateToken({id:user.id,role: user.role});
+    const newToken = generateToken(user.id, role );
   return  newToken ;
 
 }

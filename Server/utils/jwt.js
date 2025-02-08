@@ -10,7 +10,7 @@ const generateToken = ( id, role) => {
 // Verification of token
 const verifyToken = (token) => {
   return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-};
+}; 
 
 const generateRefreshToken = ( id, role) => {
   const refreshToken = jwt.sign({ id, role }, process.env.REFRESH_TOKEN_SECRET, {
