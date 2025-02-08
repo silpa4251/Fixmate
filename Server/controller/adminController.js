@@ -6,15 +6,11 @@ const adminLogin = asyncErrorHandler(async(req,res) => {
   const {error} = loginValidation(req.body);
   if (error) throw new CustomError(error.details[0].message, 400);
 
-  const data = await adminLoginService(req.body);
-  res.cookie('refreshToken', data.refreshToken, {
-    httpOnly: true,      
-    secure: true,          
-    sameSite: 'Strict',   
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+  const data = await adminLoginService(res,req.body);
+  console.log("resdf",data)
   res.status(200).json({ status: "success", data})
-})
+});
+
 const getStats = asyncErrorHandler(async(req,res) => {
   const { totalUsers, totalProviders, totalBookings, totalRevenue } = await getStatsService();
   

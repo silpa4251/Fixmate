@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 
 // Generating JWY token 
-const generateToken = (userId, role) => {
-  return jwt.sign({ userId, role }, process.env.ACCESS_TOKEN_SECRET, {
+const generateToken = ( id, role) => {
+  return jwt.sign({ id, role }, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
@@ -12,8 +12,8 @@ const verifyToken = (token) => {
   return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 };
 
-const generateRefreshToken = (userId, role) => {
-  const refreshToken = jwt.sign({ userId, role }, process.env.REFRESH_TOKEN_SECRET, {
+const generateRefreshToken = ( id, role) => {
+  const refreshToken = jwt.sign({ id, role }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: process.env.REFRESH_EXPIRES_IN, 
   });
   return refreshToken;
@@ -32,4 +32,12 @@ const sentRefreshToken = (res, token) => {
     });
 }
 
-module.exports = { generateToken, verifyToken, generateRefreshToken, verifyRefreshToken, sentRefreshToken };
+const clearToken = (req, res) => {
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+  });
+}
+
+module.exports = { generateToken, verifyToken, generateRefreshToken, verifyRefreshToken, sentRefreshToken, clearToken };

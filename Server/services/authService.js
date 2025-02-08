@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const Provider = require("../models/providerModel");
 const bcrypt = require("bcryptjs");
-const { generateToken, generateRefreshToken, verifyRefreshToken, sentRefreshToken } = require("../utils/jwt");
+const { generateToken, generateRefreshToken, verifyRefreshToken, sentRefreshToken, clearToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
 const cloudinary = require("../config/cloudinary");
 const { OAuth2Client } = require("google-auth-library");
@@ -91,8 +91,8 @@ const userLoginService = async (res,data) => {
   if (!isMatch) {
     throw new CustomError("Invalid credentials", 400);
   }
-  const token = generateToken(user._id, role);
-  const refreshToken = generateRefreshToken(user._id, role);
+  const token = generateToken({id:user._id, role});
+  const refreshToken = generateRefreshToken({id:user._id, role});
   sentRefreshToken(res, refreshToken);
 
   return {
@@ -120,8 +120,8 @@ const providerLoginService = async (res,data) => {
   if (!isMatch) {
     throw new CustomError("Invalid credentials", 400);
   }
-  const token = generateToken(provider._id, "Provider");
-  const refreshToken = generateRefreshToken(provider._id, "Provider");
+  const token = generateToken({id:provider._id,role: "Provider"});
+  const refreshToken = generateRefreshToken({id:provider._id, role: "Provider"});
   sentRefreshToken(res, refreshToken);
 
   return {
@@ -170,8 +170,8 @@ const userGoogleAuthService = async(res, Credentials) => {
   }
 
 
-  const token = generateToken(user._id, role);
-  const refreshToken = generateRefreshToken(user._id, role);
+  const token = generateToken({id:user._id, role});
+  const refreshToken = generateRefreshToken({id:user._id, role});
   sentRefreshToken(res, refreshToken);
 
   return {
@@ -213,8 +213,8 @@ const providerGoogleAuthService = async (res, Credentials) => {
   }
 
   // Generate token using the provider's ID
-  const token = generateToken(provider._id, role);
-  const refreshToken = generateRefreshToken(provider._id, role);
+  const token = generateToken({id:provider._id, role});
+  const refreshToken = generateRefreshToken({id:provider._id, role});
   sentRefreshToken(res, refreshToken);
   return {
     token,
@@ -227,16 +227,32 @@ const providerGoogleAuthService = async (res, Credentials) => {
   };
 };
 
+const logoutService = async(req,res) => {
+  return clearToken(req, res)
+}
+
 const refreshTokenService = async(token) => {
   if (!token) {
     throw new CustomError('Refresh token missing', 401);
   }
   const decoded = verifyRefreshToken(token);
-  const user = await User.findById(decoded.userId);
+  if( !decoded.role || !decoded.id){
+    throw new CustomError('Invalid token format', 401);
+  }
+  let model;
+  if(decoded.role === "Admin"){
+    model = Admin;
+  }if(decoded.role === "Provider"){
+    model = Provider;
+  }
+  if(decoded.role === "User"){
+    model = User;
+  }
+  const user = await model?.findById(decoded.id);
     if (!user) {
       throw new CustomError("Invalid refresh token", 403);
     }
-    const newToken = generateToken(decoded.userId,decoded.role);
+    const newToken = generateToken({id:user.id,role: user.role});
   return  newToken ;
 
 }
@@ -333,4 +349,4 @@ const contactService = async(data) => {
   return { message: "Your message has been sent successfully!" };
 }
 
-module.exports = { userRegisteration, providerRegisteration, userLoginService, providerLoginService, userGoogleAuthService,providerGoogleAuthService,refreshTokenService, forgotPasswordService, resetPasswordService, contactService };
+module.exports = { userRegisteration, providerRegisteration, userLoginService, providerLoginService, userGoogleAuthService, providerGoogleAuthService, logoutService, refreshTokenService, forgotPasswordService, resetPasswordService, contactService };

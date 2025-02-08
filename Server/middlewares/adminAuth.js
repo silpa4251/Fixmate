@@ -1,8 +1,8 @@
 const CustomError = require("../utils/customError");
 const { verifyToken } = require("../utils/jwt");
 
-// Authentication middleware for users
-const auth = (req, res, next) => {
+// Authentication middleware for admin
+const adminAuth = (req, res, next) => {
     try {
         const token = req.header("Authorization")?.replace("Bearer ", "");
         if (!token) {
@@ -10,7 +10,7 @@ const auth = (req, res, next) => {
         }
 
         const decoded = verifyToken(token);
-        if (decoded.role === "User") {
+        if (decoded.role === "Admin") {
             req.user = decoded;
             next();
         } else {
@@ -21,4 +21,4 @@ const auth = (req, res, next) => {
     }
 };
 
-module.exports = auth;
+module.exports = adminAuth;

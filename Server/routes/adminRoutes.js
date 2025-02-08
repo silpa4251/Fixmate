@@ -1,11 +1,9 @@
 const express = require("express");
-const auth = require("../middlewares/auth");
-const authorize = require("../middlewares/authorize");
 const { getUserById, getStats } = require("../controller/adminController");
+const adminAuth = require("../middlewares/adminAuth");
 const adminRouter = express.Router();
 
-adminRouter.use(auth);
-adminRouter.use(authorize("Admin"));
+adminRouter.use(adminAuth);
 
 adminRouter.get("/stats", getStats);
 adminRouter.get("/users/:id", getUserById);

@@ -1,10 +1,12 @@
 const User = require('../models/userModel');
+const bcrypt = require("bcryptjs");
 const Provider = require('../models/providerModel'); 
 const Bookings = require('../models/bookingModel'); 
 const Admin = require('../models/adminModel');
 const CustomError = require('../utils/customError');
+const { sentRefreshToken, generateToken, generateRefreshToken } = require('../utils/jwt');
 
-const adminLoginService = async (data) => {
+const adminLoginService = async (res, data) => {
   const { email, password } = data;
   const admin = await Admin.findOne({ email });
   const role = "Admin";
@@ -19,11 +21,11 @@ const adminLoginService = async (data) => {
   }
   const token = generateToken(admin._id, role);
   const refreshToken = generateRefreshToken(admin._id, role);
-  
+  console.log("first",token,refreshToken)
+  sentRefreshToken(res, refreshToken);
 
   return {
     message: "admin logged in successfully",
-    data: {
     token,
     refreshToken,
     user: {
@@ -32,7 +34,6 @@ const adminLoginService = async (data) => {
       email: admin.email,
       role
     },
-  }
   };
 };
 

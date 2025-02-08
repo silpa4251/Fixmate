@@ -1,5 +1,5 @@
 const { registerValidation, loginValidation, ProviderValidation } = require("../validations/userValidations");
-const { userRegisteration, providerRegisteration, forgotPasswordService, resetPasswordService, contactService, userLoginService, providerLoginService, providerGoogleAuthService, refreshTokenService, userGoogleAuthService } = require("../services/authService");
+const { userRegisteration, providerRegisteration, forgotPasswordService, resetPasswordService, contactService, userLoginService, providerLoginService, providerGoogleAuthService, refreshTokenService, userGoogleAuthService, logoutService } = require("../services/authService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler")
 const CustomError = require("../utils/customError");
 
@@ -72,6 +72,11 @@ const providerGoogleAuth = asyncErrorHandler(async (req,res) => {
 });
 });
 
+const logout = asyncErrorHandler(async(req,res) => {
+  const data = await logoutService(req,res);
+  res.status(200).json({status: "success", message:"Logout successfully",data})
+})
+
 const refreshToken = asyncErrorHandler(async(req,res) =>{
   const token = req.cookies.refreshToken;
   const newToken = await refreshTokenService(token);
@@ -97,4 +102,4 @@ const contact = asyncErrorHandler(async(req,res) => {
 })
   
 
-module.exports = { registerUser, registerProvider, userLogin, providerLogin, userGoogleAuth,providerGoogleAuth,refreshToken, forgotPassword, resetPassword, contact };
+module.exports = { registerUser, registerProvider, userLogin, providerLogin, userGoogleAuth, providerGoogleAuth, logout, refreshToken, forgotPassword, resetPassword, contact };
