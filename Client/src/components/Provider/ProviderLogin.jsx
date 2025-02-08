@@ -36,7 +36,8 @@ const ProviderLogin = () => {
     try {
       const res = await providerLoginApi(values);
       if (res.status === 200) {
-        toast.success("Login successful!", { position: "top-center" });
+        toast.success("Login successful!", { position: "top-right" });
+        console.log("provider",res.data.data);
         dispatch(login(res.data.data));
         navigate("/provider/dashboard");
       }

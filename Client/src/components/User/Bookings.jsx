@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../../api/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import Modal from '../Modal';
 
 const Bookings = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [modalType, setModalType] = useState("");
   const navigate = useNavigate();
 
   // Fetch user bookings
@@ -28,8 +32,10 @@ const Bookings = () => {
         alert("This booking cannot be rescheduled.");
         return;
     }
-    navigate(`/reschedule/${bookingId}`);
-};
+    setSelectedBooking(bookingId);
+    setModalType("reschedule");
+    setModalOpen(true);
+  };
 
   // Handle Cancel
   const handleCancel = async (bookingId, status) => {
@@ -37,23 +43,34 @@ const Bookings = () => {
         alert("This booking cannot be canceled.");
         return;
     }
+    setSelectedBooking(bookingId);
+    setModalType("cancel");
+    setModalOpen(true);
+  }
 
-    if (window.confirm('Are you sure you want to cancel this booking?')) {
-        try {
-            await axiosInstance.patch(`/bookings/${bookingId}/status`, { status: 'cancelled' });
-            alert('Booking cancelled successfully!');
-            setBookings((prevBookings) =>
-                prevBookings.filter((booking) => booking._id !== bookingId)
-            );
-        } catch (error) {
-            console.error('Error cancelling booking:', error);
-            alert('Failed to cancel booking. Please try again.');
-        }
+  const confirmReschedule = () => {
+    console.log("hyt",selectedBooking);
+    navigate(`/reschedule/${selectedBooking}`);
+    setModalOpen(false);
+  };
+  const confirmCancel = async () => {
+    try {
+      await axiosInstance.patch(`/bookings/${selectedBooking}/status`, {
+        status: "cancelled",
+      });
+      alert("Booking cancelled successfully!");
+      setBookings((prevBookings) =>
+        prevBookings.filter((booking) => booking._id !== selectedBooking._id)
+      );
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      alert("Failed to cancel booking. Please try again.");
     }
-};
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-20">
+    <div className="min-h-screen bg-gradient-to-b from-gray-200 to-green-200 py-20">
     <div className="container mx-auto px-4 max-w-7xl">
       {/* Header */}
       <div className="text-center mb-12">
@@ -82,7 +99,7 @@ const Bookings = () => {
         </svg>
       </div>
       <h2 className="text-xl font-semibold text-gray-700 mb-2">No Bookings Found</h2>
-      <p className="text-gray-500">You haven't made any bookings yet</p>
+      <p className="text-gray-500">You haven&apos;t made any bookings yet</p>
     </div>
       )}
 
@@ -173,6 +190,20 @@ const Bookings = () => {
             ))}
           </div>
         )}
+
+<Modal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onConfirm={modalType === "cancel" ? confirmCancel : confirmReschedule}
+          title={modalType === "cancel" ? "Cancel Booking" : "Reschedule Booking"}
+          message={
+            modalType === "cancel"
+              ? "Are you sure you want to cancel this booking? You may not get a refund"
+              : "Do you want to reschedule this booking?"
+          }
+          confirmText={modalType === "cancel" ? "Yes, Cancel" : "Yes, Reschedule"}
+          cancelText="No, Go Back"
+        />
       </div>
     </div>
   );

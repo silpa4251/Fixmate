@@ -24,6 +24,7 @@ import AllUsers from "./components/Admin/AllUsers";
 import AllProviders from "./components/Admin/AllProviders";
 import Bookings from "./components/User/Bookings";
 import RescheduleBooking from "./components/User/RescheduleBooking";
+import AdminLogin from "./components/Admin/AdminLogin";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -48,7 +49,8 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/loading" element={<Loading />} />
-
+          <Route path="/admin/login" element={<AdminLogin />} />
+          
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<Home />} />
             <Route path="/book/:id" element={<BookService />} />
@@ -56,13 +58,13 @@ function App() {
             <Route path="/reschedule/:bookingId" element={<RescheduleBooking />} />
           </Route>
           
-          <Route element={<AdminRoutes />}>
+          {/* <Route element={<AdminRoutes />}> */}
             <Route path = '/admin' element={<Sidebar />} >
-            <Route index element={<Dashboard />} />
+            {/* <Route index element={<Dashboard />} /> */}
             <Route path='dashboard' element={<Dashboard />} />
             <Route path='users' element={<AllUsers />} />
             <Route path='providers' element={<AllProviders />} />
-          </Route>
+          {/* </Route> */}
           </Route>
       </Routes>
     <Footer />

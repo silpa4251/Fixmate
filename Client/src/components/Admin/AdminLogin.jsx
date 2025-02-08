@@ -7,12 +7,13 @@ import { TbEyeClosed } from "react-icons/tb";
 import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/slices/authSlice";
-import { GoogleLogin } from "@react-oauth/google";
-import axios from "axios";
-import { userLoginApi } from "../../api/AuthApi";
+// import { GoogleLogin } from "@react-oauth/google";
+// import axios from "axios";
+// import { userLoginApi } from "../../api/AuthApi";
 import { userLoginValidationSchema } from "../../utils/validationSchemas";
+import { adminLoginApi } from "../../api/AdminApi";
 
-const UserLogin = () => {
+const AdminLogin = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -30,14 +31,17 @@ const UserLogin = () => {
 
   const onSubmit = async (values) => {
     try {
-      const res = await userLoginApi(values);
+        console.log("val", values);
+      const res = await adminLoginApi(values);
       if (res.status === 200) {
-        const userData = res.data.data; // Assuming the response contains user role data
+        const adminData = res.data.data;
+        console.log("Admin Data before storage:", adminData); 
+        localStorage.setItem('isAuth', 'true'); // Assuming the response contains user role data
         toast.success("Login successful!", { position: "top-right" });
-        console.log("user",userData);
+        console.log("heyy", adminData);
         // Dispatch the user data to store it in Redux
-        dispatch(login(userData));
-        navigate("/home");
+        dispatch(login(adminData));
+        navigate("/admin/dashboard");
       }
     } catch (error) {
         if (error.response) {
@@ -103,7 +107,7 @@ const UserLogin = () => {
           </button>
         </form>
 
-        <div className="text-center mt-5 mb-5 text-gray-500">Or Sign In With</div>
+        {/* <div className="text-center mt-5 mb-5 text-gray-500">Or Sign In With</div>
 
         <GoogleLogin
           onSuccess={async (credentialResponse) => {
@@ -121,17 +125,17 @@ const UserLogin = () => {
           onError={() => {
             console.log("Login Failed");
           }}
-        />
+        /> */}
 
-        <div className="text-center mt-4 text-gray-500">
+        {/* <div className="text-center mt-4 text-gray-500">
           New Member?{" "}
           <Link to="/user/register" className="text-blue-link hover:underline">
             Sign Up here
           </Link>
-        </div>
+        </div> */}
       </div>
     </div>
   );
 };
 
-export default UserLogin;
+export default AdminLogin;

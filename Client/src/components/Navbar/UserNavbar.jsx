@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/slices/authSlice";
 import { FiMenu, FiX } from "react-icons/fi";
+import { logoutApi } from "../../api/AuthApi";
 
 const UserNavbar = () => {
   const dispatch = useDispatch();
@@ -10,7 +11,8 @@ const UserNavbar = () => {
   const { user } = useSelector((state) => state.auth);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logoutApi();
     dispatch(logout());
     navigate("/user/login");
   };

@@ -25,6 +25,11 @@ export const googleAuthApi = ( data ) => {
     return res;
 }
 
+export const logoutApi = () => {
+    const res = axiosInstance.post("/auth/log-out");
+    return res;
+}
+
 export const forgotPasswordApi = ( data ) => {
     const res = axiosInstance.post("/auth/forgot-password", data);
     return res;
