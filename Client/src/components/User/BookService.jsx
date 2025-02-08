@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { useDispatch } from 'react-redux';
@@ -17,7 +17,8 @@ const BookService = () => {
   const [status, setStatus] = useState('loading');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [showBookingSection, setShowBookingSection] = useState(false); // Toggle for booking section
+  const [showBookingSection, setShowBookingSection] = useState(false);
+  const navigate = useNavigate();
 
   // Fetch provider details
   useEffect(() => {
@@ -41,7 +42,6 @@ const BookService = () => {
         const year = selectedDate.getFullYear();
         const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
         const day = String(selectedDate.getDate()).padStart(2, '0');
-        // Construct the date string in YYYY-MM-DD format
         const localDate = `${year}-${month}-${day}`;
         const response = await axiosInstance.get(
           `/bookings/available-slots?providerId=${id}&date=${localDate}`
@@ -61,21 +61,29 @@ const BookService = () => {
       return alert('Please select a time slot to proceed.');
     }
     try {
-      await dispatch(
+      // Dispatch createBooking action and get the result
+      const result = await dispatch(
         createBooking({
           providerId: id,
           date: selectedDate.toISOString().split('T')[0],
           slot: selectedSlot,
         })
       ).unwrap();
-      alert('Booking successful!');
-      setSelectedSlot(null); // Reset the selected slot after booking
+
+      // Check if the booking was created successfully and we have the booking ID
+      if (result && result.booking && result.booking._id) {
+        // Navigate to checkout page with the actual booking ID
+        navigate(`/checkout/${result.booking._id}`);
+      } else {
+        throw new Error('Booking ID not received from server');
+      }
     } catch (error) {
+      console.error('Booking error:', error);
       alert(error.message || 'Booking failed. Please try again.');
     }
   };
 
-  // Loading state
+  // Rest of the component remains the same...
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -84,7 +92,6 @@ const BookService = () => {
     );
   }
 
-  // Error or no provider found
   if (status === 'error' || !provider) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -101,43 +108,43 @@ const BookService = () => {
       <div className="container mx-auto p-4 mt-20">
         {/* Provider Details Section */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6 flex flex-col md:flex-row gap-6">
-        <div className="w-full md:w-1/3">
-    <img
-      src={provider.image || "https://via.placeholder.com/500"}
-      alt={provider.name}
-      className="w-full h-60 object-cover rounded-lg"
-    />
-  </div> 
-  <div className="w-full md:w-2/3">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
-            {provider.name}
-          </h1>
-          <p className="text-gray-600 mb-2">
-            <span className="font-medium">Service:</span> {provider.services}
-          </p>
-          <p className="text-gray-600 mb-2">
-      <span className="font-medium">Description:</span>{" "}
-      {provider.description || "No description available."}
-    </p>
-          <p className="text-gray-600 mb-2">
-            <span className="font-medium">Address:</span>{' '}
-            {provider.address[0]?.place || 'N/A'}
-          </p>
-          <p className="text-gray-600 mb-2">
-            <span className="font-medium">Charge (hour):</span> {provider.charge}
-          </p>
-        </div>
+          <div className="w-full md:w-1/3">
+            <img
+              src={provider.image || "https://via.placeholder.com/500"}
+              alt={provider.name}
+              className="w-full h-60 object-cover rounded-lg"
+            />
+          </div> 
+          <div className="w-full md:w-2/3">
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+              {provider.name}
+            </h1>
+            <p className="text-gray-600 mb-2">
+              <span className="font-medium">Service:</span> {provider.services}
+            </p>
+            <p className="text-gray-600 mb-2">
+              <span className="font-medium">Description:</span>{" "}
+              {provider.description || "No description available."}
+            </p>
+            <p className="text-gray-600 mb-2">
+              <span className="font-medium">Address:</span>{' '}
+              {provider.address[0]?.place || 'N/A'}
+            </p>
+            <p className="text-gray-600 mb-2">
+              <span className="font-medium">Charge (hour):</span> {provider.charge}
+            </p>
+          </div>
         </div>
 
         {/* Book Now Button */}
         <button
-          onClick={() => setShowBookingSection(!showBookingSection)} // Toggle booking section
+          onClick={() => setShowBookingSection(!showBookingSection)}
           className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
         >
           {showBookingSection ? 'Hide Booking Options' : 'Show Booking Options'}
         </button>
 
-        {/* Booking Section (Conditionally Rendered) */}
+        {/* Booking Section */}
         {showBookingSection && (
           <div className="bg-white p-6 rounded-lg shadow-md mt-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">

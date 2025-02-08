@@ -20,7 +20,7 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const response = await axiosInstance.get("/admin/stats");
-      setStats(response.data);
+      setStats(response.data.data.data);
       setLoading(false);
     } catch (error) {
       setLoading(false);

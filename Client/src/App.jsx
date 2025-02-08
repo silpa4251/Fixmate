@@ -25,6 +25,8 @@ import AllProviders from "./components/Admin/AllProviders";
 import Bookings from "./components/User/Bookings";
 import RescheduleBooking from "./components/User/RescheduleBooking";
 import AdminLogin from "./components/Admin/AdminLogin";
+import PaymentForm from "./components/PaymentForm";
+import CheckoutPage from "./components/User/CheckoutPage";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -50,10 +52,12 @@ function App() {
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/loading" element={<Loading />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/payment" element={<PaymentForm />} />
           
           <Route element={<ProtectedRoute />}>
             <Route path="/home" element={<Home />} />
             <Route path="/book/:id" element={<BookService />} />
+            <Route path="/checkout/:bookingId" element={<CheckoutPage />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/reschedule/:bookingId" element={<RescheduleBooking />} />
           </Route>
