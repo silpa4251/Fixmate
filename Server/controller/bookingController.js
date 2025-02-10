@@ -135,8 +135,6 @@ const bookingById = asyncErrorHandler(async(req, res) => {
 });
 
 const rescheduleBookings = asyncErrorHandler(async (req, res) => {
-    console.log("objectparams",req.params);
-    console.log("boduy", req.body);
     const { bookingId } = req.params;
     const { newDate, newSlot } = req.body;
 

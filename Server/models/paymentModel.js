@@ -1,43 +1,39 @@
-const { required } = require('joi');
 const mongoose = require('mongoose');
 
 const paymentSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   bookingId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Booking',
     required: true
   },
   razorpayOrderId: {
-    type: String,
-    required: true
+    type: String
   },
   razorpayPaymentId: {
-    type: String,
-    required: true
+    type: String
+  },
+  razorpaySignature: {
+    type: String
   },
   amount: {
     type: Number,
     required: true
+  },
+  currency: {
+    type: String,
+    required: true,
+    default: 'INR'
   },
   status: {
     type: String,
     enum: ['pending', 'successful', 'failed'],
     default: 'pending'
   },
-  paymentMethod: {
-    type: String,
-    enum: ['card','upi','netbanking','wallet'],
-    required: true
-  },
-  paymentDate: {
-    type: Date,
-    default: Date.now
+  paidAt: {
+    type: Date
   }
+},{
+  timestamps: true
 });
 
 module.exports = mongoose.model('Payment', paymentSchema);

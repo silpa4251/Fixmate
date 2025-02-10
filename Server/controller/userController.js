@@ -1,4 +1,5 @@
 const User = require("../models/userModel");
+const Booking = require("../models/bookingModel");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const razorpay = require("../utils/razorpay");
 const crypto = require("crypto");
@@ -144,7 +145,7 @@ const updateUser = asyncErrorHandler(async (req, res) => {
 });
 
 const makePayment = asyncErrorHandler(async(req, res) => {
-  const { amount, currency } = req.body;
+  const { amount, currency, bookingId } = req.body;
   const options = {
     amount: amount,
     currency: currency || "INR",
@@ -152,8 +153,20 @@ const makePayment = asyncErrorHandler(async(req, res) => {
   };
 
    const order = await razorpay.orders.create(options);
-   res.status(200).json(order);
+   const payment = await Payment.create({
+    bookingId: bookingId,
+    razorpayOrderId: order.id,
+    amount, // Convert from paise to rupees
+    currency: currency || "INR",
+    status: 'pending'
+  });
+  
+  res.status(200).json({
+    ...order,
+    paymentId: payment._id
+  });
 });
+
 
 const paymentverify = asyncErrorHandler(async(req, res) => {
   const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
@@ -167,13 +180,28 @@ const paymentverify = asyncErrorHandler(async(req, res) => {
       { razorpayOrderId: razorpay_order_id },
       {
         razorpayPaymentId: razorpay_payment_id,
-        status: 'successful'
+        razorpaySignature: razorpay_signature,
+        status: 'successful',
+        paidAt: new Date()
       },
       { new: true }
     );
+    if (!payment) {
+      throw new CustomError("Payment record not found", 404);
+    }
+
+    await Booking.findByIdAndUpdate(
+      payment.bookingId,
+      { 
+        paymentStatus: 'paid',
+        paymentId: payment._id
+      },
+      { new: true }
+    );
+
     res.status(200).json({ status: "success", message: "Payment verified successfully", payment });
   } else {
-    res.status(400).json({ status: "error", message: "Payment verification failed" });
+    throw new CustomError("Payment verification failed", 400);
   }
 })
 
