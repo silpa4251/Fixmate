@@ -53,6 +53,47 @@ const availableSlots = asyncErrorHandler(async (req, res) => {
     res.status(200).json({ status: "success", message: "Available slots fetched", availableSlots });
 });
 
+const getAllBookings = asyncErrorHandler(async (req, res) => {
+    const bookings = await Booking.aggregate([
+        {
+            $lookup: {
+                from: "users", 
+                localField: "userId",
+                foreignField: "_id",
+                as: "user"
+            }
+        },
+        {
+            $lookup: {
+                from: "providers",
+                localField: "providerId",
+                foreignField: "_id",
+                as: "provider"
+            }
+        },
+        {
+            $unwind: "$user"
+        },
+        {
+            $unwind: "$provider" 
+        },
+        {
+            $project: {
+                date: 1,
+                slot: 1,
+                status: 1,
+                user: {
+                    name: 1,
+                },
+                provider: {
+                    name: 1,
+                    services: 1,
+                },
+            }
+        }
+  ]);
+    res.status(200).json({message:"All bookings retrieved successfully", bookings});
+});
 
 // Get user bookings
 const getUserBookings = asyncErrorHandler(async (req, res) => {
@@ -62,13 +103,12 @@ const getUserBookings = asyncErrorHandler(async (req, res) => {
     const bookings = await Booking.find({ userId: req.user.id })
         .populate('providerId', 'name address services charge')
         .sort({ date: 1 , slot: 1});
-
     res.status(200).json({ status: "success", message: "Bookings fetched successfully", bookings });
 });
 
 // Get provider bookings
 const getProviderBookings = asyncErrorHandler(async (req, res) => {
-    const { providerId } = req.params;
+    const providerId = req.params.id;
 
     const bookings = await Booking.find({ providerId })
         .populate('userId', 'name email')
@@ -189,4 +229,4 @@ const updateBookingStatus = asyncErrorHandler(async (req, res) => {
     });
 });
 
-module.exports = { newBooking, availableSlots, getUserBookings, getProviderBookings, bookingById, rescheduleBookings, updateBookingStatus };
+module.exports = { newBooking, availableSlots, getAllBookings, getUserBookings, getProviderBookings, bookingById, rescheduleBookings, updateBookingStatus };

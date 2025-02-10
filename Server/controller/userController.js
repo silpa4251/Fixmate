@@ -2,7 +2,9 @@ const User = require("../models/userModel");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const razorpay = require("../utils/razorpay");
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 const Payment = require("../models/paymentModel");
+const CustomError = require("../utils/customError");
 
 
 
@@ -21,18 +23,18 @@ const getAllUsers = asyncErrorHandler(async (req, res) => {
     res.status(200).json({message:"All users retrieved successfully", users});
 });
 
-const getUserById = asyncErrorHandler(async (req,res) => {
-    const userId = req.params.id;
-    const user = await User.findById(userId);
-    if(!user) {
-        throw new CustomError("User not found",404);
-    }
-    res.status(200).json({message:"User retrieved successfully",user });
-});
+// const getUserById = asyncErrorHandler(async (req,res) => {
+//     const userId = req.params.id;
+//     const user = await User.findById(userId);
+//     if(!user) {
+//         throw new CustomError("User not found",404);
+//     }
+//     res.status(200).json({message:"User retrieved successfully",user });
+// });
 
 const blockUser = asyncErrorHandler(async (req, res) => {
-    const userId = req.params.id;
-  
+    const { userId } = req.params;
+   
     const user = await User.findById(userId);
     if (!user) {
       throw new CustomError("User not found", 404);
@@ -42,18 +44,15 @@ const blockUser = asyncErrorHandler(async (req, res) => {
       throw new CustomError("User is already blocked", 400);
     }
   
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { isBlocked: true }, // Set isBlocked to true
-      { new: true } // Return the updated user object
-    );
+    user.isBlocked = true;
+    await user.save();
   
-    res.status(200).json({message: "User blocked successfully", updatedUser });
+    res.status(200).json({ status: "success", message: "User blocked successfully", user});
 });
 
 // Unblock a user
 const unblockUser = asyncErrorHandler(async (req, res) => {
-    const userId = req.params.id;
+    const { userId } = req.params;
   
     const user = await User.findById(userId);
     if (!user) {
@@ -64,13 +63,84 @@ const unblockUser = asyncErrorHandler(async (req, res) => {
       throw new CustomError("User is not blocked", 400);
     }
   
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { isBlocked: false }, // Set isBlocked to false
-      { new: true } // Return the updated user object
-    );
+    user.isBlocked = false;
+    await user.save();
   
-    res.status(200).json({message:"User unblocked successfully", updatedUser });
+    res.status(200).json({status: "success",message:"User unblocked successfully",user});
+});
+
+const createUser = asyncErrorHandler(async (req, res) => {
+  if (!req.body.email || !req.body.password || !req.body.name) {
+    throw new CustomError('Please provide email, password and name', 400);
+  }
+
+  // Check if user with email already exists
+  const existingUser = await User.findOne({ email: req.body.email });
+  if (existingUser) {
+    throw new CustomError('User with this email already exists', 400);
+  }
+
+  // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+  const newUser = await User.create({
+    name: req.body.name,
+    email: req.body.email,
+    password: hashedPassword,
+  });
+
+  // Remove password from response
+  newUser.password = undefined;
+
+  res.status(201).json({
+    status: 'success',
+    data: newUser
+  });
+});
+
+// Update user
+const updateUser = asyncErrorHandler(async (req, res) => {
+  const updateData = {
+    name: req.body.name,
+    email: req.body.email,
+  };
+
+  // If password is provided, hash it
+  if (req.body.password) {
+    const salt = await bcrypt.genSalt(10);
+    updateData.password  = await bcrypt.hash(req.body.password, salt);
+  }
+
+  // Check if email is being changed and if it's already taken
+  if (req.body.email) {
+    const existingUser = await User.findOne({ 
+      email: req.body.email,
+      _id: { $ne: req.params.id }
+    });
+    
+    if (existingUser) {
+      throw new CustomError('Email already in use', 400);
+    }
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    updateData,
+    {
+      new: true,
+      runValidators: true
+    }
+  ).select('-password');
+
+  if (!user) {
+    throw new CustomError('No user found with that ID', 404);
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: user
+  });
 });
 
 const makePayment = asyncErrorHandler(async(req, res) => {
@@ -108,4 +178,4 @@ const paymentverify = asyncErrorHandler(async(req, res) => {
 })
 
 
-module.exports = {getAllUsers, getUserById, blockUser, unblockUser, makePayment, paymentverify };
+module.exports = {  getAllUsers, blockUser, unblockUser, createUser, updateUser, makePayment, paymentverify };

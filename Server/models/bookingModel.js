@@ -12,11 +12,6 @@ const bookingSchema = mongoose.Schema(
             ref: "Provider",
             required: true,
         },
-        // serviceId: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: "Service",
-        //     required: true,
-        // },
         date: {
             type: Date,
         },

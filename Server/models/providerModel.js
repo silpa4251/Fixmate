@@ -22,13 +22,13 @@ const providerSchema = mongoose.Schema(
         },
         image: {
             type: String,
-            // type: [
-            //     {
-            //         originalImageUrl: { type: String },
-            //         imageThumbnailUrl: { type: String },
-            //     },
-            // ],
-            // default: [],
+            type: [
+                {
+                    originalImageUrl: { type: String },
+                    imageThumbnailUrl: { type: String },
+                },
+            ],
+            default: [],
         },
         phone: {
             type: String,
@@ -73,6 +73,10 @@ const providerSchema = mongoose.Schema(
             ref: "Review",
             },
         ],
+        isBlocked: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,
