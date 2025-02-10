@@ -90,7 +90,7 @@ const Sidebar = () => {
             </li>
             <li className="mb-4">
               <NavLink
-                to="/admin/orders"
+                to="/admin/bookings"
                 className={({ isActive }) =>
                   `flex justify-center items-center p-3 rounded hover:bg-green-hover ${
                     isActive ? "bg-green-hover" : ""

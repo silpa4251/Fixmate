@@ -120,51 +120,59 @@ const CheckoutPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 mt-20 bg-gray-100 min-h-screen">
-      {/* Booking Details Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Booking Details</h1>
-        <p className="text-gray-600 mb-2">
-          <span className="font-medium">Provider:</span> {bookingDetails.providerId.name}
+    <div className="min-h-screen bg-green-100 flex items-center justify-center">
+      <div className="w-full max-w-lg p-6 bg-white rounded-2xl shadow-md">
+        <h1 className="text-xl font-bold text-center mb-6">Booking Details</h1>
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg flex items-center gap-4">
+        <img
+            src={bookingDetails.providerId.image}
+            alt={bookingDetails.providerId.name}
+            className="w-16 h-16 rounded-full"
+          />
+          <div>
+          <p className="text-gray-600 mb-2">
+          <span className="font-medium">Name:</span> {bookingDetails.providerId.name}
         </p>
         <p className="text-gray-600 mb-2">
-          <span className="font-medium">Service:</span> {bookingDetails.service}
+          <span className="font-medium">Service:</span> {bookingDetails.providerId.services}
         </p>
         <p className="text-gray-600 mb-2">
           <span className="font-medium">Date:</span> {bookingDetails.date}
         </p>
         <p className="text-gray-600 mb-2">
-          <span className="font-medium">Time:</span> {bookingDetails.time}
+          <span className="font-medium">Time:</span> {bookingDetails.slot}
         </p>
         <p className="text-gray-600 mb-2">
           <span className="font-medium">Address:</span> {bookingDetails.providerId.address?.[0]?.place || "N/A"}
         </p>
       </div>
+      </div>
 
       {/* Bill Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Bill Details</h2>
-        <div className="flex justify-between text-gray-600 mb-2">
-          <span>Base Charge</span>
+      <div className="p-4 bg-gray-50 rounded-lg mb-6">
+          <h2 className="font-semibold mb-4">Payment Details</h2>
+          <div className="flex justify-between mb-2">
+          <span>Booking Fee</span>
           <span>₹{bookingDetails.providerId.charge}</span>
         </div>
         <div className="flex justify-between text-gray-600 mb-2">
-          <span>Tax (10%)</span>
-          <span>₹{(bookingDetails.providerId.charge * 0.1).toFixed(2)}</span>
+          <span> Service Tax</span>
+          <span>₹0</span>
         </div>
-        <div className="flex justify-between text-gray-800 font-bold">
+        <div className="flex justify-between font-bold border-t border-gray-300 pt-2">
           <span>Total Amount</span>
-          <span>₹{totalAmount.toFixed(2)}</span>
+          <span>₹{bookingDetails.providerId.charge}</span>
         </div>
       </div>
 
       {/* Pay Now Button */}
       <button
         onClick={handlePayment}
-        className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
+        className="w-full bg-green-500 text-white-default py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
       >
         Pay Now (₹{totalAmount.toFixed(2)})
       </button>
+    </div>
     </div>
   );
 };

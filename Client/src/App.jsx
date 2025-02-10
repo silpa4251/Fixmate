@@ -27,6 +27,9 @@ import RescheduleBooking from "./components/User/RescheduleBooking";
 import AdminLogin from "./components/Admin/AdminLogin";
 import PaymentForm from "./components/PaymentForm";
 import CheckoutPage from "./components/User/CheckoutPage";
+import AllBookings from "./components/Admin/AllBookings";
+import ViewUser from "./components/Admin/ViewUser";
+import ViewProvider from "./components/Admin/ViewProvider";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -67,7 +70,10 @@ function App() {
             {/* <Route index element={<Dashboard />} /> */}
             <Route path='dashboard' element={<Dashboard />} />
             <Route path='users' element={<AllUsers />} />
+            <Route path="users/:id" element={<ViewUser />} />
             <Route path='providers' element={<AllProviders />} />
+            <Route path='providers/:id' element={<ViewProvider />} />
+            <Route path="bookings" element={<AllBookings />} />
           {/* </Route> */}
           </Route>
       </Routes>
