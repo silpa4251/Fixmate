@@ -97,7 +97,7 @@ const AllBookings = () => {
 
   return (
     <div className="p-4 min-h-screen">
-    <h2 className="text-xl font-bold mb-4 text-gray-700">Service Providers</h2>
+    <h2 className="text-xl font-bold mb-4 text-gray-700">Booking History</h2>
 
     {/* Search, Filter, and Action Buttons Section */}
     <div className="mb-6 flex flex-col md:flex-row gap-4">
@@ -133,7 +133,7 @@ const AllBookings = () => {
           className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white-default rounded-lg hover:bg-green-600"
         >
           <Plus size={20} />
-          Add Provider
+          Add Booking
         </button>
       </div>
 
