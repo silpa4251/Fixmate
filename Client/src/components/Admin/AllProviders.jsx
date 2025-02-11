@@ -34,6 +34,7 @@ const AllProviders = () => {
   const fetchProviders = async () => {
     try {
       const response = await axiosInstance.get("/providers");
+      console.log("ji",response.data.providers)
       if (response.data && Array.isArray(response.data.providers)) {
         setProviders(response.data.providers);
         setFilteredProviders(response.data.providers);

@@ -31,13 +31,11 @@ const AdminLogin = () => {
 
   const onSubmit = async (values) => {
     try {
-        console.log("val", values);
       const res = await adminLoginApi(values);
       if (res.status === 200) {
         const adminData = res.data.data;
-        console.log("Admin Data before storage:", adminData); 
         localStorage.setItem('isAuth', 'true'); // Assuming the response contains user role data
-        toast.success("Login successful!", { position: "top-right" });
+        toast.success("Login successful!", { position: "bottom-right" });
         console.log("heyy", adminData);
         // Dispatch the user data to store it in Redux
         dispatch(login(adminData));

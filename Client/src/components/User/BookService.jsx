@@ -5,11 +5,12 @@ import 'react-calendar/dist/Calendar.css';
 import { useDispatch } from 'react-redux';
 import { createBooking } from '../../redux/slices/bookingSlice';
 import axiosInstance from '../../api/axiosInstance';
-import UserNavbar from '../Navbar/UserNavbar';
+import { toast } from 'react-toastify';
 
 const BookService = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // State variables
   const [provider, setProvider] = useState(null);
@@ -18,7 +19,19 @@ const BookService = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showBookingSection, setShowBookingSection] = useState(false);
-  const navigate = useNavigate();
+
+  // Normalize date to local time
+  const normalizeToLocalDate = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
+
+  // Format date for backend
+  const formatDateForBackend = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   // Fetch provider details
   useEffect(() => {
@@ -39,10 +52,7 @@ const BookService = () => {
   useEffect(() => {
     const fetchTimeSlots = async () => {
       try {
-        const year = selectedDate.getFullYear();
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        const localDate = `${year}-${month}-${day}`;
+        const localDate = formatDateForBackend(selectedDate);
         const response = await axiosInstance.get(
           `/bookings/available-slots?providerId=${id}&date=${localDate}`
         );
@@ -58,28 +68,24 @@ const BookService = () => {
   // Handle booking logic
   const handleBookNow = async () => {
     if (!selectedSlot) {
-      return alert('Please select a time slot to proceed.');
+      toast.warning('Please select a time slot to proceed.');
     }
     try {
-      // Dispatch createBooking action and get the result
       const result = await dispatch(
         createBooking({
           providerId: id,
-          date: selectedDate.toISOString().split('T')[0],
+          date: formatDateForBackend(selectedDate),
           slot: selectedSlot,
         })
       ).unwrap();
-
-      // Check if the booking was created successfully and we have the booking ID
       if (result && result.booking && result.booking._id) {
-        // Navigate to checkout page with the actual booking ID
         navigate(`/checkout/${result.booking._id}`);
       } else {
-        throw new Error('Booking ID not received from server');
+        toast.error('Booking ID not received from server');
       }
     } catch (error) {
       console.error('Booking error:', error);
-      alert(error.message || 'Booking failed. Please try again.');
+      toast.error(error.message || 'Booking failed. Please try again.');
     }
   };
 
@@ -91,7 +97,6 @@ const BookService = () => {
       </div>
     );
   }
-
   if (status === 'error' || !provider) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -104,7 +109,6 @@ const BookService = () => {
 
   return (
     <>
-      <UserNavbar />
       <div className="container mx-auto p-4 mt-20">
         {/* Provider Details Section */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6 flex flex-col md:flex-row gap-6">
@@ -114,7 +118,7 @@ const BookService = () => {
               alt={provider.name}
               className="w-full h-60 object-cover rounded-lg"
             />
-          </div> 
+          </div>
           <div className="w-full md:w-2/3">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               {provider.name}
@@ -146,7 +150,7 @@ const BookService = () => {
 
         {/* Booking Section */}
         {showBookingSection && (
-          <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+          <div className="bg-white-default p-6 rounded-lg shadow-md mt-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Book a Slot
             </h2>
@@ -154,13 +158,12 @@ const BookService = () => {
               {/* Calendar */}
               <div>
                 <Calendar
-                  onChange={setSelectedDate}
+                  onChange={(date) => setSelectedDate(normalizeToLocalDate(date))}
                   value={selectedDate}
                   minDate={new Date()}
                   className="border rounded-lg shadow-sm"
                 />
               </div>
-
               {/* Available Time Slots */}
               <div>
                 <h3 className="text-lg font-medium text-gray-700 mb-4">
@@ -187,7 +190,6 @@ const BookService = () => {
                 </div>
               </div>
             </div>
-
             {/* Book Now Button */}
             <button
               disabled={!selectedSlot}

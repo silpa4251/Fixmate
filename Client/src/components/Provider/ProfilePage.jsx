@@ -8,10 +8,11 @@ const ProfilePage = () => {
     name: '',
     email: '',
     phone: '',
-    addresses: [{ place: '', district: '', state: '', pincode: '' }],
-    services: [{ name: '', charge: '' }],
+    address: [{ place: '', district: '', state: '', pincode: '' }],
+    services: [],
+    charge: '',
     image: '',
-    certificates: []
+    certifications: []
   });
   const [loading, setLoading] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
@@ -46,8 +47,11 @@ const ProfilePage = () => {
     formData.append('image', file);
 
     try {
-      const response = await axiosInstance.post('/providers/upload-image', formData);
-      setProfile(prev => ({ ...prev, image: response.data.imageUrl }));
+      const response = await axiosInstance.post('/providers/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      console.log("imhy", response.data);
+      setProfile(prev => ({ ...prev, image: response.data.image }));
       toast.success('Profile picture updated');
     } catch (error) {
       toast.error('Error uploading image');
@@ -64,13 +68,15 @@ const ProfilePage = () => {
       }
 
       const formData = new FormData();
-      formData.append('certificate', file);
+      files.forEach(file => formData.append('certificate', file));
 
       try {
-        const response = await axiosInstance.post('/providers/upload-certificate', formData);
+        const response = await axiosInstance.post('/providers/upload-certificate', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         setProfile(prev => ({
           ...prev,
-          certificates: [...prev.certificates, response.data.certificateUrl]
+          certifications: [...prev.certifications, response.data.certificateUrl]
         }));
       } catch (error) {
         toast.error('Error uploading certificate');
@@ -79,9 +85,9 @@ const ProfilePage = () => {
   };
 
   const handleAddressChange = (index, field, value) => {
-    const newAddresses = [...profile.addresses];
-    newAddresses[index] = { ...newAddresses[index], [field]: value };
-    setProfile(prev => ({ ...prev, addresses: newAddresses }));
+    const newaddress = [...profile.address];
+    newaddress[index] = { ...newaddress[index], [field]: value };
+    setProfile(prev => ({ ...prev, address: newaddress }));
   };
 
   const handleServiceChange = (index, field, value) => {
@@ -110,7 +116,7 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4 max-w-3xl">
+      <div className="container mx-auto px-4 max-w-4xl">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Profile Image */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm">
@@ -137,7 +143,7 @@ const ProfilePage = () => {
 
           {/* Basic Information */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm space-y-4">
-            <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black-default">Basic Information</h2>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -176,15 +182,15 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Addresses */}
+          {/* address */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-black-default">Addresses</h2>
+              <h2 className="text-xl font-semibold text-black-default">Address</h2>
               <button
                 type="button"
                 onClick={() => setProfile(prev => ({
                   ...prev,
-                  addresses: [...prev.addresses, { place: '', district: '', state: '', pincode: '' }]
+                  address: [...prev.address, { place: '', district: '', state: '', pincode: '' }]
                 }))}
                 className="flex items-center text-blue-500 hover:text-blue-600"
               >
@@ -193,7 +199,7 @@ const ProfilePage = () => {
               </button>
             </div>
 
-            {profile.addresses.map((address, index) => (
+            {profile.address.map((address, index) => (
               <div key={index} className="p-4 border rounded-lg mb-4 space-y-4">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium">Address {index + 1}</h3>
@@ -202,7 +208,7 @@ const ProfilePage = () => {
                       type="button"
                       onClick={() => setProfile(prev => ({
                         ...prev,
-                        addresses: prev.addresses.filter((_, i) => i !== index)
+                        address: prev.address.filter((_, i) => i !== index)
                       }))}
                       className="text-red-500 hover:text-red-600"
                     >
@@ -263,31 +269,28 @@ const ProfilePage = () => {
 
           {/* Services */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm">
-            <div className="flex justify-between items-center mb-4">
+            {/* <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-black-default">Services</h2>
               <button
                 type="button"
                 onClick={() => setProfile(prev => ({
                   ...prev,
-                  services: [...prev.services, { name: '', charge: '' }]
+                  services: [...prev.services ]
                 }))}
                 className="flex items-center text-blue-500 hover:text-blue-600"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add Service
               </button>
-            </div>
+            </div> */}
 
-            {profile.services.map((service, index) => (
-              <div key={index} className="p-4 border rounded-lg mb-4">
+            {/* {profile.services.map((service, index) => (
+              <div key={index} className="p-4 border rounded-lg mb-4"> */}
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-medium text-black-default">Service {index + 1}</h3>
+                  <h3 className="font-medium text-black-default">Service</h3>
                   <button
                     type="button"
-                    onClick={() => setProfile(prev => ({
-                      ...prev,
-                      services: prev.services.filter((_, i) => i !== index)
-                    }))}
+                   onClick={() => setProfile(prev => ({ ...prev, services: [...prev.services, ''] }))}
                     className="text-red-500 hover:text-red-600"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -301,7 +304,7 @@ const ProfilePage = () => {
                     </label>
                     <input
                       type="text"
-                      value={service.name}
+                      value={profile.services}
                       onChange={(e) => handleServiceChange(index, 'name', e.target.value)}
                       className="w-full p-2 border rounded-lg text-black-default"
                     />
@@ -312,23 +315,23 @@ const ProfilePage = () => {
                     </label>
                     <input
                       type="number"
-                      value={service.charge}
+                      value={profile.charge}
                       onChange={(e) => handleServiceChange(index, 'charge', e.target.value)}
                       className="w-full p-2 border rounded-lg text-black-default"
                     />
                   </div>
                 </div>
-              </div>
-            ))}
+              {/* </div>
+            ))} */}
           </div>
 
-          {/* Certificates */}
+          {/* certifications */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4 text-black-default">Certificates</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black-default">certifications</h2>
             
             <div className="space-y-4">
               <div className="flex flex-wrap gap-4">
-                {profile.certificates.map((cert, index) => (
+                {profile.certifications.map((cert, index) => (
                   <div key={index} className="relative">
                     <a
                       href={cert}
@@ -342,7 +345,7 @@ const ProfilePage = () => {
                       type="button"
                       onClick={() => setProfile(prev => ({
                         ...prev,
-                        certificates: prev.certificates.filter((_, i) => i !== index)
+                        certifications: prev.certifications.filter((_, i) => i !== index)
                       }))}
                       className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
                     >
@@ -356,7 +359,7 @@ const ProfilePage = () => {
                 <label className="flex items-center justify-center w-full h-32 px-4 transition bg-white-default border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400">
                   <div className="flex flex-col items-center space-y-2">
                     <Upload className="w-6 h-6 text-gray-600" />
-                    <span className="text-gray-600">Upload certificates (IMG)</span>
+                    <span className="text-gray-600">Upload certifications (IMG)</span>
                   </div>
                   <input
                     type="file"

@@ -9,10 +9,10 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate(); 
 
-  const isRegisterPage = location.pathname === "/user/register";
-  const isLoginPage = location.pathname === "/user/login";
-  const isRegisterProvider = location.pathname === "/provider/register";
-  const isLoginProvider = location.pathname === "/provider/login";
+  const isRegisterPage = location.pathname === "/register/user";
+  const isLoginPage = location.pathname === "/login/user";
+  const isRegisterProvider = location.pathname === "/register/provider";
+  const isLoginProvider = location.pathname === "/login/provider";
 
   const userText = isRegisterPage
   ? "Sign In" 

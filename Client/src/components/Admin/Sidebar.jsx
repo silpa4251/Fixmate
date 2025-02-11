@@ -17,7 +17,7 @@ const Sidebar = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/admin/login");
+      navigate("/login/admin");
     }
   }, [isAuthenticated, navigate]);
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Search, X, Calendar, Clock, User, Mail, Phone, Building2, Wrench, Plus, ChevronDown, Edit } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
 const AllBookings = () => {
   const [details, setDetails] = useState([]);
@@ -12,7 +12,7 @@ const AllBookings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     fetchBookings();
@@ -57,13 +57,13 @@ const AllBookings = () => {
     setFilteredBookings(filtered);
   };
 
-  const handleAddBooking = () => {
-    navigate("/admin/bookings/add");
-  };
+  // const handleAddBooking = () => {
+  //   navigate("/admin/bookings/add");
+  // };
 
-  const handleEditBooking = (bookingId) => {
-    navigate(`/admin/bookings/edit/${bookingId}`);
-  };
+  // const handleEditBooking = (bookingId) => {
+  //   navigate(`/admin/bookings/edit/${bookingId}`);
+  // };
 
   const handleViewBooking = (booking) => {
     setSelectedBooking(booking);
@@ -128,13 +128,13 @@ const AllBookings = () => {
           </select>
           <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400" />
 
-        <button
+        {/* <button
           onClick={handleAddBooking}
           className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white-default rounded-lg hover:bg-green-600"
         >
           <Plus size={20} />
           Add Booking
-        </button>
+        </button> */}
       </div>
 
       <div className="bg-white-default rounded-lg shadow">
@@ -170,13 +170,13 @@ const AllBookings = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 flex space-x-2">
-                  <button
+                  {/* <button
                         onClick={() => handleEditBooking(data._id)}
                         className="flex items-center gap-2 py-1 px-3 rounded text-white-default bg-blue-500 hover:bg-blue-600"
                       >
                         <Edit className="w-4 h-4" />
                         Edit
-                      </button>
+                      </button> */}
                     <button
                       onClick={() => handleViewBooking(data)}
                       className="bg-green-500 text-white-default py-1 px-4 rounded hover:bg-green-600"

@@ -28,7 +28,7 @@ const UserNavbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex md:ml-28 space-x-6 lg:space-x-8 text-green-default font-medium text-sm sm:text-lg">
-          <Link to="/" className="hover:underline">Home</Link>
+          <Link to="/home" className="hover:underline">Home</Link>
           <Link to="/bookings" className="hover:underline">Bookings</Link>
           <Link to="/user/profile" className="hover:underline">Profile</Link>
           {/* <Link to="/review" className="hover:underline">Reviews</Link> */}

@@ -15,7 +15,7 @@ const SideBar = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      navigate("/provider/login");
+      navigate("/login/provider");
     }
   }, [isAuthenticated, navigate]);
 
@@ -23,7 +23,7 @@ const SideBar = () => {
     try {
       await logoutApi();
       dispatch(logout());
-      navigate("/provider/login");
+      navigate("/login/provider");
     } catch (error) {
       console.error("Logout failed:", error);
       // Optionally add error handling here
@@ -86,7 +86,7 @@ const SideBar = () => {
                 Bookings
               </NavLink>
             </li>
-            <li className="mb-4">
+            {/* <li className="mb-4">
               <NavLink
                 to="/provider/reviews"
                 className={({ isActive }) =>
@@ -98,7 +98,7 @@ const SideBar = () => {
                 <Star size={24} className="mr-3" />
                 Reviews
               </NavLink>
-            </li>
+            </li> */}
             
           </ul>
         </nav>

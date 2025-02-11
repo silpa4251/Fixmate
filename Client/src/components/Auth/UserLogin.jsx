@@ -33,7 +33,7 @@ const UserLogin = () => {
       const res = await userLoginApi(values);
       if (res.status === 200) {
         const userData = res.data.data;
-        toast.success("Login successful!", { position: "top-right" });
+        toast.success("Login successful!", { position: "bottom-right" });
         dispatch(login(userData));
         navigate("/home");
       }
@@ -123,7 +123,7 @@ const UserLogin = () => {
 
         <div className="text-center mt-4 text-gray-500">
           New Member?{" "}
-          <Link to="/user/register" className="text-blue-link hover:underline">
+          <Link to="/register/user" className="text-blue-link hover:underline">
             Sign Up here
           </Link>
         </div>

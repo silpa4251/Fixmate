@@ -134,29 +134,17 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      {/* <toast
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      /> */}
+    <div className="min-h-screen bg-green-pale p-4 md:p-6 lg:p-8">
       
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md">
-        <div className="p-6 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900">Profile Settings</h1>
+      <div className="max-w-4xl mx-auto bg-white-default rounded-lg shadow-md">
+        <div className="p-6 border-b border-gray-200 mt-20">
+          <h1 className="text-2xl font-bold text-gray-900 text-center">Profile Settings</h1>
         </div>
         
         <div className="p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Profile Picture Section */}
-            <div className="flex flex-col items-center space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8">
+          
+            <div className="flex flex-col items-center justify-center space-y-4">
               <div className="relative">
                 <img
                   src={image || '/api/placeholder/150/150'}
@@ -336,18 +324,19 @@ const Profile = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Save Button */}
-            <div className="flex justify-end pt-4">
+              <div className="flex justify-start pt-4 ">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-blue-400"
+                className="w-full md:w-auto px-6 py-2 bg-green-600 text-white-default rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:bg-green-400"
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
+            </div>
+
+            {/* Save Button */}
+            
           </form>
         </div>
       </div>

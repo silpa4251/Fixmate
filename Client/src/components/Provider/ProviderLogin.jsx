@@ -36,8 +36,7 @@ const ProviderLogin = () => {
     try {
       const res = await providerLoginApi(values);
       if (res.status === 200) {
-        toast.success("Login successful!", { position: "top-right" });
-        console.log("provider",res.data.data);
+        toast.success("Login successful!", { position: "bottom-right" });
         dispatch(login(res.data.data));
         navigate("/provider/dashboard");
       }
@@ -120,7 +119,7 @@ const ProviderLogin = () => {
 
         <div className="text-center mt-4 text-gray-500">
           New Provider?{" "}
-          <Link to="/provider/register" className="text-blue-link hover:underline">
+          <Link to="/register/provider" className="text-blue-link hover:underline">
             Sign Up here
           </Link>
         </div>
