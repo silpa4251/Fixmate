@@ -142,7 +142,7 @@ const UserRegister = () => {
           
         <div className="text-center mt-4 text-gray-500">
         Have an account?{" "}
-          <Link to="/user/login" className="text-blue-link hover:underline">
+          <Link to="/login/user" className="text-blue-link hover:underline">
             Sign in here
           </Link>
           </div>

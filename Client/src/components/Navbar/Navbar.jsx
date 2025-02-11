@@ -28,12 +28,12 @@ const Navbar = () => {
 
   const userAction = () => {
   
-      navigate(isLoginPage ? "/user/register" : "/user/login");
+      navigate(isLoginPage ? "/register/user" : "/login/user");
 
   };
 
   const providerAction = () => {
-      navigate(isLoginProvider ? "/provider/register" : "/provider/login");
+      navigate(isLoginProvider ? "/register/provider" : "/login/provider");
   };
 
   return (

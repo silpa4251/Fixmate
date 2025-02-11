@@ -8,7 +8,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 
-const Dashboard = () => {
+const DashBoard = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalProviders: 0,
@@ -60,17 +60,17 @@ const Dashboard = () => {
         <>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <div className="p-5 bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg rounded-lg">
-            <h2 className="text-xl font-semibold">Total Users</h2>
+            <h2 className="text-xl font-semibold">Total Bookings</h2>
             <p className="text-2xl font-bold">{stats.totalUsers}</p>
           </div>
 
           <div className="p-5 bg-gradient-to-r from-teal-500 to-green-500 shadow-lg rounded-lg">
-            <h2 className="text-xl font-semibold">Total Providers</h2>
+            <h2 className="text-xl font-semibold">Pending Bookings</h2>
             <p className="text-2xl font-bold">{stats.totalProviders}</p>
           </div>
 
           <div className="p-5 bg-gradient-to-r from-yellow-400 to-orange-400 shadow-lg rounded-lg">
-            <h2 className="text-xl font-semibold">Total Bookings</h2>
+            <h2 className="text-xl font-semibold">Rating</h2>
             <p className="text-2xl font-bold">{stats.totalBookings}</p>
           </div>
 
@@ -92,4 +92,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashBoard;

@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css'
 import LandingPage from "./page/LandingPage";
@@ -30,31 +30,40 @@ import CheckoutPage from "./components/User/CheckoutPage";
 import AllBookings from "./components/Admin/AllBookings";
 import ViewUser from "./components/Admin/ViewUser";
 import ViewProvider from "./components/Admin/ViewProvider";
+import Profile from "./components/User/Profile";
+import ProviderRoutes from "./routes/ProviderRoutes";
+import SideBar from "./components/Provider/SideBar";
+import DashBoard from "./components/Provider/Dashboard";
+import ProfilePage from "./components/Provider/ProfilePage";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
 
 
 function App() {
-  const role = localStorage.getItem("role");
-  console.log("objectrole",role);
+  const location = useLocation();
+  const { role } = useSelector((state) => state.auth);
+  let user = localStorage.getItem("role");
+  const isAdminOrProviderRoute = location.pathname.startsWith("/admin") || location.pathname.startsWith("/provider");
+
 
   return (
     <>
-    <NavbarConditional />
-    {role === "User" ? <UserNavbar /> : <Navbar />}
+   {!isAdminOrProviderRoute && (
+        role === "User"|| user === 'User' ? <UserNavbar /> : <Navbar />
+      )}
       <Routes>
      
           <Route path="/" element={<LandingPage />}/>
-          <Route path="/user/register" element={<UserRegister />}/>
-          <Route path="/user/login" element={<UserLogin />} />
-          <Route path="/provider/register" element={<ProviderRegister />}/>
-          <Route path="/provider/login" element={<ProviderLogin />}/>
+          <Route path="/register/user" element={<UserRegister />}/>
+          <Route path="/login/user" element={<UserLogin />} />
+          <Route path="/register/provider" element={<ProviderRegister />}/>
+          <Route path="/login/provider" element={<ProviderLogin />}/>
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/loading" element={<Loading />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/login/admin" element={<AdminLogin />} />
           <Route path="/payment" element={<PaymentForm />} />
           
           <Route element={<ProtectedRoute />}>
@@ -63,18 +72,32 @@ function App() {
             <Route path="/checkout/:bookingId" element={<CheckoutPage />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/reschedule/:bookingId" element={<RescheduleBooking />} />
+            <Route path="/user/profile" element={<Profile />} />
           </Route>
-          
-          {/* <Route element={<AdminRoutes />}> */}
+            
+          <Route element={<ProviderRoutes />}>
+            <Route path = '/provider' element={<SideBar />} >
+            <Route index element={<DashBoard />} />
+            <Route path='dashboard' element={<DashBoard />} /> 
+            <Route path='profile' element={<ProfilePage />} />
+            {/* <Route path="users/:id" element={<ViewUser />} /> */}
+            <Route path='providers' element={<AllProviders />} />
+            {/* <Route path='providers/:id' element={<ViewProvider />} /> */}
+            {/* <Route path="bookings" element={<AllBookings />} />  */}
+          </Route>
+          </Route>
+
+
+          <Route element={<AdminRoutes />}>
             <Route path = '/admin' element={<Sidebar />} >
-            {/* <Route index element={<Dashboard />} /> */}
+            <Route index element={<Dashboard />} />
             <Route path='dashboard' element={<Dashboard />} />
             <Route path='users' element={<AllUsers />} />
             <Route path="users/:id" element={<ViewUser />} />
             <Route path='providers' element={<AllProviders />} />
             <Route path='providers/:id' element={<ViewProvider />} />
             <Route path="bookings" element={<AllBookings />} />
-          {/* </Route> */}
+          </Route>
           </Route>
       </Routes>
     <Footer />
@@ -85,9 +108,9 @@ function App() {
   )
 }
 
-const NavbarConditional = () => {
-  const { role } = useSelector((state) => state.auth);
-  return !(role === "Admin")   && <Navbar />;
+// const NavbarConditional = () => {
+//   const { role } = useSelector((state) => state.auth);
+//   return !(role === "Admin")   && <Navbar />;
 
-}
+// }
 export default App

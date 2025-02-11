@@ -202,7 +202,7 @@ const ProviderRegister = () => {
       </form>
       <div className="text-center mt-4 text-gray-500">
         Have an account?{" "}
-          <Link to="/provider/login" className="text-blue-link hover:underline">
+          <Link to="/login/provider" className="text-blue-link hover:underline">
             Sign in here
           </Link>
           </div>

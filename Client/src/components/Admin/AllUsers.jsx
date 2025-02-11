@@ -80,7 +80,7 @@ const AllUsers = () => {
       const response = await axiosInstance.patch(
         `${endpoint}/${selectedUser._id}`
       );
-
+        console.log("hekk", response);
       if (response.data.status === "success") {
         setUsers(prevUsers =>
           prevUsers.map(user =>
