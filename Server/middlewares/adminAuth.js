@@ -10,7 +10,6 @@ const adminAuth = (req, res, next) => {
         }
 
         const decoded = verifyToken(token);
-        console.log("decoded",decoded)
         if (decoded.role === "Admin") {
             req.user = decoded;
             next();

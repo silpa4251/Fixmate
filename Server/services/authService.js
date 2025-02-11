@@ -236,7 +236,6 @@ const refreshTokenService = async(token) => {
     throw new CustomError('Refresh token missing', 401);
   }
   const decoded = verifyRefreshToken(token);
-  console.log("hjello",decoded)
   if( !decoded.role || !decoded.id){
     throw new CustomError('Invalid token format', 401);
   }

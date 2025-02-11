@@ -10,7 +10,6 @@ const userAuth = (req, res, next) => {
         }
 
         const decoded = verifyToken(token);
-        console.log("decoded",decoded)
         if (decoded.role === "User") {
             req.user = decoded;
             next();

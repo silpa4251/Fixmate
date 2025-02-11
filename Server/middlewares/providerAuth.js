@@ -5,11 +5,12 @@ const { verifyToken } = require("../utils/jwt");
 const providerAuth = (req, res, next) => {
     try {
         const token = req.header("Authorization")?.replace("Bearer ", "");
+        console.log("toke", token)
         if (!token) {
             throw new CustomError("No token, authorization denied", 401);
         }
-
         const decoded = verifyToken(token);
+        console.log("decoded",decoded);
         if (decoded.role === "Provider") {
             req.user = decoded;
             next();

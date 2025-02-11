@@ -228,6 +228,7 @@ const unblockProvider = asyncErrorHandler(async (req, res) => {
 });
 
 const getProviderProfile = asyncErrorHandler(async (req, res) => {
+  console.log("req",req.user)
     const provider = await Provider.findById(req.user.id);
     if (!provider) {
       throw new CustomError('Provider not found',404);
@@ -252,6 +253,7 @@ const updateProfile = asyncErrorHandler(async (req, res) => {
 });
 
 const uploadProfilePicture = asyncErrorHandler(async (req, res) => {
+  console.log("fil",req.files);
     const file = req.files?.image;
     if (!file) {
       throw new CustomError('No file uploaded',400);
@@ -261,12 +263,14 @@ const uploadProfilePicture = asyncErrorHandler(async (req, res) => {
       folder: 'profile_images',
       resource_type: 'image',
     });
+    profileImageUrl = result.secure_url;
+    console.log('prourl', profileImageUrl)
 
-    return res.status(200).json({ status:"success", imageUrl: result.secure_url });
+    return res.status(200).json({ status:"success", image: profileImageUrl});
 });
 
 const uploadCertificate = asyncErrorHandler(async (req, res) => {
-    const file = req.files?.certificate;
+    const file = req.files?.certifications;
     if (!file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
