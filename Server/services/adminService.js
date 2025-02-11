@@ -5,6 +5,7 @@ const Bookings = require('../models/bookingModel');
 const Admin = require('../models/adminModel');
 const CustomError = require('../utils/customError');
 const { sentRefreshToken, generateToken, generateRefreshToken } = require('../utils/jwt');
+const Payment = require('../models/paymentModel');
 
 const adminLoginService = async (res, data) => {
   const { email, password } = data;
@@ -21,7 +22,6 @@ const adminLoginService = async (res, data) => {
   }
   const token = generateToken(admin._id, role);
   const refreshToken = generateRefreshToken(admin._id, role);
-  console.log("first",token,refreshToken)
   sentRefreshToken(res, refreshToken);
 
   return {
@@ -42,11 +42,12 @@ const getStatsService = async () => {
   const totalProviders = await Provider.countDocuments();
   const totalBookings = await Bookings.countDocuments();
   
-  const totalRevenueResult = await Bookings.aggregate([
-    { $group: { _id: null, totalRevenue: { $sum: '$totalCost' } } },
+  const totalRevenueResult = await Payment.aggregate([
+    { $match: { status: 'successful' } },
+  { $group: { _id: null, total: { $sum: '$amount' } } }
   ]);
   
-  const totalRevenue = totalRevenueResult[0]?.totalRevenue || 0;
+  const totalRevenue = totalRevenueResult[0]?.total || 0;
 
   return {data: {
     totalUsers,

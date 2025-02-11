@@ -47,6 +47,9 @@ const getAllProviders = asyncErrorHandler(async (req, res) => {
           email: 1,
           services: 1,
           address: 1,
+          image: 1,
+          isBlocked: 1,
+          status: 1,
           createdAt: 1,
         }
     }
@@ -224,4 +227,111 @@ const unblockProvider = asyncErrorHandler(async (req, res) => {
   res.status(200).json({status: "success",message:"provider unblocked successfully", provider});
 });
 
-module.exports = { getNearbyProviders, searchService,getAllProviders, getProviderById, getBookingByProvider, createProvider, updateProvider, blockProvider, unblockProvider };
+const getProviderProfile = asyncErrorHandler(async (req, res) => {
+    const provider = await Provider.findById(req.user.id);
+    if (!provider) {
+      throw new CustomError('Provider not found',404);
+    }
+    res.status(200).json({ status:"success",message: "profile fetched successfully", provider });
+});
+
+const updateProfile = asyncErrorHandler(async (req, res) => {
+    const { name, email, phone, address, services, image, certifications } = req.body;
+
+    const updatedProfile = await Provider.findByIdAndUpdate(
+      req.user.id,
+      { name, email, phone, address, services, image, certifications },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedProfile) {
+      throw new CustomError('Profile not found', 404);
+    }
+
+    return res.status(200).json({ status:"success", profile: updatedProfile });
+});
+
+const uploadProfilePicture = asyncErrorHandler(async (req, res) => {
+    const file = req.files?.image;
+    if (!file) {
+      throw new CustomError('No file uploaded',400);
+    }
+
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: 'profile_images',
+      resource_type: 'image',
+    });
+
+    return res.status(200).json({ status:"success", imageUrl: result.secure_url });
+});
+
+const uploadCertificate = asyncErrorHandler(async (req, res) => {
+    const file = req.files?.certificate;
+    if (!file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+      folder: 'certificates',
+      resource_type: 'raw',
+    });
+
+    return res.status(200).json({ success: true, certificateUrl: result.secure_url });
+  });
+
+// const getProviderStats = asyncErrorHandler(async (req, res) => {
+//     const providerId = req.provider.id;
+//     const totalBookings = await Booking.countDocuments({ providerId });
+//     const pendingBookings = await Booking.countDocuments({ 
+//       providerId,
+//       status: 'pending'
+//     });
+    
+//     // Calculate average rating
+//     const ratings = await Rating.find({ providerId });
+//     const averageRating = ratings.length > 0
+//       ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
+//       : 0;
+    
+//     // Calculate total revenue
+//     const completedBookings = await Booking.find({
+//       providerId,
+//       status: 'completed',
+//       paymentStatus: 'paid'
+//     });
+    
+//     const totalRevenue = completedBookings.reduce((acc, curr) => acc + curr.amount, 0);
+
+//     // Get monthly revenue stats
+//     const monthlyRevenue = await Booking.aggregate([
+//       {
+//         $match: {
+//           providerId,
+//           status: 'completed',
+//           paymentStatus: 'paid'
+//         }
+//       },
+//       {
+//         $group: {
+//           _id: {
+//             month: { $month: '$date' },
+//             year: { $year: '$date' }
+//           },
+//           revenue: { $sum: '$amount' }
+//         }
+//       },
+//       { $sort: { '_id.year': -1, '_id.month': -1 } }
+//     ]);
+
+//     return res.status(200).json({
+//       success: true,
+//       stats: {
+//         totalBookings,
+//         pendingBookings,
+//         averageRating: Number(averageRating.toFixed(1)),
+//         totalRevenue,
+//         monthlyRevenue
+//       }
+//     });
+
+module.exports = { getNearbyProviders, searchService,getAllProviders, getProviderById, getBookingByProvider, createProvider, updateProvider, blockProvider, unblockProvider, getProviderProfile, updateProfile,  uploadProfilePicture, uploadCertificate };

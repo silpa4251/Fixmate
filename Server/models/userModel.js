@@ -25,21 +25,22 @@ const userSchema = mongoose.Schema(
             type: String,
         },
         image: {
-            type: [
-                {
-                    originalImageUrl: { type: String },
-                    imageThumbUrl: { type: String },
-                },
-            ],
-            default: [], 
+            type: String,
+            // type: [
+            //     {
+            //         originalImageUrl: { type: String },
+            //         imageThumbUrl: { type: String },
+            //     },
+            // ],
+            // default: [], 
         },
         address: {
             type: [
                 {
-                    street: { type: String },
-                    city: { type: String },
+                    place: { type: String },
+                    district: { type: String },
                     state: { type: String },
-                    pinCode: { type: String },
+                    pincode: { type: String },
                 }
             ],
             default: [],

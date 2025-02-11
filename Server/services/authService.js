@@ -3,7 +3,7 @@ const Provider = require("../models/providerModel");
 const bcrypt = require("bcryptjs");
 const { generateToken, generateRefreshToken, verifyRefreshToken, sentRefreshToken, clearToken } = require("../utils/jwt");
 const CustomError = require("../utils/customError");
-const cloudinary = require("../config/cloudinary");
+
 const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");

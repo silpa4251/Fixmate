@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const Payment = require("../models/paymentModel");
 const CustomError = require("../utils/customError");
+const { updateProfileService, getProfileService } = require("../services/userService");
 
 
 
@@ -17,21 +18,14 @@ const getAllUsers = asyncErrorHandler(async (req, res) => {
             email: 1,
             phone: 1,
             address: 1,
+            image: 1,
+            isBlocked: 1,
             createdAt: 1,
           }
       }
   ]);
     res.status(200).json({message:"All users retrieved successfully", users});
 });
-
-// const getUserById = asyncErrorHandler(async (req,res) => {
-//     const userId = req.params.id;
-//     const user = await User.findById(userId);
-//     if(!user) {
-//         throw new CustomError("User not found",404);
-//     }
-//     res.status(200).json({message:"User retrieved successfully",user });
-// });
 
 const blockUser = asyncErrorHandler(async (req, res) => {
     const { userId } = req.params;
@@ -144,6 +138,18 @@ const updateUser = asyncErrorHandler(async (req, res) => {
   });
 });
 
+const updateProfile = asyncErrorHandler(async(req, res) => {
+  const userId = req.user.id;
+  const data = await updateProfileService(userId, req.body, req.file);
+  res.status(200).json({status: 'success',message: "Profile updated successfully", data})
+})
+
+const getProfile = asyncErrorHandler(async(req, res) =>{
+  const userId = req.user.id;
+  const data = await getProfileService(userId);
+  res.status(200).json({status:'success',message: "Profile retrived successfully", data})
+})
+
 const makePayment = asyncErrorHandler(async(req, res) => {
   const { amount, currency, bookingId } = req.body;
   const options = {
@@ -156,7 +162,7 @@ const makePayment = asyncErrorHandler(async(req, res) => {
    const payment = await Payment.create({
     bookingId: bookingId,
     razorpayOrderId: order.id,
-    amount, // Convert from paise to rupees
+    amount : amount / 100, // Convert from paise to rupees
     currency: currency || "INR",
     status: 'pending'
   });
@@ -206,4 +212,4 @@ const paymentverify = asyncErrorHandler(async(req, res) => {
 })
 
 
-module.exports = {  getAllUsers, blockUser, unblockUser, createUser, updateUser, makePayment, paymentverify };
+module.exports = {  getAllUsers, blockUser, unblockUser, createUser, updateUser, updateProfile, getProfile, makePayment, paymentverify };

@@ -101,7 +101,7 @@ const getUserBookings = asyncErrorHandler(async (req, res) => {
         return res.status(400).json({ status: "error", message: "User ID missing" });
     }
     const bookings = await Booking.find({ userId: req.user.id })
-        .populate('providerId', 'name address services charge')
+        .populate('providerId', 'name address services charge status')
         .sort({ date: 1 , slot: 1});
     res.status(200).json({ status: "success", message: "Bookings fetched successfully", bookings });
 });

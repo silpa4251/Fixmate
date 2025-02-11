@@ -1,7 +1,6 @@
 const express = require("express");
 const { registerUser, registerProvider, forgotPassword, resetPassword, contact, userLogin, providerLogin, providerGoogleAuth, refreshToken, userGoogleAuth, logout } = require("../controller/authController");
 const { adminLogin } = require("../controller/adminController");
-// const upload = require("../middlewares/multer");
 const authRouter = express.Router();
 
 authRouter.post("/register/user", registerUser);
