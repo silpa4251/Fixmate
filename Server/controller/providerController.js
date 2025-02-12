@@ -3,6 +3,7 @@ const Provider= require("../models/providerModel");
 const bcrypt = require("bcryptjs");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/customError");
+const cloudinary = require("../config/cloudinary");
 
 const getNearbyProviders = asyncErrorHandler(async (req, res) => {
   const { latitude, longitude, distance = 5000, service } = req.query;
@@ -253,33 +254,34 @@ const updateProfile = asyncErrorHandler(async (req, res) => {
 });
 
 const uploadProfilePicture = asyncErrorHandler(async (req, res) => {
-  console.log("fil",req.files);
-    const file = req.files?.image;
+  console.log("fil",req.file);
+    const file = req.file;
     if (!file) {
       throw new CustomError('No file uploaded',400);
     }
-
-    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+    console.log("File path:", file.path);
+    const result = await cloudinary.uploader.upload(file.path, {
       folder: 'profile_images',
       resource_type: 'image',
     });
-    profileImageUrl = result.secure_url;
+    const profileImageUrl = result.secure_url;
     console.log('prourl', profileImageUrl)
 
     return res.status(200).json({ status:"success", image: profileImageUrl});
 });
 
 const uploadCertificate = asyncErrorHandler(async (req, res) => {
-    const file = req.files?.certifications;
+  console.log("fil",req.file);
+    const file = req.file;
     if (!file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    const result = await cloudinary.uploader.upload(file.tempFilePath, {
+    const result = await cloudinary.uploader.upload(file.path, {
       folder: 'certificates',
       resource_type: 'raw',
     });
-
+    console.log("ju",result.secure_url )
     return res.status(200).json({ success: true, certificateUrl: result.secure_url });
   });
 

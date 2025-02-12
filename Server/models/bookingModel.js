@@ -12,11 +12,17 @@ const bookingSchema = mongoose.Schema(
             ref: "Provider",
             required: true,
         },
-        date: {
+        startDate: {
             type: Date,
+            required: true,
         },
-        slot: {
-            type: String,
+        endDate: {
+            type: Date,
+            required: true,
+        },
+        numberOfDays: {
+            type: Number,
+            required: true,
         },
         status: {
             type: String,
@@ -28,5 +34,8 @@ const bookingSchema = mongoose.Schema(
         timestamps: true,
     }
 );
+
+bookingSchema.index({ providerId: 1, startDate: 1, endDate: 1 });
+bookingSchema.index({ userId: 1, status: 1 });
 
 module.exports = mongoose.model("Booking", bookingSchema);
