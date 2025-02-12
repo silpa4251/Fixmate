@@ -82,6 +82,7 @@ const CheckoutPage = () => {
             });
 
             if (verifyResponse.data.status === "success") {
+              await axiosInstance.patch(`/bookings/${bookingId}/status`,{status: "confirmed"});
               toast.success("Payment processed successfully!", {
                 position: "bottom-right",
                 autoClose: 3000,
