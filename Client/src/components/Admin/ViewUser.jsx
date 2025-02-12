@@ -84,7 +84,7 @@ const ViewUsers = () => {
           {/* Profile Picture */}
           <div className="flex-shrink-0">
             <img
-              src={user.profilePic || "https://via.placeholder.com/150"}
+              src={user.image || "https://via.placeholder.com/150"}
               alt={`${user.name}'s profile`}
               className="w-32 h-32 rounded-full object-cover border-2 border-green-500"
             />

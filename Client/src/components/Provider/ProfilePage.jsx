@@ -62,10 +62,10 @@ const ProfilePage = () => {
     const files = Array.from(e.target.files);
     
     for (const file of files) {
-      if (!file.type.match('application/pdf')) {
-        toast.error('Please upload PDF files only');
-        return;
-      }
+      // if (!file.type.match('application/pdf')) {
+      //   toast.error('Please upload PDF files only');
+      //   return;
+      // }
 
       const formData = new FormData();
       files.forEach(file => formData.append('certificate', file));

@@ -41,9 +41,6 @@ export default {
           medium: '#484444',
           dark:'#191818'
         },
-        red:{
-          dark:'#ED4545'
-        }
       }
     },
   },

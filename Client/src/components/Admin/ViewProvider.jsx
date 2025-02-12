@@ -121,7 +121,7 @@ const ViewProvider = () => {
                     className="hover:bg-gray-50"
                   >
                     <td className="px-6 py-4">{booking.userId.name}</td>
-                    <td className="px-6 py-4">{booking.userId.address}</td>
+                    <td className="px-6 py-4">{booking.userId.address[0].place}</td>
                     <td className="px-6 py-4">
                       {new Date(booking.date).toLocaleDateString()}
                     </td>
