@@ -35,6 +35,7 @@ import ProviderRoutes from "./routes/ProviderRoutes";
 import SideBar from "./components/Provider/SideBar";
 import DashBoard from "./components/Provider/Dashboard";
 import ProfilePage from "./components/Provider/ProfilePage";
+import TotalBookings from "./components/Provider/TotalBookings";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -43,14 +44,13 @@ import ProfilePage from "./components/Provider/ProfilePage";
 function App() {
   const location = useLocation();
   const { role } = useSelector((state) => state.auth);
-  let user = localStorage.getItem("role");
   const isAdminOrProviderRoute = location.pathname.startsWith("/admin") || location.pathname.startsWith("/provider");
 
 
   return (
     <>
    {!isAdminOrProviderRoute && (
-        role === "User"|| user === 'User' ? <UserNavbar /> : <Navbar />
+        role === "User" ? <UserNavbar /> : <Navbar />
       )}
       <Routes>
      
@@ -80,10 +80,7 @@ function App() {
             <Route index element={<DashBoard />} />
             <Route path='dashboard' element={<DashBoard />} /> 
             <Route path='profile' element={<ProfilePage />} />
-            {/* <Route path="users/:id" element={<ViewUser />} /> */}
-            <Route path='providers' element={<AllProviders />} />
-            {/* <Route path='providers/:id' element={<ViewProvider />} /> */}
-            {/* <Route path="bookings" element={<AllBookings />} />  */}
+            <Route path="bookings" element={<TotalBookings />} /> 
           </Route>
           </Route>
 
@@ -100,7 +97,7 @@ function App() {
           </Route>
           </Route>
       </Routes>
-    <Footer />
+      {!isAdminOrProviderRoute && <Footer />}
      
        
     </>
@@ -108,9 +105,5 @@ function App() {
   )
 }
 
-// const NavbarConditional = () => {
-//   const { role } = useSelector((state) => state.auth);
-//   return !(role === "Admin")   && <Navbar />;
 
-// }
 export default App

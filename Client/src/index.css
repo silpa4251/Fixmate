@@ -21,3 +21,42 @@
   background-attachment: fixed;
 
 }
+
+.calendar-container .react-calendar {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #055910;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.date-disabled {
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+}
+
+
+.date-booked {
+  background-color: #93feb9e6 !important;
+  color: #713f12 !important;
+  cursor: not-allowed !important;
+}
+
+.react-calendar__tile--active,
+.react-calendar__tile:enabled:focus {
+  background-color: #22c55e !important;
+  color: white !important;
+}
+
+
+.react-calendar__tile:enabled:hover {
+  background-color: #94feb9 !important;
+  color: #166534 !important; 
+}
+
+.react-calendar__tile--now {
+  background-color: #f0fdf4 !important;
+  color: #166534 !important; 
+}

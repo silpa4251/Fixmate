@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../api/axiosInstance";
-import { Bar } from "react-chartjs-2";
-import { Line } from "react-chartjs-2";
+import { Bar, Line , Pie } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -10,18 +9,20 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const DashBoard = () => {
   const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalProviders: 0,
+    totalBookingsForToday: 0,
+    pendingBookings: 0,
+    completedBookings: 0,
+    cancelledBookings: 0,
     totalBookings: 0,
-    totalRevenue: 0,
+    totalEarnings: 0,
   });
   const [loading, setLoading] = useState(true);
 
   const fetchStats = async () => {
     try {
-      const response = await axiosInstance.get("/admin/stats");
-      console.log("fdd",response.data.data.data)
-      setStats(response.data.data.data);
+      const response = await axiosInstance.get("/providers/stats");
+      console.log("fdd",response.data.data)
+      setStats(response.data.data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -34,17 +35,16 @@ const DashBoard = () => {
   }, []);
 
   const chartData = {
-    labels: ["Users", "Providers", "Bookings", "Revenue"],
+    labels: ["Pending", "Completed", "Cancelled"],
     datasets: [
       {
         label: "Statistics",
         data: [
-          stats.totalUsers,
-          stats.totalProviders,
-          stats.totalBookings,
-          stats.totalRevenue,
+          stats.pendingBookings,
+          stats.completedBookings,
+          stats.cancelledBookings,
         ],
-        backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#EC4899'],
+        backgroundColor: ['#6366F1', '#10B981', '#F59E0B'],
         barThickness: 50,
       },
     ],
@@ -60,23 +60,23 @@ const DashBoard = () => {
         <>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           <div className="p-5 bg-gradient-to-r from-indigo-500 to-purple-500 shadow-lg rounded-lg">
-            <h2 className="text-xl font-semibold">Total Bookings</h2>
-            <p className="text-2xl font-bold">{stats.totalUsers}</p>
+            <h2 className="text-xl font-semibold">Bookings for Today</h2>
+            <p className="text-2xl font-bold">{stats.totalBookingsForToday}</p>
           </div>
 
           <div className="p-5 bg-gradient-to-r from-teal-500 to-green-500 shadow-lg rounded-lg">
-            <h2 className="text-xl font-semibold">Pending Bookings</h2>
-            <p className="text-2xl font-bold">{stats.totalProviders}</p>
+            <h2 className="text-xl font-semibold">Completed Bookings</h2>
+            <p className="text-2xl font-bold">{stats.completedBookings}</p>
           </div>
 
           <div className="p-5 bg-gradient-to-r from-yellow-400 to-orange-400 shadow-lg rounded-lg">
-            <h2 className="text-xl font-semibold">Rating</h2>
+            <h2 className="text-xl font-semibold">Total Bookings</h2>
             <p className="text-2xl font-bold">{stats.totalBookings}</p>
           </div>
 
           <div className="p-5 bg-gradient-to-r from-pink-500 to-red-500 shadow-lg rounded-lg">
-            <h2 className="text-xl font-semibold">Total Revenue</h2>
-            <p className="text-2xl font-bold">Rs.{stats.totalRevenue}</p>
+            <h2 className="text-xl font-semibold">Total Earnings</h2>
+            <p className="text-2xl font-bold">Rs.{stats.totalEarnings}</p>
           </div>
         </div>
 

@@ -44,8 +44,6 @@ const BookService = () => {
         setProvider(providerRes.data.provider);
         // Assuming the API returns an array of date strings in 'YYYY-MM-DD' format
         setBookedDates(bookingsRes.data.bookedDates.map(dateStr => parseDate(dateStr)));
-        console.log("ju",bookingsRes)
-        console.log("book", bookingsRes.data.bookedDates)
         setStatus('success');
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -90,6 +88,19 @@ const BookService = () => {
     }
     // Disable booked dates
     return isDateBooked(date);
+  };
+
+  const tileClassName = ({ date }) => {
+    // Style for past dates
+    if (date < new Date().setHours(0, 0, 0, 0)) {
+      return "date-disabled"; // Grayed-out past dates
+    }
+    // Style for booked dates
+    if (isDateBooked(date)) {
+      return "date-booked"; // Red background for booked dates
+    }
+    // Default style
+    return null;
   };
 
   // Modified date selection handler
@@ -217,10 +228,10 @@ const BookService = () => {
           <p className="text-gray-600 mb-2">
             <span className="font-medium">Service:</span> {provider.services}
           </p>
-          <p className="text-gray-600 mb-2">
+          {/* <p className="text-gray-600 mb-2">
             <span className="font-medium">Description:</span>{" "}
             {provider.description || "No description available."}
-          </p>
+          </p> */}
           <p className="text-gray-600 mb-2">
             <span className="font-medium">Address:</span>{' '}
             {provider.address[0]?.place || 'N/A'}
@@ -246,17 +257,15 @@ const BookService = () => {
           
           <div className="space-y-6">
             {/* Calendar with multi-date selection */}
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md mx-auto calendar-container">
             <Calendar
                 onChange={handleDateChange}
                 value={selectedDates.length > 0 ? [selectedDates[0], selectedDates[selectedDates.length - 1]] : null}
                 minDate={new Date()}
-                className="border rounded-lg shadow-sm w-full"
+                // className="border rounded-lg shadow-sm w-full"
                 selectRange={true}
                 tileDisabled={tileDisabled}
-                tileClassName={({ date }) => 
-                  isDateBooked(date) ? 'bg-red-100 text-gray-500' : null
-                }
+                tileClassName={tileClassName}
               />
             </div>
 

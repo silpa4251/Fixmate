@@ -6,12 +6,19 @@ import axiosInstance from '../../api/axiosInstance';
 
 const RescheduleBooking = () => {
   const { bookingId } = useParams();
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedDates, setSelectedDates] = useState([]); // Array to store selected dates
   const [timeSlots, setTimeSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [bookingDetails, setBookingDetails] = useState(null);
   const [error, setError] = useState('');
+
+  // Format date for backend
+  const formatDateForBackend = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   // Fetch booking details
   useEffect(() => {
@@ -19,7 +26,7 @@ const RescheduleBooking = () => {
       try {
         const response = await axiosInstance.get(`/bookings/${bookingId}`);
         setBookingDetails(response.data.booking);
-        setSelectedDate(new Date(response.data.booking.date));
+        setLoading(false);
       } catch (err) {
         console.error('Error fetching booking details:', err);
         alert('Failed to load booking details. Please try again.');
@@ -28,47 +35,21 @@ const RescheduleBooking = () => {
     fetchBookingDetails();
   }, [bookingId]);
 
-  // Fetch available slots for the selected date
-  useEffect(() => {
-    const fetchTimeSlots = async () => {
-      if (!bookingDetails) return;
-
-      setLoading(true);
-      try {
-        const year = selectedDate.getFullYear();
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        const localDate = `${year}-${month}-${day}`;
-        const response = await axiosInstance.get(
-          `/bookings/available-slots?providerId=${bookingDetails.providerId._id}&date=${localDate}`
-        );
-        setTimeSlots(response.data.availableSlots || []);
-      } catch (err) {
-        console.error('Error fetching time slots:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTimeSlots();
-  }, [selectedDate, bookingDetails]);
-
   // Handle Reschedule
   const handleReschedule = async () => {
-    if (!selectedSlot) {
-      setError('Please select a new time slot.');
+    if (selectedDates.length === 0) {
+      setError('Please select valid dates for rescheduling.');
       return;
     }
 
-    try {
-      const year = selectedDate.getFullYear();
-        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-        const day = String(selectedDate.getDate()).padStart(2, '0');
-        const localDate = `${year}-${month}-${day}`;
-      await axiosInstance.patch(`/bookings/${bookingId}/reschedule`, {
-        newDate: localDate,
-        newSlot: selectedSlot,
-      });
+    const startDate = selectedDates[0];
+    const endDate = selectedDates[selectedDates.length - 1];
 
+    try {
+      await axiosInstance.patch(`/bookings/${bookingId}/reschedule`, {
+        startDate: formatDateForBackend(startDate),
+        endDate: formatDateForBackend(endDate),
+      });
       alert('Booking rescheduled successfully!');
       window.location.href = '/bookings';
     } catch (err) {
@@ -102,48 +83,47 @@ const RescheduleBooking = () => {
 
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="mb-6">
-            <h3 className="text-xl font-medium text-gray-700 mb-4">Select New Date</h3>
+            <h3 className="text-xl font-medium text-gray-700 mb-4">Select New Dates</h3>
             <Calendar
-              onChange={setSelectedDate}
-              value={selectedDate}
+              onChange={(range) => {
+                if (!range || !Array.isArray(range)) {
+                  setSelectedDates([]);
+                  return;
+                }
+                if (range.length === 1) {
+                  setSelectedDates([range[0]]);
+                } else {
+                  setSelectedDates(range);
+                }
+              }}
+              value={selectedDates.length > 0 ? [selectedDates[0], selectedDates[selectedDates.length - 1]] : null}
               minDate={new Date()}
               className="border rounded-lg shadow-sm"
+              selectRange={true} // Enable range selection
             />
           </div>
 
-          <div className="mb-6">
-            <h3 className="text-xl font-medium text-gray-700 mb-4">Available Slots</h3>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            <div className="grid grid-cols-2 gap-4">
-              {loading ? (
-                <p className="text-gray-500 col-span-2">Loading slots...</p>
-              ) : timeSlots.length > 0 ? (
-                timeSlots.map((slot, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedSlot(slot)}
-                    className={`p-3 rounded-lg text-center ${
-                      selectedSlot === slot
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200'
-                    }`}
-                  >
-                    {slot}
-                  </button>
-                ))
-              ) : (
-                <p className="text-gray-500 col-span-2">No slots available</p>
-              )}
+          {/* Display Selected Dates */}
+          {selectedDates.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-700 mb-2">Selected Dates:</h3>
+              <ul className="list-disc list-inside">
+                {selectedDates.map((date, index) => (
+                  <li key={index}>{formatDateForBackend(date)}</li>
+                ))}
+              </ul>
             </div>
-          </div>
+          )}
 
           <button
             onClick={handleReschedule}
-            disabled={!selectedSlot || loading}
+            disabled={selectedDates.length === 0 || loading}
             className="w-full bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             {loading ? 'Rescheduling...' : 'Confirm Reschedule'}
           </button>
+
+          {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
         </div>
       </div>
     </div>

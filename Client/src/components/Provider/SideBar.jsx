@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import logo from "../../assets/logo.png";
-import { Clock, Star, FileText, User } from 'lucide-react';
+import { Clock, Star, FileText, User, Wallet } from 'lucide-react';
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/slices/authSlice";
 // import Breadcrumbs from "./Breadcrumbs";
@@ -11,7 +11,7 @@ import { MdOutlineLogout } from "react-icons/md";
 const SideBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated,user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -86,20 +86,6 @@ const SideBar = () => {
                 Bookings
               </NavLink>
             </li>
-            {/* <li className="mb-4">
-              <NavLink
-                to="/provider/reviews"
-                className={({ isActive }) =>
-                  `flex justify-center items-center p-3 rounded hover:bg-green-hover ${
-                    isActive ? "bg-green-hover" : ""
-                  }`
-                }
-              >
-                <Star size={24} className="mr-3" />
-                Reviews
-              </NavLink>
-            </li> */}
-            
           </ul>
         </nav>
 
@@ -112,8 +98,8 @@ const SideBar = () => {
         </button>
       </aside>
       <main className="flex-1 p-6 bg-green-pale overflow-auto">
-        <div className="p-6 bg-white-default shadow rounded-lg mt-2 mx-5">
-          {/* <Breadcrumbs /> */}
+        <div className="p-6 bg-white-default shadow rounded-lg mt-2 mx-5 text-black-default">
+          <h1 className="text-lg font-semibold">Welcome {user.name} !</h1>
         </div>
         <Outlet />
       </main>

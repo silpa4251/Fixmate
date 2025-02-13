@@ -39,7 +39,8 @@ const CheckoutPage = () => {
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Failed to load Razorpay script"));
+      script.onerror = () =>
+        reject(new Error("Failed to load Razorpay script"));
       document.body.appendChild(script);
     });
   };
@@ -57,7 +58,7 @@ const CheckoutPage = () => {
       const response = await axiosInstance.post("/users/make-payment", {
         amount: FIXED_AMOUNT * 100,
         currency: "INR",
-        bookingId: bookingId 
+        bookingId: bookingId,
       });
 
       const { id: orderId, amount, currency } = response.data;
@@ -72,17 +73,23 @@ const CheckoutPage = () => {
         description: "Booking Payment",
         order_id: orderId,
         handler: async function (response) {
-          const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
+          const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
+            response;
 
           try {
-            const verifyResponse = await axiosInstance.post("/users/verify-payment", {
-              razorpay_payment_id,
-              razorpay_order_id,
-              razorpay_signature,
-            });
+            const verifyResponse = await axiosInstance.post(
+              "/users/verify-payment",
+              {
+                razorpay_payment_id,
+                razorpay_order_id,
+                razorpay_signature,
+              }
+            );
 
             if (verifyResponse.data.status === "success") {
-              await axiosInstance.patch(`/bookings/${bookingId}/status`,{status: "confirmed"});
+              await axiosInstance.patch(`/bookings/${bookingId}/status`, {
+                status: "confirmed",
+              });
               toast.success("Payment processed successfully!", {
                 position: "bottom-right",
                 autoClose: 3000,
@@ -128,7 +135,9 @@ const CheckoutPage = () => {
   }
 
   if (!bookingDetails) {
-    return <div className="text-center mt-20">No booking details available.</div>;
+    return (
+      <div className="text-center mt-20">No booking details available.</div>
+    );
   }
 
   return (
@@ -143,19 +152,28 @@ const CheckoutPage = () => {
           />
           <div>
             <p className="text-gray-600 mb-2">
-              <span className="font-medium">Name:</span> {bookingDetails.providerId.name}
+              <span className="font-medium">Name:</span>{" "}
+              {bookingDetails.providerId.name}
             </p>
             <p className="text-gray-600 mb-2">
-              <span className="font-medium">Service:</span> {bookingDetails.providerId.services}
+              <span className="font-medium">Service:</span>{" "}
+              {bookingDetails.providerId.services}
             </p>
             <p className="text-gray-600 mb-2">
-              <span className="font-medium">Date:</span> {bookingDetails.date}
+              <span className="font-medium">Date:</span>{" "}
+              {new Date(bookingDetails.startDate).toLocaleDateString() ===
+              new Date(bookingDetails.endDate).toLocaleDateString()
+                ? new Date(bookingDetails.startDate).toLocaleDateString()
+                : `${new Date(
+                    bookingDetails.startDate
+                  ).toLocaleDateString()} - ${new Date(
+                    bookingDetails.endDate
+                  ).toLocaleDateString()}`}
             </p>
+
             <p className="text-gray-600 mb-2">
-              <span className="font-medium">Time:</span> {bookingDetails.slot}
-            </p>
-            <p className="text-gray-600 mb-2">
-              <span className="font-medium">Address:</span> {bookingDetails.providerId.address?.[0]?.place || "N/A"}
+              <span className="font-medium">Address:</span>{" "}
+              {bookingDetails.providerId.address?.[0]?.place || "N/A"}
             </p>
           </div>
         </div>
