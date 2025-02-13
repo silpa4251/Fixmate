@@ -93,24 +93,10 @@ const createProvider = asyncErrorHandler(async (req, res) => {
     !req.body.name ||
     !req.body.email ||
     !req.body.services ||
-    !req.body.password
+    !req.body.password 
   ) {
     throw new CustomError('Please provide name, email, services, address, password, and password confirmation', 400);
   }
-
-  // for (const addr of req.body.address) {
-  //   if (
-  //     !addr.place ||
-  //     !addr.district ||
-  //     !addr.state ||
-  //     !addr.pincode ||
-  //     !addr.coordinates ||
-  //     !Array.isArray(addr.coordinates.coordinates) || // Ensure coordinates are an array
-  //     addr.coordinates.coordinates.length !== 2       // Ensure exactly two coordinates (longitude, latitude)
-  //   ) {
-  //     throw new CustomError('Invalid address format. Each address must include place, district, state, pincode, and valid coordinates.', 400);
-  //   }
-  // }
 
   // Check if provider with email already exists
   const existingProvider = await Provider.findOne({ email: req.body.email });
@@ -129,6 +115,7 @@ const createProvider = asyncErrorHandler(async (req, res) => {
     services: req.body.services,
     // address: req.body.address,
     password: hashedPassword,
+    availability: req.body.availability,
   });
 
   // Remove password from response
@@ -147,6 +134,7 @@ const updateProvider = asyncErrorHandler(async (req, res) => {
     email: req.body.email,
     services: req.body.services,
     address: req.body.address,
+    availability: req.body.availability,
   };
 
   // If password is provided, hash it
@@ -271,7 +259,6 @@ const uploadProfilePicture = asyncErrorHandler(async (req, res) => {
 });
 
 const uploadCertificate = asyncErrorHandler(async (req, res) => {
-  console.log("fil",req.file);
     const file = req.file;
     if (!file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
@@ -283,61 +270,129 @@ const uploadCertificate = asyncErrorHandler(async (req, res) => {
     });
     console.log("ju",result.secure_url )
     return res.status(200).json({ success: true, certificateUrl: result.secure_url });
+});
+
+  
+const getProviderStats = asyncErrorHandler(async (req, res) => {
+    const providerId = req.user.id;
+    const totalBookings = await Booking.countDocuments({ providerId });
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+    const totalBookingsForToday = await Booking.countDocuments({ 
+      providerId,
+      status: 'confirmed',
+      startDate: {
+        $gte: startOfDay, 
+        $lte: endOfDay, 
+      },
+
+    });
+    const pendingBookings = await Booking.countDocuments({
+      providerId,
+      status: 'confirmed'
+      })
+    const completedBookings = await Booking.countDocuments({ 
+      providerId,
+      status: 'completed'
+    });
+    const cancelledBookings = await Booking.countDocuments({
+      providerId,
+      status: 'cancelled'
+    })
+    // Calculate average rating
+    // const ratings = await Rating.find({ providerId });
+    // const averageRating = ratings.length > 0
+    //   ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
+    //   : 0;
+    const provider = await Provider.findById(providerId);
+  if (!provider) {
+    throw new CustomError("Provider not found", 404);
+  }
+  const chargePerDay = provider.charge;
+
+    // Calculate total revenue
+    const completeBookings = await Booking.find({
+      providerId,
+      status:"completed",
+    });
+    
+    const totalEarnings = completeBookings.reduce((total, booking) => total + booking.numberOfDays * chargePerDay, 0);
+
+    // Get monthly revenue stats
+    // const monthlyRevenue = await Booking.aggregate([
+    //   {
+    //     $match: {
+    //       providerId,
+    //       status: 'completed',
+    //     }
+    //   },
+    //   {
+    //     $group: {
+    //       _id: {
+    //         year: { $year: "$startDate" },
+    //         month: { $month: "$startDate" },
+    //       },
+    //       revenue: { 
+    //         $sum: {
+    //           $multiply: ["$numberOfDays", chargePerDay],
+    //         },
+    //        }
+    //     }
+    //   },
+    //   { 
+    //     $sort: { '_id.year': -1, '_id.month': -1 }
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 0, 
+    //       year: "$_id.year",
+    //       month: "$_id.month",
+    //       revenue: 1,
+    //     },
+    //   },
+    // ]);
+
+    return res.status(200).json({
+      status:"success",
+      data: {
+        totalBookingsForToday,
+        completedBookings,
+        totalBookings,
+        totalEarnings,
+        pendingBookings,
+        cancelledBookings,
+      }
+    });
   });
 
-// const getProviderStats = asyncErrorHandler(async (req, res) => {
-//     const providerId = req.provider.id;
-//     const totalBookings = await Booking.countDocuments({ providerId });
-//     const pendingBookings = await Booking.countDocuments({ 
-//       providerId,
-//       status: 'pending'
-//     });
-    
-//     // Calculate average rating
-//     const ratings = await Rating.find({ providerId });
-//     const averageRating = ratings.length > 0
-//       ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length
-//       : 0;
-    
-//     // Calculate total revenue
-//     const completedBookings = await Booking.find({
-//       providerId,
-//       status: 'completed',
-//       paymentStatus: 'paid'
-//     });
-    
-//     const totalRevenue = completedBookings.reduce((acc, curr) => acc + curr.amount, 0);
+  const getTotalEarnings = asyncErrorHandler(async(req, res) => {
+    const providerId = req.user.id;
 
-//     // Get monthly revenue stats
-//     const monthlyRevenue = await Booking.aggregate([
-//       {
-//         $match: {
-//           providerId,
-//           status: 'completed',
-//           paymentStatus: 'paid'
-//         }
-//       },
-//       {
-//         $group: {
-//           _id: {
-//             month: { $month: '$date' },
-//             year: { $year: '$date' }
-//           },
-//           revenue: { $sum: '$amount' }
-//         }
-//       },
-//       { $sort: { '_id.year': -1, '_id.month': -1 } }
-//     ]);
+    const bookings = await Booking.find({ providerId })
+        .populate("userId", "name email address phone")
+        .populate("providerId", "charge");
+    
+    const formatted = bookings.map((booking) => ({
+        _id: booking._id,
+        userId: {
+          _id: booking.userId._id,
+          name: booking.userId.name,
+          email: booking.userId.email,
+          phone: booking.userId.phone,
+          address: booking.userId.address[0],
+        },
+        providerId: {
+          _id: booking.providerId._id,
+          services: booking.providerId.services,
+        },
+        startDate: booking.startDate,
+        endDate: booking.endDate,
+        status: booking.status,
+        earnings: booking.numberofdays * booking.providerId.charge
+        }));
+        
 
-//     return res.status(200).json({
-//       success: true,
-//       stats: {
-//         totalBookings,
-//         pendingBookings,
-//         averageRating: Number(averageRating.toFixed(1)),
-//         totalRevenue,
-//         monthlyRevenue
-//       }
-//     });
+  })
 
-module.exports = { getNearbyProviders, searchService,getAllProviders, getProviderById, getBookingByProvider, createProvider, updateProvider, blockProvider, unblockProvider, getProviderProfile, updateProfile,  uploadProfilePicture, uploadCertificate };
+module.exports = { getNearbyProviders, searchService,getAllProviders, getProviderById, getBookingByProvider, createProvider, updateProvider, blockProvider, unblockProvider, getProviderProfile, updateProfile,  uploadProfilePicture, uploadCertificate, getProviderStats };

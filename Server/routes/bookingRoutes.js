@@ -6,7 +6,7 @@ const bookingRouter = express.Router();
 bookingRouter.use(userAuth);
 
 bookingRouter.get("/user", getUserBookings);
-bookingRouter.get("/provider", getProviderBookings);
+// bookingRouter.get("/provider", getProviderBookings);
 // bookingRouter.get("/available-slots", availableSlots);
 bookingRouter.get('/check-availability', checkAvailability);
 bookingRouter.get('/provider/:providerId/booked-dates', getProviderBookedDates);

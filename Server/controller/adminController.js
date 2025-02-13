@@ -40,52 +40,7 @@ const getBookingByUser = asyncErrorHandler(async (req, res) => {
   res.status(200).json({ status: "success", message: "Bookings fetched successfully", bookings });
 });
 
-// const createBooking = asyncErrorHandler(async (req, res) => {
-//   const { userId, providerId, date, slot, status } = req.body;
 
-//     // Validate user and provider existence
-//     const user = await User.findById(userId);
-//     const provider = await Provider.findById(providerId);
-
-//     if (!user || !provider) {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Invalid user or provider'
-//       });
-//     }
-
-//     // Check for existing booking in the same slot
-//     const existingBooking = await Booking.findOne({
-//       provider: providerId,
-//       date,
-//       slot
-//     });
-
-//     if (existingBooking) {
-//       return res.status(400).json({
-//         success: false,
-//         message: 'This time slot is already booked'
-//       });
-//     }
-
-//     const booking = await Booking.create({
-//       userId,
-//       providerId,
-//       date,
-//       slot,
-//       status: status || 'pending'
-//     });
-
-//     const populatedBooking = await Booking.populate([
-//       { path: 'userId', select: 'name email phone' },
-//       { path: 'providerId', select: 'name services' }
-//     ]);
-
-//   res.status(201).json({
-//     status: 'success',
-//     booking: populatedBooking
-//   });
-// });
 
 
 module.exports = { adminLogin, getAllUsers, getUserById, getStats, getBookingByUser };
