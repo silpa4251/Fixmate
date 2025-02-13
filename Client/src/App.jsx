@@ -36,6 +36,7 @@ import SideBar from "./components/Provider/SideBar";
 import DashBoard from "./components/Provider/Dashboard";
 import ProfilePage from "./components/Provider/ProfilePage";
 import TotalBookings from "./components/Provider/TotalBookings";
+import FeedbackForm from "./components/User/FeedBackForm";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -73,6 +74,8 @@ function App() {
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/reschedule/:bookingId" element={<RescheduleBooking />} />
             <Route path="/user/profile" element={<Profile />} />
+            <Route path="/reviews" element={<}
+            <Route path="/feedback/:id" element={<FeedbackForm />} />
           </Route>
             
           <Route element={<ProviderRoutes />}>

@@ -42,6 +42,16 @@ const Bookings = () => {
     }
   });
 
+  const handleFeedback = (booking) => {
+    if (booking.status.toLowerCase() !== "completed") {
+      toast.error("Feedback can only be submitted for completed bookings.");
+      return;
+    }
+    setSelectedBooking(booking);
+    setModalType("feedback");
+    setModalOpen(true);
+  };
+
   const handleReschedule = (booking) => {
     if (["completed", "cancelled"].includes(booking.status.toLowerCase())) {
       toast.error("This booking cannot be rescheduled.");
@@ -87,6 +97,39 @@ const Bookings = () => {
       toast.error("Failed to cancel booking. Please try again.");
     } finally {
       setModalOpen(false);
+    }
+  };
+
+  const getModalConfig = () => {
+    switch (modalType) {
+      case "cancel":
+        return {
+          title: "Cancel Booking",
+          message: "Are you sure you want to cancel this booking? You may not get a refund",
+          confirmText: "Yes, Cancel",
+          onConfirm: confirmCancel
+        };
+      case "reschedule":
+        return {
+          title: "Reschedule Booking",
+          message: "Do you want to reschedule this booking?",
+          confirmText: "Yes, Reschedule",
+          onConfirm: confirmReschedule
+        };
+      case "feedback":
+        return {
+          title: "Submit Feedback",
+          message: "Would you like to provide feedback for this service?",
+          confirmText: "Yes, Give Feedback",
+          onConfirm: () => navigate(`/feedback/${selectedBooking?._id}`)
+        };
+      default:
+        return {
+          title: "",
+          message: "",
+          confirmText: "",
+          onConfirm: () => {}
+        };
     }
   };
 
@@ -162,6 +205,9 @@ const Bookings = () => {
                     src={booking.providerId?.image}
                     alt={booking.providerId?.name || "Provider"}
                     className="w-20 h-20 rounded-full object-cover shadow-md"
+                    onError={(e) => {
+                      e.target.src = "/default-provider-image.png"; // Add a default image
+                    }}
                   />
                 </div>
 
@@ -256,57 +302,57 @@ const Bookings = () => {
                 </div>
 
                 <div className="p-4 bg-gray-50 flex gap-3">
-                  <button
-                    onClick={() => handleReschedule(booking)}
-                    disabled={["completed", "cancelled"].includes(
-                      booking.status.toLowerCase()
-                    )}
-                    className={`flex-1 ${
-                      ["completed", "cancelled"].includes(
-                        booking.status.toLowerCase()
-                      )
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600"
-                    } text-white py-2.5 px-4 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                  >
-                    Reschedule
-                  </button>
-                  <button
-                    onClick={() => handleCancel(booking)}
-                    disabled={["completed", "cancelled"].includes(
-                      booking.status.toLowerCase()
-                    )}
-                    className={`flex-1 ${
-                      ["completed", "cancelled"].includes(
-                        booking.status.toLowerCase()
-                      )
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-red-500 hover:bg-red-600"
-                    } text-white py-2.5 px-4 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
-                  >
-                    Cancel
-                  </button>
+                  {booking.status.toLowerCase() === "completed" ? (
+                    <button
+                      onClick={() => handleFeedback(booking)}
+                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 px-4 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+                    >
+                      Give Feedback
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleReschedule(booking)}
+                        disabled={["completed", "cancelled"].includes(
+                          booking.status.toLowerCase()
+                        )}
+                        className={`flex-1 ${
+                          ["completed", "cancelled"].includes(
+                            booking.status.toLowerCase()
+                          )
+                            ? "bg-gray-300 cursor-not-allowed"
+                            : "bg-blue-500 hover:bg-blue-600"
+                        } text-white py-2.5 px-4 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                      >
+                        Reschedule
+                      </button>
+                      <button
+                        onClick={() => handleCancel(booking)}
+                        disabled={["completed", "cancelled"].includes(
+                          booking.status.toLowerCase()
+                        )}
+                        className={`flex-1 ${
+                          ["completed", "cancelled"].includes(
+                            booking.status.toLowerCase()
+                          )
+                            ? "bg-gray-300 cursor-not-allowed"
+                            : "bg-red-500 hover:bg-red-600"
+                        } text-white py-2.5 px-4 rounded-lg font-medium transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
                 </div>
-              </div>
-            ))}
+                </div>
+              ))}
           </div>
         )}
 
         <Modal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
-          onConfirm={modalType === "cancel" ? confirmCancel : confirmReschedule}
-          title={
-            modalType === "cancel" ? "Cancel Booking" : "Reschedule Booking"
-          }
-          message={
-            modalType === "cancel"
-              ? "Are you sure you want to cancel this booking? You may not get a refund"
-              : "Do you want to reschedule this booking?"
-          }
-          confirmText={
-            modalType === "cancel" ? "Yes, Cancel" : "Yes, Reschedule"
-          }
+          {...getModalConfig()}
           cancelText="No, Go Back"
         />
       </div>

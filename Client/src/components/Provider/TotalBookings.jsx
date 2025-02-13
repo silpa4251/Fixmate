@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Search, Calendar, User, Mail, Phone, MapPin, X, Wallet } from "lucide-react";
+import { toast } from "react-toastify";
 
 const TotalBookings = () => {
   const [bookings, setBookings] = useState([]);
@@ -33,6 +34,26 @@ const TotalBookings = () => {
     } catch (err) {
       setError("Failed to fetch bookings.");
       setLoading(false);
+    }
+  };
+
+  const handleUpdateBooking = async (bookingId, updatedData) => {
+    try {
+      const response = await axiosInstance.patch(`/bookings/${bookingId}/status`, updatedData);
+      console.log("res", response.data);
+      if (response.data.booking) {
+        toast.success("Booking status updated successfully");
+        // Update the local state to reflect the change immediately
+        setBookings(bookings.map(booking => 
+          booking._id === bookingId 
+            ? { ...booking, ...updatedData }
+            : booking
+        ));
+      } else {
+        toast.error("Failed to update booking status");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update booking status");
     }
   };
 
@@ -178,14 +199,29 @@ const TotalBookings = () => {
                 <td className="px-6 py-4">{booking.providerId?.services || "N/A"}</td>
                 <td className="px-6 py-4">{new Date(booking.startDate).toLocaleDateString()}</td>
                 <td className="px-6 py-4">{new Date(booking.endDate).toLocaleDateString()}</td>
-                <td className="px-6 py-4">{booking.earnings || "N/A"}</td>
                 <td className="px-6 py-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${getStatusColor(booking.status)}`}
-                  >
-                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                  </span>
+                  <div className="flex items-center space-x-1">
+                    <Wallet className="w-4 h-4 text-gray-400" />
+                    <input
+                      type="number"
+                      defaultValue={booking.earnings || 0}
+                      onBlur={(e) => handleUpdateBooking(booking._id, { earnings: parseFloat(e.target.value) })}
+                      className="w-20 px-2 py-1 border rounded text-black-default focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    />
+                  </div>
                 </td>
+                <td className="px-6 py-4">
+                  <select
+                    value={booking.status}
+                    onChange={(e) => handleUpdateBooking(booking._id, { status: e.target.value })}
+                    className={`px-3 py-1.5 border rounded-full text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer ${getStatusColor(booking.status)}`}
+                  >
+                    <option value="confirmed" className="bg-yellow-100 text-yellow-800">Confirmed</option>
+                    <option value="completed" className="bg-green-100 text-green-800">Completed</option>
+                    <option value="cancelled" className="bg-red-100 text-red-800">Cancelled</option>
+                  </select>
+                </td>
+
                 <td className="px-6 py-4">
                   <button
                     onClick={() => handleViewBooking(booking)}
