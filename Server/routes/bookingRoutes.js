@@ -3,6 +3,8 @@ const { newBooking, getUserBookings, getProviderBookings, updateBookingStatus, a
 const userAuth = require("../middlewares/userAuth");
 const bookingRouter = express.Router();
 
+bookingRouter.patch("/:id/status", updateBookingStatus);
+
 bookingRouter.use(userAuth);
 
 bookingRouter.get("/user", getUserBookings);
@@ -11,7 +13,7 @@ bookingRouter.get("/user", getUserBookings);
 bookingRouter.get('/check-availability', checkAvailability);
 bookingRouter.get('/provider/:providerId/booked-dates', getProviderBookedDates);
 bookingRouter.post("/", newBooking);
-bookingRouter.patch("/:id/status", updateBookingStatus);
+
 bookingRouter.get("/:bookingId", bookingById);
 bookingRouter.patch("/:bookingId/reschedule", rescheduleBookings);
 
