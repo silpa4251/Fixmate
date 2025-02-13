@@ -1,18 +1,18 @@
 const express = require("express");
 const userAuth = require("../middlewares/userAuth");
-const { createRating, getAllRatings, getRatingById, updateRating, deleteRating, getRatingsByProvider } = require("../controller/ratingController");
+const { createRating, getAllRatings, getRatingById, updateRating, deleteRating, getRatingsByProvider, getAverageRating, getRatingsByUser } = require("../controller/ratingController");
 const ratingRouter = express.Router();
 
 ratingRouter.use(userAuth);
 
-ratingRouter.post('/ratings', createRating);
-ratingRouter.get('/ratings', getAllRatings);
-ratingRouter.get('/ratings/:id', getRatingById);
-ratingRouter.put('/ratings/:id', updateRating);
-ratingRouter.patch('/ratings/:id', deleteRating);
-ratingRouter.get('/ratings/provider/:providerId', getRatingsByProvider);
-ratingRouter.get('/ratings/provider/:providerId/average', ratingController.getAverageRating);
-ratingRouter.get('/ratings/user/:userId', ratingController.getRatingsByUser);
+ratingRouter.post('/', createRating);
+ratingRouter.get('/', getAllRatings);
+ratingRouter.get('/:id', getRatingById);
+ratingRouter.put('/:id', updateRating);
+ratingRouter.patch('/:id', deleteRating);
+ratingRouter.get('/provider/:providerId', getRatingsByProvider);
+ratingRouter.get('/provider/:providerId/average', getAverageRating);
+ratingRouter.get('/user', getRatingsByUser);
 
 
 module.exports = ratingRouter;

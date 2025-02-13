@@ -41,6 +41,10 @@ const searchService = asyncErrorHandler(async (req, res) => {
 });
 
 const getAllProviders = asyncErrorHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1; 
+  const limit = parseInt(req.query.limit) || 10; 
+  const skip = (page - 1) * limit;
+
   const providers = await Provider.aggregate([
     {
       $project: {
@@ -52,14 +56,25 @@ const getAllProviders = asyncErrorHandler(async (req, res) => {
           isBlocked: 1,
           status: 1,
           createdAt: 1,
-        }
-    }
+        },
+    },
+    { $skip: skip }, 
+    { $limit: limit },
 ]);
-  res.status(200).json({message:"All users retrieved successfully", providers});
+const totalProviders = await Provider.countDocuments();
+const totalPages = Math.ceil(totalProviders / limit);
+
+  res.status(200).json({message:"All providers retrieved successfully", providers, pagination: {
+    currentPage: page,
+    totalPages,
+    totalProviders,
+    limit,
+  },});
 });
 
 const getProviderById = asyncErrorHandler( async(req, res) => {
   const providerId = req.params.id;
+
   const provider = await Provider.findById(providerId);
   if(!provider) {
     throw new CustomError("provider not found", 404);
@@ -69,7 +84,9 @@ const getProviderById = asyncErrorHandler( async(req, res) => {
 
 const getBookingByProvider = asyncErrorHandler(async (req, res) => {
   const providerId = req.params.id;
-  
+   const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
   // Verify provider exists
   const provider = await Provider.findById(providerId);
   if (!provider) {
@@ -77,12 +94,23 @@ const getBookingByProvider = asyncErrorHandler(async (req, res) => {
   }
   const bookings = await Booking.find({ providerId: providerId })
   .populate('userId', 'name address')
-  .sort({ date: 1, slot: 1 });
+  .sort({ date: 1, slot: 1 })
+  .skip(skip) 
+  .limit(limit);
+  const totalBookings = await Booking.countDocuments({ providerId: providerId });
 
+  // Calculate total pages
+  const totalPages = Math.ceil(totalBookings / limit);
   res.status(200).json({
     status: "success",
     message: "Bookings fetched successfully",
-    bookings
+    bookings,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalBookings,
+      limit,
+    },
   });
 });
 

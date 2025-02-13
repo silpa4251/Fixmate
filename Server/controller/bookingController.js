@@ -104,6 +104,9 @@ const checkAvailability = asyncErrorHandler(async (req, res, next) => {
 });
 
 const getAllBookings = asyncErrorHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
   const bookings = await Booking.aggregate([
     {
       $match: {
@@ -148,10 +151,20 @@ const getAllBookings = asyncErrorHandler(async (req, res) => {
         },
       },
     },
+    { $skip: skip },
+    { $limit: limit },
   ]);
+
+  const totalBookings = await Booking.countDocuments({ isDeleted: false });
+  const totalPages = Math.ceil(totalBookings / limit);
   res
     .status(200)
-    .json({ message: "All bookings retrieved successfully", bookings });
+    .json({ message: "All bookings retrieved successfully", bookings, pagination: {
+      currentPage: page,
+      totalPages,
+      totalBookings,
+      limit,
+    },});
 });
 
 // Get user bookings
@@ -161,26 +174,46 @@ const getUserBookings = asyncErrorHandler(async (req, res) => {
       .status(400)
       .json({ status: "error", message: "User ID missing" });
   }
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
   const bookings = await Booking.find({ userId: req.user.id })
     .populate("providerId", "name image address services charge status")
-    .sort({ date: 1 });
+    .sort({ date: 1 })
+    .skip(skip) 
+    .limit(limit); 
+    const totalBookings = await Booking.countDocuments({userId: req.user.id  });
+
+    // Calculate total pages
+    const totalPages = Math.ceil(totalBookings / limit);
   res.status(200).json({
     status: "success",
     message: "Bookings fetched successfully",
     bookings,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalBookings,
+      limit,
+    },
   });
 });
 
 // Get provider bookings
 const getProviderBookings = asyncErrorHandler(async (req, res) => {
   const providerId = req.user.id;
-
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
   const bookings = await Booking.find({ providerId })
     .populate("userId", "name email address phone")
     .populate("providerId", "services charge")
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip) 
+    .limit(limit); 
+const totalBookings = await Booking.countDocuments({ providerId });
+const totalPages = Math.ceil(totalBookings / limit);
 
-// Format the response to include startDate and endDate explicitly
 const formattedBookings = bookings.map((booking) => ({
   _id: booking._id,
   userId: {
@@ -204,6 +237,12 @@ const formattedBookings = bookings.map((booking) => ({
     status: "success",
     message: "Bookings fetched successfully",
     bookings: formattedBookings,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalBookings,
+      limit,
+    },
   });
 });
 

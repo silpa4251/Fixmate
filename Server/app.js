@@ -9,6 +9,7 @@ const providerRoutes = require("./routes/providerRoutes");
 const mapRoute = require("./routes/mapRoute");
 const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const ratingRoutes = require("./routes/ratingRoutes");
 
 
 // Middlewares for parsing request body
@@ -29,6 +30,7 @@ app.use("/api/providers",providerRoutes);
 app.use("/api/map", mapRoute);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin",adminRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 
 // Middleware for gobal error handling

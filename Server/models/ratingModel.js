@@ -27,6 +27,10 @@ const ratingSchema = new mongoose.Schema({
     required: false,
     maxlength: 1000
   },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
 }, {
     timestamps: true
 });

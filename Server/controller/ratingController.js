@@ -1,12 +1,13 @@
 const Rating = require('../models/ratingModel'); 
+const asyncErrorHandler = require("../utils/asyncErrorHandler");
+const CustomError = require("../utils/customError");
 
-// Create a new rating
 const createRating = asyncErrorHandler(async (req, res) => {
     const { bookingId, userId, providerId, rating, comment } = req.body;
 
     // Validate required fields
     if (!bookingId || !userId || !providerId || !rating) {
-      return res.status(400).json({ message: "All fields are required except comment." });
+      throw new CustomError("All fields are required except comment.", 400);
     }
 
     // Check if the rating is within the valid range
@@ -37,7 +38,7 @@ const createRating = asyncErrorHandler(async (req, res) => {
 
 // Get all ratings
 const getAllRatings = asyncErrorHandler(async (req, res) => {
-      const ratings = await Rating.find()
+      const ratings = await Rating.find({ isDeleted: false })
         .populate('bookingId')
         .populate('userId')
         .populate('providerId');
@@ -49,7 +50,7 @@ const getAllRatings = asyncErrorHandler(async (req, res) => {
 const getRatingById = asyncErrorHandler(async (req, res) => {
       const { id } = req.params;
   
-      const rating = await Rating.findById(id)
+      const rating = await Rating.findById({ id, isDeleted: false })
         .populate('bookingId')
         .populate('userId')
         .populate('providerId');
@@ -92,13 +93,16 @@ const updateRating = asyncErrorHandler(async (req, res) => {
 const deleteRating = asyncErrorHandler(async (req, res) => {
       const { id } = req.params;
   
-      const deletedRating = await Rating.findByIdAndDelete(id);
-  
-      if (!deletedRating) {
+      const updatedRating = await Rating.findByIdAndUpdate(
+        id,
+        { isDeleted: true }, // Set isDeleted to true
+        { new: true } // Return the updated document
+      );
+      if (!updatedRating) {
         return res.status(404).json({ message: "Rating not found." });
       }
   
-      res.status(200).json({ message: "Rating deleted successfully." });
+      res.status(200).json({ message: "Rating deleted successfully.", rating: updatedRating });
 
 });
 
@@ -106,7 +110,7 @@ const deleteRating = asyncErrorHandler(async (req, res) => {
 const getRatingsByProvider = asyncErrorHandler(async (req, res) => {
       const { providerId } = req.params;
   
-      const ratings = await Rating.find({ providerId })
+      const ratings = await Rating.find({ providerId, isDeleted: false })
         .populate('bookingId')
         .populate('userId');
   
@@ -130,10 +134,10 @@ const getAverageRating = asyncErrorHandler(async (req, res) => {
 });
 
 const getRatingsByUser = asyncErrorHandler(async (req, res) => {
-      const { userId } = req.params; 
+      const userId = req.user.id; 
   
       // Fetch all ratings where the userId matches
-      const ratings = await Rating.find({ userId })
+      const ratings = await Rating.find({ userId, isDeleted: false })
         .populate('bookingId') // Populate booking details if needed
         .populate('providerId'); // Populate provider details if needed
   

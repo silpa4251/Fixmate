@@ -11,20 +11,37 @@ const { updateProfileService, getProfileService } = require("../services/userSer
 
 
 const getAllUsers = asyncErrorHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10; 
+    const skip = (page - 1) * limit;
+
     const users = await User.aggregate([
       {
         $project: {
-            name: 1,
-            email: 1,
-            phone: 1,
-            address: 1,
-            image: 1,
-            isBlocked: 1,
-            createdAt: 1,
-          }
-      }
-  ]);
-    res.status(200).json({message:"All users retrieved successfully", users});
+          name: 1,
+          email: 1,
+          phone: 1,
+          address: 1,
+          image: 1,
+          isBlocked: 1,
+          createdAt: 1,
+        },
+      },
+      { $skip: skip }, 
+      { $limit: limit }, 
+    ]);
+    const totalUsers = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsers / limit);
+    res.status(200).json({
+      message: "All users retrieved successfully",
+      users,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalUsers,
+        limit,
+      },
+    });
 });
 
 const blockUser = asyncErrorHandler(async (req, res) => {
