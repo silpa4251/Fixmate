@@ -144,3 +144,4 @@ const getRatingsByUser = asyncErrorHandler(async (req, res) => {
       res.status(200).json({ ratings });
 });
 
+module.exports = { createRating, getAllRatings, getAverageRating, getRatingById, updateRating, deleteRating, getRatingsByProvider, getRatingsByUser };
