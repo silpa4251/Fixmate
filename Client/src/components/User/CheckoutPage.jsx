@@ -61,7 +61,7 @@ const CheckoutPage = () => {
         bookingId: bookingId,
       });
 
-      const { id: orderId, amount, currency } = response.data;
+      const { id: orderId, amount, currency } = response.data.paymentResponse;
 
       await loadRazorpayScript();
 
@@ -142,13 +142,13 @@ const CheckoutPage = () => {
 
   return (
     <div className="min-h-screen bg-green-100 flex items-center justify-center">
-      <div className="w-full max-w-lg p-6 bg-white rounded-2xl shadow-md">
+      <div className="w-full max-w-lg p-6 bg-white rounded-2xl shadow-md bg-white-default">
         <h1 className="text-xl font-bold text-center mb-6">Booking Details</h1>
         <div className="mb-6 p-4 bg-gray-50 rounded-lg flex items-center gap-4">
           <img
             src={bookingDetails.providerId.image}
             alt={bookingDetails.providerId.name}
-            className="w-16 h-16 rounded-full"
+            className="w-28 h-28 rounded-full object-cover"
           />
           <div>
             <p className="text-gray-600 mb-2">
@@ -182,23 +182,23 @@ const CheckoutPage = () => {
           <h2 className="font-semibold mb-4">Payment Details</h2>
           <div className="flex justify-between mb-2">
             <span>Booking Fee</span>
-            <span>₹{FIXED_AMOUNT}</span>
+            <span>₹ {FIXED_AMOUNT.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-gray-600 mb-2">
             <span>Service Tax</span>
-            <span>₹0</span>
+            <span>₹ 0.00</span>
           </div>
           <div className="flex justify-between font-bold border-t border-gray-300 pt-2">
             <span>Total Amount</span>
-            <span>₹{FIXED_AMOUNT}</span>
+            <span>₹ {FIXED_AMOUNT.toFixed(2)}</span>
           </div>
         </div>
 
         <button
           onClick={handlePayment}
-          className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
+          className="w-full bg-green-500 text-white-default font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
         >
-          Pay Now (₹{FIXED_AMOUNT})
+          Pay Now (₹{FIXED_AMOUNT.toFixed(2)})
         </button>
       </div>
     </div>

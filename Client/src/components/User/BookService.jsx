@@ -40,7 +40,6 @@ const BookService = () => {
           axiosInstance.get(`/providers/${id}`),
           axiosInstance.get(`/bookings/provider/${id}/booked-dates`)
         ]);
-        
         setProvider(providerRes.data.provider);
         // Assuming the API returns an array of date strings in 'YYYY-MM-DD' format
         setBookedDates(bookingsRes.data.bookedDates.map(dateStr => parseDate(dateStr)));
@@ -72,7 +71,6 @@ const BookService = () => {
 
   // Check if a date is booked
   const isDateBooked = (date) => {
-    console.log('booked dates',bookedDates);
     return bookedDates.some(bookedDate => 
       date.getFullYear() === bookedDate.getFullYear() &&
       date.getMonth() === bookedDate.getMonth() &&
@@ -105,7 +103,6 @@ const BookService = () => {
 
   // Modified date selection handler
   const handleDateChange = (range) => {
-    console.log("Range:", range);
     if (!range || !Array.isArray(range)) {
       setSelectedDates([]);
       return;
@@ -213,8 +210,8 @@ const BookService = () => {
   return (
     <div className="container mx-auto p-4 mt-20">
       {/* Provider Details Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6 flex flex-col md:flex-row gap-6">
-        <div className="w-full md:w-1/3">
+      <div className="bg-white-default p-6 rounded-lg shadow-md mb-6 flex flex-col md:flex-row gap-6">
+        <div>
           <img
             src={provider.image || "https://via.placeholder.com/500"}
             alt={provider.name}
@@ -241,13 +238,15 @@ const BookService = () => {
           </p>
         </div>
       </div>
-
+      
+      <div className='flex justify-center'>
       <button
         onClick={() => setShowBookingSection(!showBookingSection)}
-        className="w-full bg-green-500 text-white-default py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
+        className="bg-green-500 text-white-default py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300"
       >
         {showBookingSection ? 'Hide Booking Options' : 'Show Booking Options'}
       </button>
+      </div>
 
       {showBookingSection && (
         <div className="bg-white p-6 rounded-lg shadow-md mt-6">
@@ -255,9 +254,9 @@ const BookService = () => {
             Select Booking Dates
           </h2>
           
-          <div className="space-y-6">
+          <div className="space-y-6 grid grid-cols-2">
             {/* Calendar with multi-date selection */}
-            <div className="max-w-md mx-auto calendar-container">
+            <div className="max-w-md mx-auto calendar-container mt-4">
             <Calendar
                 onChange={handleDateChange}
                 value={selectedDates.length > 0 ? [selectedDates[0], selectedDates[selectedDates.length - 1]] : null}
@@ -287,14 +286,17 @@ const BookService = () => {
               </div>
             )}
 
+
+          </div>
+            <div className='flex justify-center'>
             <button
               disabled={selectedDates.length === 0}
               onClick={handleBookNow}
-              className="w-full bg-green-500 text-white-default py-2 px-4 rounded-lg mt-6 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition duration-300"
+              className="bg-green-500 text-white-default py-2 px-6 rounded-lg mt-6 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition duration-300"
             >
               Confirm Booking 
             </button>
-          </div>
+            </div>
         </div>
       )}
     </div>

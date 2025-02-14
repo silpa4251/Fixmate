@@ -8,7 +8,6 @@ export const fetchAllUsers = createAsyncThunk(
   async () => {
     try {
       const response = await axiosInstance.get("/users");
-      console.log("responseall", response);
       const nonAdminUsers = response.data.data.users.filter(user => user.role !== "admin");
       return nonAdminUsers;
     } catch (error) {

@@ -69,7 +69,7 @@ const Feedbacks = () => {
   // Confirm deletion of feedback
   const confirmDeleteFeedback = async () => {
     try {
-      await axiosInstance.delete(`/ratings/${selectedFeedback._id}`);
+      await axiosInstance.patch(`/ratings/${selectedFeedback._id}`);
       setFeedbacks((prevFeedbacks) => prevFeedbacks.filter((fb) => fb._id !== selectedFeedback._id));
       toast.success("Feedback deleted successfully!");
     } catch (error) {

@@ -17,7 +17,7 @@ const FeedbackForm = () => {
     setLoading(true);
 
     try {
-      await axiosInstance.post(`/bookings/${id}/feedback`, feedback);
+      await axiosInstance.post(`/ratings`, feedback);
       toast.success('Feedback submitted successfully!');
       navigate('/bookings');
     } catch (error) {

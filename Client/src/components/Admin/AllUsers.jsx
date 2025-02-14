@@ -5,25 +5,30 @@ import { useNavigate } from "react-router-dom";
 import { Search, UserPlus, Edit } from "lucide-react";
 import Modal from "../Modal";
 import UserForm from "./UserForm";
+import useDebounce from "../../hooks/useDebounce";
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [updateLoading, setUpdateLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionType, setActionType] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(6);
   const [showUserForm, setShowUserForm] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const navigate = useNavigate();
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [currentPage, limit]);
 
   useEffect(() => {
     filterUsers();
@@ -31,9 +36,12 @@ const AllUsers = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axiosInstance.get("/admin/users");
-      setUsers(response.data.users);
-      setFilteredUsers(response.data.users);
+      const response = await axiosInstance.get("/admin/users", {
+        params: { page: currentPage, limit },
+      });
+      setUsers(response.data.data.users);
+      setFilteredUsers(response.data.data.users);
+      setTotalPages(response.data.data.pagination.totalPages);
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch users.");
@@ -53,7 +61,7 @@ const AllUsers = () => {
     }
 
     if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
+      const searchLower = debouncedSearchTerm.toLowerCase();
       result = result.filter(
         user =>
           user.name.toLowerCase().includes(searchLower) ||
@@ -72,15 +80,12 @@ const AllUsers = () => {
 
   const handleConfirmAction = async () => {
     if (!selectedUser) return;
-
-    setUpdateLoading(true);
     try {
       const endpoint =
         actionType === "block" ? "/admin/block-user" : "/admin/unblock-user";
       const response = await axiosInstance.patch(
         `${endpoint}/${selectedUser._id}`
       );
-        console.log("hekk", response);
       if (response.data.status === "success") {
         setUsers(prevUsers =>
           prevUsers.map(user =>
@@ -99,10 +104,13 @@ const AllUsers = () => {
         err.response?.data?.message || "Failed to update user status"
       );
     } finally {
-      setUpdateLoading(false);
       setModalOpen(false);
       setSelectedUser(null);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   const handleEditUser = (user) => {
@@ -247,6 +255,29 @@ const AllUsers = () => {
           </tbody>
         </table>
       </div>
+
+      <div className="flex justify-between items-center mt-6">
+        <div>
+          <span>Page {currentPage} of {totalPages}</span>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
 
       {/* Modal for Block/Unblock Confirmation */}
       <Modal

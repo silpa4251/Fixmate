@@ -36,7 +36,6 @@ const AdminLogin = () => {
         const adminData = res.data.data;
         localStorage.setItem('isAuth', 'true'); // Assuming the response contains user role data
         toast.success("Login successful!", { position: "bottom-right" });
-        console.log("heyy", adminData);
         // Dispatch the user data to store it in Redux
         dispatch(login(adminData));
         navigate("/admin/dashboard");

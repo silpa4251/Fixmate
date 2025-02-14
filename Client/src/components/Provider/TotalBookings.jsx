@@ -1,64 +1,48 @@
-import { useEffect, useState } from "react";
+/* eslint-disable no-unused-vars */
+import { useState } from "react";
 import axiosInstance from "../../api/axiosInstance";
 import { Search, Calendar, User, Mail, Phone, MapPin, X, Wallet } from "lucide-react";
 import { toast } from "react-toastify";
+import useDebounce from "../../hooks/useDebounce";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 const TotalBookings = () => {
-  const [bookings, setBookings] = useState([]);
-  const [filteredBookings, setFilteredBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all"); // New state for date filter
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewBooking, setViewBooking] = useState(null);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit, setLimit] = useState(1); 
 
-  // Fetch bookings for the logged-in provider
-  useEffect(() => {
-    fetchProviderBookings();
-  }, []);
+  const { data: bookingsData, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ["bookings", currentPage, limit],
+    queryFn: async () => {
+      const response = await axiosInstance.get("/providers/bookings", {
+        params: { page: currentPage, limit },
+      });
+      return response.data;
+    },
+  });
 
-  // Filter bookings based on search term, status, and date
-  useEffect(() => {
-    filterBookings();
-  }, [searchTerm, statusFilter, dateFilter, bookings]);
-
-  const fetchProviderBookings = async () => {
-    try {
-      const response = await axiosInstance.get("/providers/bookings");
-      console.log("hyt",response.data.bookings)
-      setBookings(response.data.bookings);
-      setFilteredBookings(response.data.bookings);
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to fetch bookings.");
-      setLoading(false);
-    }
-  };
-
-  const handleUpdateBooking = async (bookingId, updatedData) => {
-    try {
+  const updateBookingMutation = useMutation({
+    mutationFn: async ({ bookingId, updatedData }) => {
       const response = await axiosInstance.patch(`/bookings/${bookingId}/status`, updatedData);
-      console.log("res", response.data);
-      if (response.data.booking) {
-        toast.success("Booking status updated successfully");
-        // Update the local state to reflect the change immediately
-        setBookings(bookings.map(booking => 
-          booking._id === bookingId 
-            ? { ...booking, ...updatedData }
-            : booking
-        ));
-      } else {
-        toast.error("Failed to update booking status");
-      }
-    } catch (err) {
+      return response.data;
+    },
+    onSuccess: (data, { bookingId, updatedData }) => {
+      toast.success("Booking status updated successfully");
+      // Invalidate the query to refetch updated data
+      refetch();
+    },
+    onError: (err) => {
       toast.error(err.response?.data?.message || "Failed to update booking status");
-    }
-  };
+    },
+  });
 
   const filterBookings = () => {
-    let filtered = [...bookings];
+    let filtered = bookingsData?.bookings || [];
 
     // Apply status filter
     if (statusFilter !== "all") {
@@ -70,9 +54,9 @@ const TotalBookings = () => {
     // Apply date filter
     if (dateFilter !== "all") {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Start of today
+      today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
-      tomorrow.setDate(today.getDate() + 1); // Start of tomorrow
+      tomorrow.setDate(today.getDate() + 1);
 
       switch (dateFilter) {
         case "today":
@@ -81,14 +65,12 @@ const TotalBookings = () => {
             return bookingDate >= today && bookingDate < tomorrow;
           });
           break;
-
         case "tomorrow":
           filtered = filtered.filter((booking) => {
             const bookingDate = new Date(booking.startDate);
             return bookingDate >= tomorrow && bookingDate < new Date(tomorrow.getTime() + 86400000); // End of tomorrow
           });
           break;
-
         default:
           break;
       }
@@ -96,15 +78,21 @@ const TotalBookings = () => {
 
     // Apply search filter
     if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
+      const searchLower = debouncedSearchTerm.toLowerCase();
       filtered = filtered.filter(
         (booking) =>
           booking.userId?.name?.toLowerCase().includes(searchLower) ||
-          booking.providerId?.services?.toLowerCase().includes(searchLower)
+          booking.providerId?.services[0]?.toLowerCase().includes(searchLower)
       );
     }
 
-    setFilteredBookings(filtered);
+    return filtered;
+  };
+
+  const filteredBookings = filterBookings();
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   const handleViewBooking = (booking) => {
@@ -125,12 +113,12 @@ const TotalBookings = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
+if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  if (error) {
-    return <div>Error: {error}</div>;
+  if (isError) {
+    return <div className="flex justify-center items-center h-screen">Error: {error.message}</div>;
   }
 
   return (
@@ -205,7 +193,11 @@ const TotalBookings = () => {
                     <input
                       type="number"
                       defaultValue={booking.earnings || 0}
-                      onBlur={(e) => handleUpdateBooking(booking._id, { earnings: parseFloat(e.target.value) })}
+                      onBlur={(e) =>
+                      updateBookingMutation.mutate({
+                        bookingId: booking._id,
+                        updatedData: { earnings: parseFloat(e.target.value) },
+                      })}
                       className="w-20 px-2 py-1 border rounded text-black-default focus:ring-2 focus:ring-green-500 focus:outline-none"
                     />
                   </div>
@@ -213,7 +205,12 @@ const TotalBookings = () => {
                 <td className="px-6 py-4">
                   <select
                     value={booking.status}
-                    onChange={(e) => handleUpdateBooking(booking._id, { status: e.target.value })}
+                    onChange={(e) =>
+                      updateBookingMutation.mutate({
+                        bookingId: booking._id,
+                        updatedData: { status: e.target.value },
+                      })
+                    }
                     className={`px-3 py-1.5 border rounded-full text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 cursor-pointer ${getStatusColor(booking.status)}`}
                   >
                     <option value="confirmed" className="bg-yellow-100 text-yellow-800">Confirmed</option>
@@ -333,6 +330,27 @@ const TotalBookings = () => {
           </div>
         </div>
       )}
+       <div className="flex justify-between items-center mt-6 text-black-default">
+        <div>
+          <span>Page {currentPage} of {bookingsData?.pagination.totalPages}</span>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === bookingsData?.pagination.totalPages}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

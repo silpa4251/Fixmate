@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import axiosInstance from "../../api/axiosInstance";
 import { Bar } from "react-chartjs-2";
-import { Line } from "react-chartjs-2";
+// import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -20,9 +20,9 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       const response = await axiosInstance.get("/admin/stats");
-      console.log("fdd",response.data.data.data)
       setStats(response.data.data.data);
       setLoading(false);
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setLoading(false);
       toast.error("Failed to fetch dashboard data");

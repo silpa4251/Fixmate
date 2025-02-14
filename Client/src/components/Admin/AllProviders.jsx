@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, UserPlus, Edit, Eye } from "lucide-react"; // Import Eye icon for "View"
 import Modal from "../Modal";
 import ProviderForm from "./ProviderForm";
+import useDebounce from "../../hooks/useDebounce";
 
 const AllProviders = () => {
   const [providers, setProviders] = useState([]);
@@ -18,12 +19,15 @@ const AllProviders = () => {
   const [actionType, setActionType] = useState("");
   const [showProviderForm, setShowProviderForm] = useState(false);
   const [editProvider, setEditProvider] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(6); // Items per page
   const navigate = useNavigate();
-
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   // Fetch providers on component mount
   useEffect(() => {
     fetchProviders();
-  }, []);
+  }, [currentPage, limit]);
 
   // Filter providers when search term or filter status changes
   useEffect(() => {
@@ -33,11 +37,13 @@ const AllProviders = () => {
   // Fetch all providers from the API
   const fetchProviders = async () => {
     try {
-      const response = await axiosInstance.get("/providers");
-      console.log("ji",response.data.providers)
+      const response = await axiosInstance.get("/providers",{
+        params: { page: currentPage, limit },
+      });
       if (response.data && Array.isArray(response.data.providers)) {
         setProviders(response.data.providers);
         setFilteredProviders(response.data.providers);
+        setTotalPages(response.data.pagination.totalPages);
       } else {
         throw new Error("Invalid data format received from the server.");
       }
@@ -61,7 +67,7 @@ const AllProviders = () => {
 
     // Apply search filter
     if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
+      const searchLower = debouncedSearchTerm.toLowerCase();
       result = result.filter(
         (provider) =>
           provider.name?.toLowerCase().includes(searchLower) ||
@@ -70,6 +76,10 @@ const AllProviders = () => {
     }
 
     setFilteredProviders(result);
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   // Open modal for block/unblock actions
@@ -266,6 +276,28 @@ const AllProviders = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex justify-between items-center mt-6">
+        <div>
+          <span>Page {currentPage} of {totalPages}</span>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Modal for Block/Unblock Confirmation */}

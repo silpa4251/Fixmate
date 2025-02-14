@@ -34,7 +34,7 @@ const Home = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 lg:px-8">
+      <div className="container mx-auto mt-6 grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-6 px-4 lg:px-8">
         {/* Provider List */}
         <div>
           <ProviderList  providers={serviceProviders}/>

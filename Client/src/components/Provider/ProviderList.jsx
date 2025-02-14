@@ -24,7 +24,7 @@ const ProviderList = ({ providers }) => {
   };
 
   return (
-    <div className="flex flex-col p-4">
+    <div className="flex flex-col sm:max-w-2xl p-4">
       { currentProviders.length > 0 ? (
          currentProviders.map((provider) => (
           <ProviderCard key={provider._id} provider={provider} />

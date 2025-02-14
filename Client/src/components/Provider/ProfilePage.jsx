@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { Trash2, Upload, Plus, X } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -24,7 +25,11 @@ const ProfilePage = () => {
   const fetchProfile = async () => {
     try {
       const response = await axiosInstance.get('/providers/profile');
-      setProfile(response.data.provider);
+      const profileData = response.data.provider;
+      setProfile(profileData);
+      if (profileData.image) {
+        setPreviewImage(profileData.image);
+      }
       setLoading(false);
     } catch (error) {
       toast.error('Error fetching profile');
@@ -41,8 +46,8 @@ const ProfilePage = () => {
       return;
     }
 
-    setPreviewImage(URL.createObjectURL(file));
-    
+    const previewUrl = URL.createObjectURL(file);
+    setPreviewImage(previewUrl);
     const formData = new FormData();
     formData.append('image', file);
 
@@ -50,10 +55,13 @@ const ProfilePage = () => {
       const response = await axiosInstance.post('/providers/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      console.log("imhy", response.data);
-      setProfile(prev => ({ ...prev, image: response.data.image }));
+      const imageUrl = response.data.image;
+      setProfile(prev => ({ ...prev, image: imageUrl }));
+      setPreviewImage(imageUrl);
+      URL.revokeObjectURL(previewUrl);
       toast.success('Profile picture updated');
     } catch (error) {
+      setPreviewImage(profile.image);
       toast.error('Error uploading image');
     }
   };
@@ -269,34 +277,9 @@ const ProfilePage = () => {
 
           {/* Services */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm">
-            {/* <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-black-default">Services</h2>
-              <button
-                type="button"
-                onClick={() => setProfile(prev => ({
-                  ...prev,
-                  services: [...prev.services ]
-                }))}
-                className="flex items-center text-blue-500 hover:text-blue-600"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add Service
-              </button>
-            </div> */}
-
-            {/* {profile.services.map((service, index) => (
-              <div key={index} className="p-4 border rounded-lg mb-4"> */}
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-medium text-black-default">Service</h3>
-                  <button
-                    type="button"
-                   onClick={() => setProfile(prev => ({ ...prev, services: [...prev.services, ''] }))}
-                    className="text-red-500 hover:text-red-600"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-
+            </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -304,8 +287,11 @@ const ProfilePage = () => {
                     </label>
                     <input
                       type="text"
-                      value={profile.services}
-                      onChange={(e) => handleServiceChange(index, 'name', e.target.value)}
+                      value={profile.services[0] || " "}
+                      onChange={(e) => setProfile(prev => ({ 
+                        ...prev, 
+                        services: [e.target.value] // Update as single item array
+                      }))}
                       className="w-full p-2 border rounded-lg text-black-default"
                     />
                   </div>
@@ -315,14 +301,15 @@ const ProfilePage = () => {
                     </label>
                     <input
                       type="number"
-                      value={profile.charge}
-                      onChange={(e) => handleServiceChange(index, 'charge', e.target.value)}
+                      value={profile.charge || " "}
+                      onChange={(e) => setProfile(prev => ({ 
+                        ...prev, 
+                        charge: e.target.value 
+                      }))}
                       className="w-full p-2 border rounded-lg text-black-default"
                     />
                   </div>
                 </div>
-              {/* </div>
-            ))} */}
           </div>
 
           {/* certifications */}

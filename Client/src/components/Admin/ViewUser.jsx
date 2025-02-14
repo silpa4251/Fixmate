@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 
 const ViewUsers = () => {
     const { id } = useParams();
-    console.log("first",id)
   const [user, setUser] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);

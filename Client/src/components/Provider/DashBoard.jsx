@@ -21,9 +21,9 @@ const DashBoard = () => {
   const fetchStats = async () => {
     try {
       const response = await axiosInstance.get("/providers/stats");
-      console.log("fdd",response.data.data)
       setStats(response.data.data);
       setLoading(false);
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       setLoading(false);
       toast.error("Failed to fetch dashboard data");

@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import axiosInstance from '../../api/axiosInstance';
+import { toast } from 'react-toastify';
 
 const RescheduleBooking = () => {
   const { bookingId } = useParams();
-  const [selectedDates, setSelectedDates] = useState([]); // Array to store selected dates
-  const [timeSlots, setTimeSlots] = useState([]);
+  const [selectedDates, setSelectedDates] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [bookingDetails, setBookingDetails] = useState(null);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   // Format date for backend
   const formatDateForBackend = (date) => {
@@ -50,8 +51,8 @@ const RescheduleBooking = () => {
         startDate: formatDateForBackend(startDate),
         endDate: formatDateForBackend(endDate),
       });
-      alert('Booking rescheduled successfully!');
-      window.location.href = '/bookings';
+      toast.success('Booking rescheduled successfully!');
+      navigate('/bookings');
     } catch (err) {
       console.error('Error rescheduling booking:', err);
       setError('Failed to reschedule booking. Please try again.');
@@ -81,8 +82,8 @@ const RescheduleBooking = () => {
           </div>
         )}
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="mb-6">
+        <div className="bg-white-default p-6 rounded-lg shadow-md">
+          <div className="mb-6 calendar-container">
             <h3 className="text-xl font-medium text-gray-700 mb-4">Select New Dates</h3>
             <Calendar
               onChange={(range) => {
@@ -98,8 +99,10 @@ const RescheduleBooking = () => {
               }}
               value={selectedDates.length > 0 ? [selectedDates[0], selectedDates[selectedDates.length - 1]] : null}
               minDate={new Date()}
-              className="border rounded-lg shadow-sm"
-              selectRange={true} // Enable range selection
+              // className="border rounded-lg shadow-sm"
+              selectRange={true}
+              // tileDisabled={tileDisabled}
+              // tileClassName={tileClassName}
             />
           </div>
 

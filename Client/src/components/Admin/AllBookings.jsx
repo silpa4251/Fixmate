@@ -4,6 +4,7 @@ import { Search, Plus, Edit, X, Calendar, User, Mail, Phone, Building2, Wrench }
 import { toast } from "react-toastify";
 import Modal from "../Modal";
 import BookingForm from "./BookingForm";
+import useDebounce from "../../hooks/useDebounce";
 
 const AllBookings = () => {
   const [details, setDetails] = useState([]);
@@ -18,20 +19,30 @@ const AllBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [editBooking, setEditBooking] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  // eslint-disable-next-line no-unused-vars
+  const [limit, setLimit] = useState(6); 
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   useEffect(() => {
     fetchBookings();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, limit]);
 
   useEffect(() => {
     filterBookings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, statusFilter, details]);
 
   const fetchBookings = async () => {
     try {
-      const response = await axiosInstance.get("/admin/bookings");
+      const response = await axiosInstance.get("/admin/bookings",{
+        params: { page: currentPage, limit },
+      });
       setDetails(response.data.bookings);
       setFilteredBookings(response.data.bookings);
+      setTotalPages(response.data.pagination.totalPages);
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch bookings.");
@@ -49,7 +60,7 @@ const AllBookings = () => {
     }
 
     if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase();
+      const searchLower = debouncedSearchTerm.toLowerCase();
       filtered = filtered.filter(
         booking =>
           booking.user.name.toLowerCase().includes(searchLower) ||
@@ -61,6 +72,10 @@ const AllBookings = () => {
     setFilteredBookings(filtered);
   };
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+  
   const handleModalOpen = (booking) => {
     setSelectedBooking(booking);
     setModalOpen(true);
@@ -238,6 +253,28 @@ const AllBookings = () => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex justify-between items-center mt-6">
+        <div>
+          <span>Page {currentPage} of {totalPages}</span>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {/* Delete Confirmation Modal */}

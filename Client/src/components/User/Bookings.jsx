@@ -35,7 +35,7 @@ const Bookings = () => {
         return status === "pending" || status === "confirmed";
       case "Completed":
         return status === "completed";
-      case "Canceled":
+      case "Cancelled":
         return status === "cancelled";
       default:
         return true;
@@ -106,21 +106,21 @@ const Bookings = () => {
         return {
           title: "Cancel Booking",
           message: "Are you sure you want to cancel this booking? You may not get a refund",
-          confirmText: "Yes, Cancel",
+          confirmText: "Yes",
           onConfirm: confirmCancel
         };
       case "reschedule":
         return {
           title: "Reschedule Booking",
           message: "Do you want to reschedule this booking?",
-          confirmText: "Yes, Reschedule",
+          confirmText: "Yes",
           onConfirm: confirmReschedule
         };
       case "feedback":
         return {
           title: "Submit Feedback",
           message: "Would you like to provide feedback for this service?",
-          confirmText: "Yes, Give Feedback",
+          confirmText: "Yes",
           onConfirm: () => navigate(`/feedback/${selectedBooking?._id}`)
         };
       default:
@@ -136,8 +136,8 @@ const Bookings = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-green-200 py-20">
       <div className="container mx-auto px-4 max-w-7xl">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl mt-8 md:text-4xl font-bold text-gray-800 mb-4">
             My Bookings
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
@@ -146,13 +146,13 @@ const Bookings = () => {
         </div>
 
         <div className="flex justify-center mb-6">
-          {["Upcoming", "Completed", "Canceled"].map((tab) => (
+          {["Upcoming", "Completed", "Cancelled"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 mx-2 rounded-lg transition-colors ${
                 activeTab === tab
-                  ? "bg-green-500 text-white"
+                  ? "bg-green-500 text-white-default"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
@@ -168,7 +168,7 @@ const Bookings = () => {
         )}
 
         {!loading && filteredBookings.length === 0 && (
-          <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-2xl shadow-sm p-8">
+          <div className="flex flex-col items-center justify-center min-h-[400px] bg-white-default rounded-2xl shadow-sm p-8">
             <div className="text-gray-400 mb-4">
               <svg
                 className="w-16 h-16"
@@ -198,13 +198,13 @@ const Bookings = () => {
             {filteredBookings.map((booking) => (
               <div
                 key={booking._id}
-                className="bg-white p-6 rounded-lg shadow-md"
+                className="bg-white-default p-6 rounded-lg shadow-md"
               >
                 <div className="flex justify-center mb-4">
                   <img
                     src={booking.providerId?.image}
                     alt={booking.providerId?.name || "Provider"}
-                    className="w-20 h-20 rounded-full object-cover shadow-md"
+                    className="w-28 h-28 rounded-full object-cover shadow-md"
                     onError={(e) => {
                       e.target.src = "/default-provider-image.png"; // Add a default image
                     }}
@@ -217,13 +217,13 @@ const Bookings = () => {
                       {booking.providerId?.name || "Provider"}
                     </h2>
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      className={`px-4 py-2 rounded-full text-sm font-medium ${
                         booking.status.toLowerCase() === "confirmed"
-                          ? "bg-yellow-100 text-yellow-800"
+                          ? "bg-yellow-200 text-yellow-800"
                           : booking.status.toLowerCase() === "completed"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-green-200 text-green-800"
                           : booking.status.toLowerCase() === "cancelled"
-                          ? "bg-red-100 text-red-800"
+                          ? "bg-red-200 text-red-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
@@ -301,7 +301,7 @@ const Bookings = () => {
                   </div>
                 </div>
 
-                <div className="p-4 bg-gray-50 flex gap-3">
+                <div className="p-4 flex gap-3">
                   {booking.status.toLowerCase() === "completed" ? (
                     <button
                       onClick={() => handleFeedback(booking)}
@@ -353,7 +353,7 @@ const Bookings = () => {
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           {...getModalConfig()}
-          cancelText="No, Go Back"
+          cancelText="No"
         />
       </div>
     </div>

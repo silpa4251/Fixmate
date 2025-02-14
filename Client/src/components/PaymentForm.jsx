@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axiosInstance from "../api/axiosInstance";
+import { toast } from "react-toastify";
 
 const PaymentForm = () => {
   const [loading, setLoading] = useState(false);
@@ -38,13 +39,13 @@ const PaymentForm = () => {
             });
 
             if (verifyResponse.data.status === "success") {
-              alert("Payment successful! Response:", verifyResponse.data);
+              toast.success("Payment successful! Response:", verifyResponse.data);
             } else {
-              alert("Payment verification failed.");
+              toast.error("Payment verification failed.");
             }
           } catch (error) {
             console.error("Error verifying payment:", error);
-            alert("Failed to verify payment. Please try again.");
+            toast.error("Failed to verify payment. Please try again.");
           }
         },
         prefill: {
