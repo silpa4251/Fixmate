@@ -254,11 +254,12 @@ const getProviderProfile = asyncErrorHandler(async (req, res) => {
 });
 
 const updateProfile = asyncErrorHandler(async (req, res) => {
-    const { name, email, phone, address, services, image, certifications } = req.body;
+    const { name, email, phone, address, charge, services, image, certifications } = req.body;
+    console.log("ki", image)
 
     const updatedProfile = await Provider.findByIdAndUpdate(
       req.user.id,
-      { name, email, phone, address, services, image, certifications },
+      { name, email, phone, address, charge, services, image, certifications },
       { new: true, runValidators: true }
     );
 

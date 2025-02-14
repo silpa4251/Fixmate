@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const Booking = require('../models/bookingModel');
 const bcrypt = require("bcryptjs");
 const Provider = require('../models/providerModel'); 
 const Bookings = require('../models/bookingModel'); 
@@ -68,5 +69,18 @@ const getUserByIdService = async (id) => {
   }
   return { data: {user}};
 }
- 
-module.exports = { adminLoginService, getStatsService, getUserByIdService };
+
+const getBookingsByUserService = async (userId) => {
+    const bookings = await Booking.find({ userId })
+      .populate('providerId', 'name address services charge') 
+      .sort({ date: 1, slot: 1 }); 
+
+    if (!bookings || bookings.length === 0) {
+      throw new Error("No bookings found for this user.");
+    }
+
+    return bookings; 
+  };
+
+  
+module.exports = { adminLoginService, getStatsService, getUserByIdService, getBookingsByUserService };
