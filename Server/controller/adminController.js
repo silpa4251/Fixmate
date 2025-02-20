@@ -1,5 +1,4 @@
 const { RESPONSE } = require("../constants/response");
-const Booking = require("../models/bookingModel");
 const { getStatsService, adminLoginService, getUserByIdService, getBookingsByUserService } = require("../services/adminService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const { loginValidation } = require("../validations/userValidations");
@@ -22,11 +21,6 @@ const getStats = asyncErrorHandler(async(req,res) => {
   });
 });
 
-// const getAllUsers = asyncErrorHandler(async (req, res) => {
-//    const result = await allUsersService();
-//   res.status(200).json({status:"success",message:"All users retrieved successfully",result});
-// });
-
 const getUserById = asyncErrorHandler(async (req,res) => {
   const userId = req.params.id;
   const data = await getUserByIdService(userId);
@@ -39,8 +33,6 @@ const getBookingByUser = asyncErrorHandler(async (req, res) => {
   const bookings = await getBookingsByUserService(id);
   res.status(200).json({  status: RESPONSE.success, message: "Bookings fetched successfully", bookings });
 });
-
-
 
 
 module.exports = { adminLogin, getUserById, getStats, getBookingByUser };

@@ -1,48 +1,19 @@
-const Booking = require("../models/bookingModel");
+
+const { RESPONSE } = require("../constants/response");
 const Provider = require("../models/providerModel");
 const User = require("../models/userModel");
+const { newBookingService } = require("../services/bookingService");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
-const CustomError = require("../utils/customError");
+
 // const { generateSlots, parseTime } = require("../utils/generateSlots");
 
 // Create a new booking
 const newBooking = asyncErrorHandler(async (req, res) => {
-  const { providerId, startDate, endDate, numberOfDays } = req.body;
   const userId = req.user.id;
-
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-
-  const overlappingBookings = await Booking.find({
-    providerId,
-    $or: [
-      {
-        startDate: { $lte: end },
-        endDate: { $gte: start },
-      },
-      {
-        startDate: { $lte: end },
-        endDate: { $gte: start },
-      },
-    ],
-  });
-
-  if (overlappingBookings.length > 0) {
-    throw new CustomError("Selected dates are not available", 400);
-  }
-
-  const booking = await Booking.create({
-    userId,
-    providerId,
-    startDate,
-    endDate,
-    numberOfDays,
-    status: "pending",
-  });
-
+  const data = await newBookingService(userId, req.body); 
   res
     .status(201)
-    .json({ status: "success", message: "Booking successful!", booking });
+    .json({ status: RESPONSE.success, message: "Booking successful!", data});
 });
 
 const getProviderBookedDates = asyncErrorHandler(async (req, res, next) => {
