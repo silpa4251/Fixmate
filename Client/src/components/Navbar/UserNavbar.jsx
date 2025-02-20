@@ -31,7 +31,7 @@ const UserNavbar = () => {
           <Link to="/home" className="hover:underline">Home</Link>
           <Link to="/bookings" className="hover:underline">Bookings</Link>
           <Link to="/user/profile" className="hover:underline">Profile</Link>
-          <Link to="/reviews" className="hover:underline">Reviews</Link>
+          {/* <Link to="/reviews" className="hover:underline">Reviews</Link> */}
         </div>
 
         {/* Profile Image & Logout */}

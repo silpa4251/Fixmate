@@ -14,7 +14,7 @@ const TotalBookings = () => {
   const [viewBooking, setViewBooking] = useState(null);
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(1); 
+  const [limit, setLimit] = useState(6); 
 
   const { data: bookingsData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["bookings", currentPage, limit],

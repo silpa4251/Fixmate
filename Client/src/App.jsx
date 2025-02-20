@@ -36,7 +36,7 @@ import SideBar from "./components/Provider/SideBar";
 import DashBoard from "./components/Provider/Dashboard";
 import ProfilePage from "./components/Provider/ProfilePage";
 import TotalBookings from "./components/Provider/TotalBookings";
-import FeedbackForm from "./components/User/FeedBackForm";
+import FeedbackForm from "./components/User/FeedbackForm";
 import Feedbacks from "./components/User/Feedbacks";
 
 // import axios from "axios"
