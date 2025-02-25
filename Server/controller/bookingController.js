@@ -6,7 +6,7 @@ const CustomError = require("../utils/customError");
 // Create a new booking
 const newBooking = asyncErrorHandler(async (req, res) => {
   const userId = req.user.id;
-  const booking = await newBookingService(userId, req.body); 
+  const {booking} = await newBookingService(userId, req.body); 
   res
     .status(201)
     .json({ status: RESPONSE.success, message: "Booking successful!", booking});
@@ -15,8 +15,7 @@ const newBooking = asyncErrorHandler(async (req, res) => {
 const getProviderBookedDates = asyncErrorHandler(async (req, res) => {
   const { providerId } = req.params;
   
-  const bookedDates = await getProviderBookedDatesService(providerId);
-
+  const {bookedDates} = await getProviderBookedDatesService(providerId);
   res.status(200).json({
     status: RESPONSE.success,
     message: "Booked Dates retrived successfully",
@@ -99,7 +98,7 @@ const getProviderBookings = asyncErrorHandler(async (req, res) => {
 
 const bookingById = asyncErrorHandler(async (req, res) => {
   const { bookingId } = req.params;
-  const booking = await getBookingByIdService(bookingId);
+  const {booking} = await getBookingByIdService(bookingId);
 
   res.status(200).json({
     status: RESPONSE.success,
@@ -111,7 +110,7 @@ const bookingById = asyncErrorHandler(async (req, res) => {
 const rescheduleBookings = asyncErrorHandler(async (req, res) => {
   const { bookingId } = req.params;
   const { startDate, endDate } = req.body;
-  const updatedBooking = await rescheduleBookingService(bookingId, startDate, endDate);
+  const {updatedBooking} = await rescheduleBookingService(bookingId, startDate, endDate);
 
   res.status(200).json({
     status: RESPONSE.success,
@@ -124,7 +123,7 @@ const rescheduleBookings = asyncErrorHandler(async (req, res) => {
 const updateBookingStatus = asyncErrorHandler(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-  const updatedBooking = await updateBookingStatusService(id, status);
+  const {updatedBooking} = await updateBookingStatusService(id, status);
 
   res.status(200).json({
     status: RESPONSE.success,
@@ -135,7 +134,7 @@ const updateBookingStatus = asyncErrorHandler(async (req, res) => {
 
 const createBooking = asyncErrorHandler(async (req, res) => {
   const { user, provider, startDate, endDate, status = 'pending'} = req.body;
-  const booking = await createBookingService(user, provider, startDate, endDate, status);
+  const {booking} = await createBookingService(user, provider, startDate, endDate, status);
   res.status(201).json({
     status: RESPONSE.success,
     message: 'Booking created successfully',
@@ -147,7 +146,7 @@ const editBooking = asyncErrorHandler(async(req, res) => {
   const { bookingId } = req.params;
   const { startDate, endDate, status } = req.body;
 
-  const updatedBooking = await editBookingService(bookingId, startDate, endDate, status);
+  const {updatedBooking} = await editBookingService(bookingId, startDate, endDate, status);
 
   res.status(200).json({
     status: RESPONSE.success,
@@ -158,7 +157,7 @@ const editBooking = asyncErrorHandler(async(req, res) => {
 
 const deleteBooking = asyncErrorHandler(async (req, res) => {
     const { bookingId } = req.params;
-    const result = await deleteBookingService(bookingId);
+    const {result} = await deleteBookingService(bookingId);
 
     res.status(200).json({
       status: RESPONSE.success,

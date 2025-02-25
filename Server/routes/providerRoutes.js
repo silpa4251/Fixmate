@@ -1,5 +1,5 @@
 const express = require("express");
-const { getNearbyProviders, searchService, getProviderById, getAllProviders, getProviderProfile, updateProfile, uploadProfilePicture, uploadCertificate, getProviderStats } = require("../controller/providerController");
+const { getNearbyProviders, searchService, getProviderById, getAllProviders, getProviderProfile, updateProfile, uploadProfilePicture, uploadCertificate, getProviderStats, searchProvider } = require("../controller/providerController");
 const upload = require("../middlewares/multer");
 const providerAuth = require("../middlewares/providerAuth");
 const { getProviderBookings } = require("../controller/bookingController");
@@ -7,7 +7,7 @@ const providerRouter = express.Router();
 
 providerRouter.get("/",getAllProviders);
 providerRouter.get("/nearby", getNearbyProviders);
-providerRouter.get("/search", searchService);
+providerRouter.get("/search", searchProvider);
 
 providerRouter.get("/stats", providerAuth, getProviderStats);
 providerRouter.get("/profile",providerAuth, getProviderProfile);

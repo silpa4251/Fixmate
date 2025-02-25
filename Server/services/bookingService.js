@@ -1,4 +1,5 @@
 const Booking = require("../models/bookingModel");
+const Provider= require("../models/providerModel");
 const CustomError = require("../utils/customError");
 
 const newBookingService = async(userId,data) => {
@@ -23,6 +24,14 @@ const newBookingService = async(userId,data) => {
       if (overlappingBookings.length > 0) {
         throw new CustomError("Selected dates are not available", 400);
       }
+
+      const provider = await Provider.findById(providerId);
+      if (!provider) {
+          throw new CustomError("Provider not found", 404);
+      }
+  
+      const { charge } = provider;
+      const amount = charge * numberOfDays;
     
       const booking = await Booking.create({
         userId,
@@ -30,6 +39,7 @@ const newBookingService = async(userId,data) => {
         startDate,
         endDate,
         numberOfDays,
+        amount,
         status: "pending",
       });
     return {booking};
@@ -52,8 +62,7 @@ const getProviderBookedDatesService = async (providerId) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
   });
-
-  return bookedDates;
+  return {bookedDates};
 };
 
 const checkAvailabilityService = async (providerId, startDate, endDate) => {
@@ -111,6 +120,7 @@ const getAllBookingsService = async (page, limit) => {
       $project: {
         startDate: 1,
         endDate: 1,
+        amount: 1,
         status: 1,
         user: {
           name: 1,
@@ -201,7 +211,7 @@ const getBookingByIdService = async (bookingId) => {
     throw new CustomError("Booking not found.", 404);
   }
 
-  return booking;
+  return { booking };
 };
 
 const rescheduleBookingService = async (bookingId, startDate, endDate) => {
@@ -236,7 +246,7 @@ const rescheduleBookingService = async (bookingId, startDate, endDate) => {
     { new: true }
   );
 
-  return updatedBooking;
+  return { updatedBooking };
 };
 
 const updateBookingStatusService = async (id, status) => {

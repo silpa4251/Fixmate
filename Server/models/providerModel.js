@@ -67,10 +67,10 @@ const providerSchema = mongoose.Schema(
             type: Boolean,
             default: true,
         },
-        reviews: [
+        rating: [
             {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Review",
+            ref: "Rating",
             },
         ],
         isBlocked: {

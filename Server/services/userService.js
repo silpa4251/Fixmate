@@ -133,6 +133,7 @@ const updateUserService = async(userId, updateData) => {
 
 const updateProfileService = async(userId, body, file) => {
     const { name, email, phone, address } = body;
+    console.log("hj65", name, email, phone, address)
     let parsedAddress = [];
     if (typeof address === "string") {
         try {

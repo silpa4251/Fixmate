@@ -58,8 +58,8 @@ const updateUser = asyncErrorHandler(async (req, res) => {
 
 const updateProfile = asyncErrorHandler(async(req, res) => {
   const userId = req.user.id;
-  const data = await updateProfileService(userId, req.body, req.file);
-  res.status(200).json({status: 'success',message: "Profile updated successfully", data})
+  const { updatedProfile } = await updateProfileService(userId, req.body, req.file);
+  res.status(200).json({status: 'success',message: "Profile updated successfully", updatedProfile})
 })
 
 const getProfile = asyncErrorHandler(async(req, res) =>{
