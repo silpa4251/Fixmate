@@ -100,9 +100,8 @@ const Profile = () => {
 
       // Append image if there's a new one
       if (imageFile) {
-        submitData.append('image', imageFile);
+        submitData.append('profileImage', imageFile);
       }
-
       await axiosInstance.put('/users/profile', submitData, {
         headers: {
           'Content-Type': 'multipart/form-data'

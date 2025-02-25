@@ -54,7 +54,7 @@ const Home = () => {
               { title: "Satisfaction Guaranteed", desc: "100% satisfaction or money back guarantee" }
             ].map((feature, idx) => (
               <div key={idx} 
-                   className="bg-white rounded-lg shadow-md hover:shadow-lg 
+                   className="bg-white-default rounded-lg shadow-md hover:shadow-lg 
                             transition duration-200 p-6 text-center">
                 <h3 className="text-xl font-semibold text-green-700 mb-2">
                   {feature.title}

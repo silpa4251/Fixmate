@@ -75,7 +75,7 @@ function App() {
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/reschedule/:bookingId" element={<RescheduleBooking />} />
             <Route path="/user/profile" element={<Profile />} />
-            <Route path="/reviews" element={<Feedbacks />} />
+            <Route path="/feedbacks" element={<Feedbacks />} />
             <Route path="/feedback/:id" element={<FeedbackForm />} />
           </Route>
             

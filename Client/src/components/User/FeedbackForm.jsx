@@ -4,7 +4,7 @@ import axiosInstance from '../../api/axiosInstance';
 import { toast } from 'react-toastify';
 
 const FeedbackForm = () => {
-  const { providerId } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [feedback, setFeedback] = useState({
     rating: 5,
@@ -17,7 +17,7 @@ const FeedbackForm = () => {
     setLoading(true);
 
     try {
-      await axiosInstance.post(`/ratings/${providerId}`, feedback);
+      await axiosInstance.post("/ratings", { ...feedback, id });
       toast.success('Feedback submitted successfully!');
       navigate('/bookings');
     } catch (error) {

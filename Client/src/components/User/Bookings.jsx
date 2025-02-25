@@ -47,6 +47,7 @@ const Bookings = () => {
       toast.error("Feedback can only be submitted for completed bookings.");
       return;
     }
+    console.log("tfertirst", booking)
     setSelectedBooking(booking);
     setModalType("feedback");
     setModalOpen(true);
