@@ -1,7 +1,7 @@
 const { RESPONSE } = require("../constants/response");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/customError");
-const { getNearbyProvidersService, searchProviderService, getAllProvidersService, getProviderByIdService, getBookingByProviderService, createProviderService, updateProviderService, blockProviderService, unblockProviderService, getProviderProfileService, updateProviderProfileService, uploadProfileImageService, uploadCertificateService, getProviderStatsService } = require("../services/providerService");
+const { getNearbyProvidersService, searchProviderService, getAllProvidersService, getProviderByIdService, getBookingByProviderService, createProviderService, updateProviderService, blockProviderService, unblockProviderService, getProviderProfileService, updateProviderProfileService, uploadProfileImageService, uploadCertificateService, getProviderStatsService, getBookingsByMonthService, getEarningsByMonthService, getTodaysBookingsService } = require("../services/providerService");
 
 const getNearbyProviders = asyncErrorHandler(async (req, res) => {
   const { latitude, longitude, distance = 5000, service } = req.query;
@@ -152,6 +152,15 @@ const uploadCertificate = asyncErrorHandler(async (req, res) => {
   });
 });
 
+const getTodaysBookings = asyncErrorHandler( async( req, res) => {
+  const providerId = req.user.id;
+  const data = await getTodaysBookingsService(providerId);
+  res.status(200).json({
+    status: "success",
+    data
+  });
+})
+
 const getProviderStats = asyncErrorHandler(async (req, res) => {
   const providerId = req.user.id;
   const stats = await getProviderStatsService(providerId);
@@ -162,33 +171,24 @@ const getProviderStats = asyncErrorHandler(async (req, res) => {
   });
 });
 
-// const getTotalEarnings = asyncErrorHandler(async(req, res) => {
-//     const providerId = req.user.id;
+const getBookingsByMonth = asyncErrorHandler( async(req, res) => {
+  const providerId = req.user.id;
+  const data = await getBookingsByMonthService(providerId);
+  res.status(200).json({
+    status: "success",
+    data
+  });
 
-//     const bookings = await Booking.find({ providerId })
-//         .populate("userId", "name email address phone")
-//         .populate("providerId", "charge");
-    
-//     const formatted = bookings.map((booking) => ({
-//         _id: booking._id,
-//         userId: {
-//           _id: booking.userId._id,
-//           name: booking.userId.name,
-//           email: booking.userId.email,
-//           phone: booking.userId.phone,
-//           address: booking.userId.address[0],
-//         },
-//         providerId: {
-//           _id: booking.providerId._id,
-//           services: booking.providerId.services,
-//         },
-//         startDate: booking.startDate,
-//         endDate: booking.endDate,
-//         status: booking.status,
-//         earnings: booking.numberofdays * booking.providerId.charge
-//         }));
-        
+})
 
-// })
+const getEarningsByMonth = asyncErrorHandler( async(req, res) => {
+  const providerId = req.user.id;
+  const data = await getEarningsByMonthService(providerId);
+  res.status(200).json({
+    status: "success",
+    data
+  });
 
-module.exports = { getNearbyProviders, searchProvider, getAllProviders, getProviderById, getBookingByProvider, createProvider, updateProvider, blockProvider, unblockProvider, getProviderProfile, updateProfile,  uploadProfilePicture, uploadCertificate, getProviderStats };
+})
+
+module.exports = { getNearbyProviders, searchProvider, getAllProviders, getProviderById, getBookingByProvider, createProvider, updateProvider, blockProvider, unblockProvider, getProviderProfile, updateProfile,  uploadProfilePicture, uploadCertificate, getTodaysBookings, getProviderStats, getBookingsByMonth, getEarningsByMonth };

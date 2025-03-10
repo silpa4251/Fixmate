@@ -1,7 +1,7 @@
 const express = require("express");
 const { makePayment, paymentverify, getProfile, updateProfile } = require("../controller/userController");
 const userRouter = express.Router();
-const upload = require("../middlewares/multer");
+const { upload } = require("../middlewares/multer");
 const userAuth = require("../middlewares/userAuth");
 
 userRouter.use(userAuth);
@@ -9,7 +9,7 @@ userRouter.use(userAuth);
 userRouter.post("/make-payment", makePayment);
 userRouter.post("/verify-payment", paymentverify);
 userRouter.get("/profile", getProfile);
-userRouter.put("/profile", upload.single('profileImage'), updateProfile);
+userRouter.put("/profile", upload.single('image'), updateProfile);
 // userRouter.get("/",getAllUsers);
 // userRouter.get("/:id",getUserById);
 // userRouter.patch("/block/:id",blockUser)

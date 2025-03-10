@@ -1,7 +1,10 @@
 const Provider= require("../models/providerModel");
 const Booking = require("../models/bookingModel");
 const bcrypt = require("bcryptjs");
-const cloudinary = require("../config/cloudinary");
+// const cloudinary = require("../config/cloudinary");
+const { mongoose } = require("mongoose");
+const { uploadToS3, generatePresignedUrl } = require("../middlewares/multer");
+
 
 
 const getNearbyProvidersService = async (latitude, longitude, distance, service) => {
@@ -14,7 +17,11 @@ const getNearbyProvidersService = async (latitude, longitude, distance, service)
       },
       ...(service && { services: new RegExp(service, "i") }),
     });
-
+    for (let i = 0; i < providers.length; i++) {
+      if (providers[i].image) {
+        providers[i].image = await generatePresignedUrl(providers[i].image);
+      }
+    }
     return { providers };
 };
 
@@ -22,6 +29,11 @@ const searchProviderService = async (service) => {
     const providers = await Provider.find({
       services: new RegExp(service, "i"), // Case-insensitive search
     });
+    for (let i = 0; i < providers.length; i++) {
+      if (providers[i].image) {
+        providers[i].image = await generatePresignedUrl(providers[i].image);
+      }
+    }
     return { providers }
 };
 
@@ -44,7 +56,11 @@ const getAllProvidersService = async (page, limit) => {
       { $skip: skip },
       { $limit: limit },
     ]);
-  
+    for (let i = 0; i < providers.length; i++) {
+      if (providers[i].image) {
+        providers[i].image = await generatePresignedUrl(providers[i].image);
+      }
+    }
     const totalProviders = await Provider.countDocuments();
     const totalPages = Math.ceil(totalProviders / limit);
   
@@ -53,7 +69,11 @@ const getAllProvidersService = async (page, limit) => {
 
 const getProviderByIdService = async (id) => {
     const provider = await Provider.findById(id);
-    return { provider } ;
+    const providerData = provider.toObject();
+    if (providerData.image) {
+      providerData.image = await generatePresignedUrl(providerData.image);
+    }
+    return { provider: providerData } ;
 };
 
 const getBookingByProviderService = async(providerId, page, limit) => {
@@ -175,17 +195,31 @@ const getProviderProfileService = async (providerId) => {
     if (!provider) {
       throw new CustomError("Provider not found", 404);
     }
-    return provider;
+    const providerData = provider.toObject();
+    if (providerData.image) {
+      providerData.image = await generatePresignedUrl(providerData.image);
+    }
+    if (providerData.certificates && Array.isArray(providerData.certificates)) {
+      for (let i = 0; i < providerData.certificates.length; i++) {
+        if (typeof providerData.certificates[i] === 'string') {
+          providerData.certificates[i] = await generatePresignedUrl(providerData.certificates[i]);
+        } else if (providerData.certificates[i] && typeof providerData.certificates[i].url === 'string') {
+          providerData.certificates[i].url = await generatePresignedUrl(providerData.certificates[i].url);
+        }
+      }
+    }
+    return providerData;
 };
   
 const updateProviderProfileService = async (providerId, updateData) => {
     const { name, email, phone, address, charge, services, image, certifications } = updateData;
-  
+  console.log("poi", image)
     const updatedProfile = await Provider.findByIdAndUpdate(
       providerId,
       { name, email, phone, address, charge, services, image, certifications },
       { new: true, runValidators: true }
     );
+    console.log("poi", updatedProfile)
   
     if (!updatedProfile) {
       throw new CustomError("Profile not found", 404);
@@ -199,12 +233,8 @@ const uploadProfileImageService = async (file) => {
       throw new CustomError("No file uploaded", 400);
     }
   
-    const result = await cloudinary.uploader.upload(file.path, {
-      folder: "profile_images",
-      resource_type: "image",
-    });
-  
-    return result.secure_url;
+    const fileUrl = await uploadToS3(file);
+    return fileUrl;
 };
 
 const uploadCertificateService = async (file) => {
@@ -212,13 +242,24 @@ const uploadCertificateService = async (file) => {
       throw new CustomError("No file uploaded", 400);
     }
   
-    const result = await cloudinary.uploader.upload(file.path, {
-      folder: "certificates",
-      resource_type: "raw",
-    });
+    const fileUrl = await uploadToS3(file);
   
-    return result.secure_url;
+    return fileUrl;
 };
+
+const getTodaysBookingsService = async(providerId) => {
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  
+  const todaysBookings = await Booking.find({
+    providerId: new mongoose.Types.ObjectId(providerId),
+    startDate: { $gte: startOfDay, $lte: endOfDay },
+  }).sort({ bookingDate: -1 })
+  .populate("userId", "name phone"); 
+
+  return todaysBookings;
+}
   
 const getProviderStatsService = async (providerId) => {
     const totalBookings = await Booking.countDocuments({ providerId });
@@ -276,5 +317,74 @@ const getProviderStatsService = async (providerId) => {
     };
 };
 
+const getBookingsByMonthService = async (providerId) => {
+  const currentYear = new Date().getFullYear();
+  const bookings = await Booking.aggregate([
+    {
+      $match: {
+        providerId: new mongoose.Types.ObjectId(providerId),
+        $expr: { $eq: [{ $year: "$startDate" }, currentYear] },
+      },
+    },
+    {
+      $group: {
+        _id: { $month: "$startDate" },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { _id: 1 },
+    },
+  ]);
+  const monthsInYear = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ].map((month, index) => ({
+    month,
+    count: 0,
+  }));
 
-module.exports = { getNearbyProvidersService, searchProviderService, getAllProvidersService, getProviderByIdService, getBookingByProviderService, createProviderService, updateProviderService, blockProviderService, unblockProviderService, getProviderProfileService, updateProviderProfileService, uploadProfileImageService, uploadCertificateService, getProviderStatsService };
+  bookings.forEach((booking) => {
+    monthsInYear[booking._id - 1].count = booking.count;
+  });
+
+  return monthsInYear ;
+}
+
+const getEarningsByMonthService = async(providerId) => {
+  const currentYear = new Date().getFullYear();
+  const earnings = await Booking.aggregate([
+    {
+      $match: {
+        providerId: new mongoose.Types.ObjectId(providerId),
+        status: "completed",
+        $expr: { $eq: [{ $year: "$startDate" }, currentYear] },
+      },
+    },
+    {
+      $group: {
+        _id: { $month: "$startDate" },
+        totalEarnings: { $sum: "$amount" },
+      },
+    },
+    {
+      $sort: { _id: 1 },
+    },
+  ]);
+  const monthsInYear = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ].map((month, index) => ({
+    month,
+    totalEarnings: 0,
+  }));
+
+  earnings.forEach((earning) => {
+    monthsInYear[earning._id - 1].totalEarnings = earning.totalEarnings;
+  });
+
+  return monthsInYear;
+}
+
+
+module.exports = { getNearbyProvidersService, searchProviderService, getAllProvidersService, getProviderByIdService, getBookingByProviderService, createProviderService, updateProviderService, blockProviderService, unblockProviderService, getProviderProfileService, updateProviderProfileService, uploadProfileImageService, uploadCertificateService, getTodaysBookingsService, getProviderStatsService, getBookingsByMonthService, getEarningsByMonthService };

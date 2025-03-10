@@ -6,6 +6,7 @@ const razorpay = require("../utils/razorpay");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const Payment = require("../models/paymentModel");
+const { uploadToS3, generatePresignedUrl } = require("../middlewares/multer");
 
 const getAllUsersService = async (page, limit) => {
   const skip = (page - 1) * limit;
@@ -133,7 +134,6 @@ const updateUserService = async(userId, updateData) => {
 
 const updateProfileService = async(userId, body, file) => {
     const { name, email, phone, address } = body;
-    console.log("hj65", name, email, phone, address)
     let parsedAddress = [];
     if (typeof address === "string") {
         try {
@@ -154,12 +154,8 @@ const updateProfileService = async(userId, body, file) => {
 
     // Handle image upload if present
     if (file) {
-      const result = await cloudinary.uploader.upload(file.path, {
-        folder: 'profile_images',
-        width: 300,
-        crop: "scale"
-      });
-      profileImageUrl = result.secure_url;
+      const fileUrl = await uploadToS3(file)
+      profileImageUrl = fileUrl ;
     }
     const updateData = {
         name,
@@ -182,7 +178,11 @@ const getProfileService = async(userId) => {
     if (!profile) {
       throw new CustomError('Profile not found',404);
     }
-    return {profile};
+    const profileData = profile.toObject();
+        if (profileData.image) {
+          profileData.image = await generatePresignedUrl(profileData.image);
+        }
+    return {profile: profileData};
 }
 
 const makePaymentService = async (amount, currency, bookingId) => {

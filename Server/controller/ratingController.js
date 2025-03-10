@@ -61,8 +61,7 @@ const getRatingById = asyncErrorHandler(async (req, res) => {
   
       if (!rating) {
         return res.status(404).json({ message: "Rating not found." });
-      }
-  
+      }  
       res.status(200).json({ rating });
 
 });
@@ -155,4 +154,34 @@ const getRatingsByUser = asyncErrorHandler(async (req, res) => {
       res.status(200).json({ feedbacks });
 });
 
-module.exports = { createRating, getAllRatings, getAverageRating, getRatingById, updateRating, deleteRating, getRatingsByProvider, getRatingsByUser };
+const getRatingForProvider = asyncErrorHandler(async (req, res) => {
+  const providerId = req.user.id; 
+
+  const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+  const skip = (page - 1) * limit;
+  const totalRatings = await Rating.countDocuments({ providerId, isDeleted: false });
+
+  // Fetch all ratings where the userId matches
+  const feedbacks = await Rating.find({ providerId, isDeleted: false })
+    .populate('bookingId') 
+    .populate('userId')
+    .skip(skip) // Skip documents based on the current page
+    .limit(limit); 
+
+  if (!feedbacks || feedbacks.length === 0) {
+    return res.status(404).json({ message: "No ratings found for this user." });
+  }
+  const totalPages = Math.ceil(totalRatings / limit);
+
+  res.status(200).json({ feedbacks,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      totalRatings,
+      limit,
+    },
+   });
+});
+
+module.exports = { createRating, getAllRatings, getAverageRating, getRatingById, updateRating, deleteRating, getRatingsByProvider, getRatingsByUser, getRatingForProvider };

@@ -1,3 +1,4 @@
+const { generatePresignedUrl } = require("../middlewares/multer");
 const Booking = require("../models/bookingModel");
 const Provider= require("../models/providerModel");
 const CustomError = require("../utils/customError");
@@ -143,27 +144,40 @@ const getAllBookingsService = async (page, limit) => {
   return { bookings, totalBookings, totalPages };
 };
 
-const getUserBookingsService = async (userId, page = 1, limit = 10) => {
-  const skip = (page - 1) * limit;
+const getUserBookingsService = async (userId ) => {
+  // const skip = (page - 1) * limit;
 
   const bookings = await Booking.find({ userId })
     .populate("providerId", "name image address services charge status")
-    .sort({ date: 1 })
-    .skip(skip)
-    .limit(limit);
+    .sort({ date: 1 });
 
-  const totalBookings = await Booking.countDocuments({ userId });
+    const processedBookings = await Promise.all(bookings.map(async (booking) => {
+      const bookingObj = booking.toObject();
+      
+      // Handle provider image if it exists
+      if (bookingObj.providerId && bookingObj.providerId.image) {
+        bookingObj.providerId.image = await generatePresignedUrl(bookingObj.providerId.image);
+      }
+      
+      // Handle any booking images if they exist
+      if (bookingObj.image) {
+        bookingObj.image = await generatePresignedUrl(bookingObj.image);
+      }
+      return bookingObj;
+    }));
+    
+  // const totalBookings = await Booking.countDocuments({ userId });
 
-  const totalPages = Math.ceil(totalBookings / limit);
+  // const totalPages = Math.ceil(totalBookings / limit);
 
   return {
-    bookings,
-    pagination: {
-      currentPage: page,
-      totalPages,
-      totalBookings,
-      limit,
-    },
+    bookings: processedBookings,
+    // pagination: {
+    //   currentPage: page,
+    //   totalPages,
+    //   totalBookings,
+    //   limit,
+    // },
   };
 };
 
@@ -210,6 +224,10 @@ const getBookingByIdService = async (bookingId) => {
   if (!booking) {
     throw new CustomError("Booking not found.", 404);
   }
+  if (booking.providerId && booking.providerId.image) {
+    booking.providerId.image = await generatePresignedUrl(booking.providerId.image);
+  }
+  
 
   return { booking };
 };

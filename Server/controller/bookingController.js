@@ -64,15 +64,15 @@ const getUserBookings = asyncErrorHandler(async (req, res) => {
   if (!req.user?.id) {
     throw new CustomError("User ID missing", 400);
   }
-  const page = parseInt(req.query.page) || 1; 
-  const limit = parseInt(req.query.limit) || 10;
-  const { bookings, pagination } = await getUserBookingsService(req.user.id, page, limit);
+  // const page = parseInt(req.query.page) || 1; 
+  // const limit = parseInt(req.query.limit) || 10;
+  const { bookings } = await getUserBookingsService(req.user.id);
   res.status(200).json({
     status: RESPONSE.success,
     message: "Bookings fetched successfully",
-    bookings,
-    pagination
+    bookings
   });
+
 });
 
 // Get provider bookings
