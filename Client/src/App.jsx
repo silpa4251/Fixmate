@@ -38,6 +38,7 @@ import ProfilePage from "./components/Provider/ProfilePage";
 import TotalBookings from "./components/Provider/TotalBookings";
 import FeedbackForm from "./components/User/FeedbackForm";
 import Feedbacks from "./components/User/Feedbacks";
+import AllReviews from "./components/Provider/AllReviews";
 
 // import axios from "axios"
 // import { GoogleLogin } from "@react-oauth/google"
@@ -85,6 +86,7 @@ function App() {
             <Route path='dashboard' element={<DashBoard />} /> 
             <Route path='profile' element={<ProfilePage />} />
             <Route path="bookings" element={<TotalBookings />} /> 
+            <Route path="reviews" element={<AllReviews />} />
           </Route>
           </Route>
 

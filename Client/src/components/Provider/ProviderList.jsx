@@ -3,7 +3,6 @@ import { useState } from "react";
 import ProviderCard from "./ProviderCard";
 
 const ProviderList = ({ providers }) => {
-  console.log("u6",providers);
   const [currentPage, setCurrentPage] = useState(1);
   const PROVIDER_PER_PAGE = 3;
 

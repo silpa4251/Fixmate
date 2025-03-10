@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { User, Mail, Phone, MapPin, Camera, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../../api/axiosInstance';
 
 const Profile = () => {
-  const [loading, setLoading] = useState(false);
-  const [image, setimage] = useState(null);
+  const [image, setImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const queryClient = useQueryClient();
   
   const {
     register,
@@ -29,13 +30,10 @@ const Profile = () => {
     name: "address"
   });
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
+  // Fetch profile data query
+  const { isLoading: isLoadingProfile } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
       const response = await axiosInstance.get('/users/profile');
       const data = response.data.data.profile;
       
@@ -46,17 +44,44 @@ const Profile = () => {
         address: data.address?.length ? data.address : [{ place: '', district: '', state: '', pincode: '' }]
       });
       
-      setimage(data.image);
-    } catch (err) {
+      setImage(data.image);
+      return data;
+    },
+    onError: (error) => {
       toast.error('Failed to fetch profile data. Please try again later.', {
         position: "bottom-right",
         autoClose: 3000
       });
-      console.error('Error fetching profile:', err);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching profile:', error);
     }
-  };
+  });
+
+  // Update profile mutation
+  const { mutate: updateProfile, isPending: isUpdating } = useMutation({
+    mutationFn: async (formData) => {
+      const response = await axiosInstance.put('/users/profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Profile updated successfully!', {
+        position: "bottom-right",
+        autoClose: 3000
+      });
+      setImageFile(null); // Reset image file after successful upload
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'Failed to update profile. Please try again.', {
+        position: "bottom-right",
+        autoClose: 3000
+      });
+      console.error('Error updating profile:', err);
+    }
+  });
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -72,7 +97,7 @@ const Profile = () => {
       // Preview the image locally
       const reader = new FileReader();
       reader.onloadend = () => {
-        setimage(reader.result);
+        setImage(reader.result);
       };
       reader.readAsDataURL(file);
       setImageFile(file);
@@ -84,47 +109,27 @@ const Profile = () => {
     }
   };
 
-  const onSubmit = async (formData) => {
-    try {
-      setLoading(true);
-      const submitData = new FormData();
-      
-      // Append form data
-      Object.keys(formData).forEach(key => {
-        if (key === 'address') {
-          submitData.append(key, JSON.stringify(formData[key]));
-        } else {
-          submitData.append(key, formData[key]);
-        }
-      });
-
-      // Append image if there's a new one
-      if (imageFile) {
-        submitData.append('profileImage', imageFile);
+  const onSubmit = (formData) => {
+    const submitData = new FormData();
+    
+    // Append form data
+    Object.keys(formData).forEach(key => {
+      if (key === 'address') {
+        submitData.append(key, JSON.stringify(formData[key]));
+      } else {
+        submitData.append(key, formData[key]);
       }
-      await axiosInstance.put('/users/profile', submitData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+    });
 
-      toast.success('Profile updated successfully!', {
-        position: "bottom-right",
-        autoClose: 3000
-      });
-      setImageFile(null); // Reset image file after successful upload
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update profile. Please try again.', {
-        position: "bottom-right",
-        autoClose: 3000
-      });
-      console.error('Error updating profile:', err);
-    } finally {
-      setLoading(false);
+    // Append image if there's a new one
+    if (imageFile) {
+      submitData.append('image', imageFile);
     }
+    
+    updateProfile(submitData);
   };
 
-  if (loading && !image) {
+  if (isLoadingProfile && !image) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -239,7 +244,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-900">
                     <MapPin className="w-5 h-5" />
-                    address
+                    Address
                   </h3>
                   <button
                     type="button"
@@ -323,19 +328,16 @@ const Profile = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex justify-start pt-4 ">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full md:w-auto font-semibold px-6 py-2 bg-green-500 text-white-default rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:bg-green-400"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
+              <div className="flex justify-start pt-4">
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="w-full md:w-auto font-semibold px-6 py-2 bg-green-500 text-white-default rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:bg-green-400"
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
-            </div>
-
-            {/* Save Button */}
-            
           </form>
         </div>
       </div>

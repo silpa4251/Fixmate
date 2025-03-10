@@ -1,7 +1,7 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { Trash2, Upload, Plus, X } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom';
 import axiosInstance from '../../api/axiosInstance';
 
 const ProfilePage = () => {
@@ -17,15 +17,31 @@ const ProfilePage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [previewImage, setPreviewImage] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [location.pathname]);
 
   const fetchProfile = async () => {
     try {
+      setLoading(true);
       const response = await axiosInstance.get('/providers/profile');
       const profileData = response.data.provider;
+      
+      // Convert certifications to objects if they're just strings
+      if (profileData.certifications && profileData.certifications.length > 0) {
+        const formattedCertifications = profileData.certifications.map(cert => {
+          if (typeof cert === 'string') {
+            // Extract filename from URL
+            const fileName = cert.split('/').pop() || 'Certificate';
+            return { url: cert, fileName: fileName };
+          }
+          return cert;
+        });
+        profileData.certifications = formattedCertifications;
+      }
+      
       setProfile(profileData);
       if (profileData.image) {
         setPreviewImage(profileData.image);
@@ -55,6 +71,7 @@ const ProfilePage = () => {
       const response = await axiosInstance.post('/providers/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
+      
       const imageUrl = response.data.image;
       setProfile(prev => ({ ...prev, image: imageUrl }));
       setPreviewImage(imageUrl);
@@ -70,24 +87,33 @@ const ProfilePage = () => {
     const files = Array.from(e.target.files);
     
     for (const file of files) {
-      // if (!file.type.match('application/pdf')) {
-      //   toast.error('Please upload PDF files only');
-      //   return;
-      // }
-
       const formData = new FormData();
-      files.forEach(file => formData.append('certificate', file));
+      formData.append('certificate', file);
 
       try {
         const response = await axiosInstance.post('/providers/upload-certificate', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
+        console.log("Certificate response:", response.data);
+        
+        // Assuming the server returns certificateUrl
+        const certificateUrl = response.data.certificateUrl;
+        
+        // Add the new certificate with file name to the profile
         setProfile(prev => ({
           ...prev,
-          certifications: [...prev.certifications, response.data.certificateUrl]
+          certifications: [
+            ...prev.certifications, 
+            { 
+              url: certificateUrl, 
+              fileName: file.name 
+            }
+          ]
         }));
+        
+        toast.success(`Certificate "${file.name}" uploaded successfully`);
       } catch (error) {
-        toast.error('Error uploading certificate');
+        toast.error(`Error uploading certificate "${file.name}"`);
       }
     }
   };
@@ -106,12 +132,31 @@ const ProfilePage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prepare data for submission - convert certifications to format expected by server
+    const submissionData = {...profile};
+    
+    // If the certifications are objects with url and fileName, extract just the URLs for submission
+    if (submissionData.certifications && submissionData.certifications.length > 0) {
+      if (typeof submissionData.certifications[0] === 'object') {
+        submissionData.certifications = submissionData.certifications.map(cert => cert.url);
+      }
+    }
+    
     try {
-      await axiosInstance.put('/providers/profile', profile);
+      await axiosInstance.put('/providers/profile', submissionData);
       toast.success('Profile updated successfully');
     } catch (error) {
       toast.error('Error updating profile');
     }
+  };
+
+  const handleRemoveCertificate = (index) => {
+    setProfile(prev => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index)
+    }));
+    toast.success('Certificate removed');
   };
 
   if (loading) {
@@ -190,7 +235,7 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* address */}
+          {/* Address */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-black-default">Address</h2>
@@ -312,35 +357,53 @@ const ProfilePage = () => {
                 </div>
           </div>
 
-          {/* certifications */}
+          {/* Certifications */}
           <div className="bg-white-default p-6 rounded-lg shadow-sm">
-            <h2 className="text-xl font-semibold mb-4 text-black-default">certifications</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black-default">Certifications</h2>
             
             <div className="space-y-4">
               <div className="flex flex-wrap gap-4">
-                {profile.certifications.map((cert, index) => (
-                  <div key={index} className="relative">
-                    <a
-                      href={cert}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block p-4 border rounded-lg hover:bg-gray-50"
-                    >
-                      Certificate {index + 1}
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => setProfile(prev => ({
-                        ...prev,
-                        certifications: prev.certifications.filter((_, i) => i !== index)
-                      }))}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+                {profile.certifications.map((cert, index) => {
+                  // Get filename from certification object or URL
+                  const fileName = typeof cert === 'object' ? 
+                    cert.fileName : 
+                    (cert.split('/').pop() || `Certificate ${index + 1}`);
+                  
+                  // Get URL from certification object or use cert itself if it's a string
+                  const url = typeof cert === 'object' ? cert.url : cert;
+                  
+                  return (
+                    <div key={index} className="relative p-4 border rounded-lg bg-gray-50 w-full md:w-64">
+                      <div className="flex flex-col">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 font-medium truncate hover:underline mb-1"
+                          title={fileName}
+                        >
+                          {fileName}
+                        </a>
+                        <span className="text-xs text-gray-500 truncate">{url.split('/').slice(-2).join('/')}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCertificate(index)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                        title="Remove certificate"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
+
+              {profile.certifications.length === 0 && (
+                <div className="text-center text-gray-500 my-4">
+                  No certifications uploaded yet. Add some below.
+                </div>
+              )}
 
               <div>
                 <label className="flex items-center justify-center w-full h-32 px-4 transition bg-white-default border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400">

@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import logo from "../../assets/logo.png";
-import { Clock, Star, FileText, User, Wallet } from 'lucide-react';
+import { Clock, Star, FileText, User, Wallet, CalendarRange } from 'lucide-react';
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/slices/authSlice";
 // import Breadcrumbs from "./Breadcrumbs";
@@ -82,8 +82,21 @@ const SideBar = () => {
                   }`
                 }
               >
-                <FileText size={24} className="mr-3" />
+                <CalendarRange size={24} className="mr-3" />
                 Bookings
+              </NavLink>
+            </li>
+            <li className="mb-4">
+              <NavLink
+                to="/provider/reviews"
+                className={({ isActive }) =>
+                  `flex justify-center items-center p-3 rounded hover:bg-green-hover ${
+                    isActive ? "bg-green-hover" : ""
+                  }`
+                }
+              >
+                <FileText size={24} className="mr-3" />
+                Reviews
               </NavLink>
             </li>
           </ul>
