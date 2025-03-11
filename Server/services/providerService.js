@@ -6,7 +6,6 @@ const { mongoose } = require("mongoose");
 const { uploadToS3, generatePresignedUrl } = require("../middlewares/multer");
 
 
-
 const getNearbyProvidersService = async (latitude, longitude, distance, service) => {
     const providers = await Provider.find({
       "address.coordinates": {
@@ -21,7 +20,18 @@ const getNearbyProvidersService = async (latitude, longitude, distance, service)
       if (providers[i].image) {
         providers[i].image = await generatePresignedUrl(providers[i].image);
       }
+      if (providers[i].rating && providers[i].rating.length > 0) {
+        const validRatings = providers[i].rating.filter(r => !r.isDeleted);
+        const ratingSum = validRatings.reduce((sum, r) => sum + r.rating, 0);
+        providers[i]._doc.averageRating = validRatings.length > 0 ? 
+          (ratingSum / validRatings.length).toFixed(1) : 0;
+        providers[i]._doc.ratingCount = validRatings.length;
+      } else {
+        providers[i]._doc.averageRating = 0;
+        providers[i]._doc.ratingCount = 0;
+      }
     }
+    console.log("rat", providers)
     return { providers };
 };
 

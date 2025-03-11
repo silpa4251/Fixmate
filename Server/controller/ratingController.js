@@ -3,6 +3,8 @@ const Booking = require("../models/bookingModel");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const CustomError = require("../utils/customError");
 const { mongoose } = require('mongoose');
+const { generatePresignedUrl } = require('../middlewares/multer');
+const Provider= require("../models/providerModel");
 
 const createRating = asyncErrorHandler(async (req, res) => {
     const { id, rating, comment } = req.body;
@@ -34,9 +36,15 @@ const createRating = asyncErrorHandler(async (req, res) => {
       comment,
     });
 
-    await newRating.save();
+    const savedRating = await newRating.save();
+  
+    // Update the provider document to include this rating reference
+    await Provider.findByIdAndUpdate(
+      booking.providerId,
+      { $push: { rating: savedRating._id } }
+    );
 
-    res.status(201).json({ message: "Rating submitted successfully.", rating: newRating });
+    res.status(201).json({ message: "Rating submitted successfully.",     rating: savedRating  });
   
 });
 
@@ -150,8 +158,16 @@ const getRatingsByUser = asyncErrorHandler(async (req, res) => {
       if (!feedbacks || feedbacks.length === 0) {
         return res.status(404).json({ message: "No ratings found for this user." });
       }
+
+      const feedbacksWithUrls = await Promise.all(feedbacks.map(async (feedback) => {
+        const feedbackObj = feedback.toObject();
+        if (feedbackObj.providerId && feedbackObj.providerId.image) {
+          feedbackObj.providerId.image = await generatePresignedUrl(feedbackObj.providerId.image);
+        }
+        return feedbackObj;
+      }));
   
-      res.status(200).json({ feedbacks });
+      res.status(200).json({ feedbacks: feedbacksWithUrls});
 });
 
 const getRatingForProvider = asyncErrorHandler(async (req, res) => {
