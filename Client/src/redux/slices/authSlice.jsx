@@ -48,7 +48,7 @@ export const unblockUser = createAsyncThunk(
 
 const initialState = {
   isAuthenticated: localStorage.getItem('token') ? true : false,
-  user: localStorage.getItem('user')|| null,
+  user: JSON.parse(localStorage.getItem('user')) || null,
   users: [],
   role: localStorage.getItem('role') || null,
   loading: false,
@@ -67,7 +67,7 @@ const userSlice = createSlice({
       localStorage.setItem('isAuth',true);
       localStorage.setItem('token', action.payload.token); 
       localStorage.setItem('user', JSON.stringify(action.payload.user)); 
-      localStorage.setItem('role', JSON.stringify(action.payload.user.role)); 
+      localStorage.setItem('role', action.payload.user.role); 
     },
     logout: (state) => {
       state.isAuthenticated = false;
